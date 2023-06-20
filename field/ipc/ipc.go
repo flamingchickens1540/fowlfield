@@ -10,10 +10,8 @@ import (
 )
 
 type NodeIPC struct {
-	channel               go2node.NodeChannel
-	latestMessage         *go2node.NodeMessage
-	latestMessageContents *model.IPCMessage
-	hasSentAck            bool
+	channel    go2node.NodeChannel
+	hasSentAck bool
 }
 
 var arena *field.Arena
@@ -28,32 +26,27 @@ func NewClient(field_arena *field.Arena) *NodeIPC {
 
 	return &NodeIPC{
 		channel,
-		nil,
-		&model.IPCMessage{},
 		false,
 	}
 }
 
 func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
-	client.latestMessage = msg
-	err := msg.Unmarshal(client.latestMessageContents)
+	msgContents := new(model.IPCMessage)
+	err := msg.Unmarshal(msgContents)
 	if err != nil {
-		fmt.Println("COULD NOT PARSE MSG", err, client.latestMessage, client.latestMessageContents)
+		fmt.Println("COULD NOT PARSE MSG", err, msg, msgContents)
 	}
+	fmt.Println(msgContents)
 
-	processCommand(*client.latestMessageContents)
+	processCommand(msgContents.Command, msg.Message)
 	client.hasSentAck = false
 	return err
 }
 
 func (client *NodeIPC) send(signal string, data any) {
-	dataJson, err := json.Marshal(data)
-	if err != nil {
-		fmt.Println(err)
-	}
 	bytes, err := json.Marshal(model.IPCMessage{
 		Command: signal,
-		Data:    string(dataJson),
+		Data:    data,
 	})
 	if err != nil {
 		fmt.Println(err)

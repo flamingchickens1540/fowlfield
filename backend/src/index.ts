@@ -13,12 +13,12 @@ ipc.load({
     elimGroup: -1, 
     elimInstance: -1,
     type: 'qualification',
-    red1: 0,
-    red2: 0,
-    red3: 0,
-    blue1: 0,
-    blue2: 0,
-    blue3: 0,
+    red1: 1,
+    red2: 2,
+    red3: 3,
+    blue1: 4,
+    blue2: 5,
+    blue3: 6,
 })
 
 console.log("starting")

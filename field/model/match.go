@@ -1,9 +1,5 @@
 package model
 
-import (
-	"encoding/json"
-	"fmt"
-)
 
 type Match struct {
 	Id           string `json:"id"`
@@ -20,11 +16,3 @@ type Match struct {
 	Blue3        int    `json:"blue3"`
 }
 
-func LoadMatch(jsonBlob []byte) (Match, error) {
-	var match Match
-	err := json.Unmarshal(jsonBlob, &match)
-	if err != nil {
-		fmt.Println("error:", err)
-	}
-	return match, err
-}

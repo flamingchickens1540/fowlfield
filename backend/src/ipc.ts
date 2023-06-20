@@ -6,12 +6,10 @@ import { AllianceStationStatus, IPCMessage, Match } from './types';
 let client:IPCClient|null = null;
 
 export default function createIPC(handlers:IPCHandlers):IPCClient {
-  console.log("creating")
   if (client == null) {
     client = new IPCClient(handlers);
     
   }
-  console.log("created")
   return client
 }
 
@@ -39,19 +37,19 @@ class IPCClient {
   }
 
   private sendMessage(message:IPCMessage) {this.child.send(message)}
-  private send(cmd:string, data:string) {this.sendMessage({cmd, data})}
+  private send(cmd:string, data:any) {this.sendMessage({cmd, data})}
 
   private handleMessage(message:IPCMessage) {
     switch (message.cmd) {
-      case "dsStatus": this.handlers.dsStatus(JSON.parse(message.data)); break;
+      case "dsStatus": this.handlers.dsStatus(message.data); break;
     }
   }
 
   load(data:Match) {
-    this.send('load', JSON.stringify(data));
+    this.send('load', data);
   }
   
   start(data:Match) {
-    this.send('start', JSON.stringify(data));
+    this.send('start', data);
   }
 }

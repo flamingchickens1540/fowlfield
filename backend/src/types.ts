@@ -13,7 +13,7 @@ export interface AllianceStationStatus {
 
 export interface IPCMessage {
   cmd: string;
-  data: string;
+  data: any;
 }
 
 //////////
