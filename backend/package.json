@@ -1,0 +1,18 @@
+{
+  "name": "fowlfield",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build.js",
+    "prebuild":"cd ../field && ./generateTypes.sh",
+    "reload": "npm run build && node index.cjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "esbuild": "^0.18.4"
+  }
+}
