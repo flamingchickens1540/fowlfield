@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "node build.js",
-    "prebuild":"cd ../field && ./generateTypes.sh",
-    "reload": "npm run build && node index.cjs"
+    "updateTypes":"cd ../field && ./generateTypes.sh",
+    "reload": "npm run updateTypes && npm run build && node index.cjs"
   },
   "author": "",
   "license": "ISC",
