@@ -19,3 +19,7 @@ jobs:
     - name: Build
       working-directory: ./backend
       run: npm run build
+    - uses: actions/upload-artifact@v3
+      with:
+        name: index.cjs
+        path: ./backend/index.cjs
