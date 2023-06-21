@@ -43,11 +43,8 @@ func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
 	return err
 }
 
-func (client *NodeIPC) send(signal string, data any) {
-	bytes, err := json.Marshal(model.IPCMessage{
-		Command: signal,
-		Data:    data,
-	})
+func (client *NodeIPC) send(message model.IPCMessage) {
+	bytes, err := json.Marshal(message)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -57,7 +54,12 @@ func (client *NodeIPC) send(signal string, data any) {
 }
 
 func (client *NodeIPC) SendDsStatus(statuses map[string]model.AllianceStationStatus) {
-	client.send("dsStatus", statuses)
+	client.send(model.IPCMessage{
+		Command: "dsStatus",
+		Data: model.IPCData{
+			DsStatus: &statuses,
+		},
+	})
 }
 
 func (client *NodeIPC) Loop() {

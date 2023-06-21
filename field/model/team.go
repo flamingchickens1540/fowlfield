@@ -1,9 +1,8 @@
 package model
 
 type Team struct {
-	Id              int
-	Name            string
-	Nickname        string
-	RobotName       string
-	Accomplishments string
+	Id          int    `json:"id"`
+	Name        string `json:"name"`
+	RobotName   string `json:"robotname"`
+	Description string `json:"description"`
 }

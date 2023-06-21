@@ -1,23 +1,13 @@
 import child_process from 'child_process';
 import {dirname, join} from 'path'
-import { AllianceStationStatus, IPCMessage, Match } from './types';
+import { AllianceStationStatus, IPCData, IPCMessage, Match } from './ipctypes';
 
-
-let client:IPCClient|null = null;
-
-export default function createIPC(handlers:IPCHandlers):IPCClient {
-  if (client == null) {
-    client = new IPCClient(handlers);
-    
-  }
-  return client
-}
 
 interface IPCHandlers {
-  dsStatus:(data:{[key:string]:AllianceStationStatus}) => void;
+  dsStatus:(data:IPCData["ds_status"]) => void;
 }
 
-class IPCClient {
+export class IPCClient {
   private child:child_process.ChildProcess;
 
   constructor(private handlers:IPCHandlers) {
@@ -37,19 +27,19 @@ class IPCClient {
   }
 
   private sendMessage(message:IPCMessage) {this.child.send(message)}
-  private send(cmd:string, data:any) {this.sendMessage({cmd, data})}
+  private send(cmd:string, data:IPCData) {this.sendMessage({cmd, data})}
 
   private handleMessage(message:IPCMessage) {
     switch (message.cmd) {
-      case "dsStatus": this.handlers.dsStatus(message.data); break;
+      case "dsStatus": this.handlers.dsStatus(message.data.ds_status!); break;
     }
   }
 
   load(data:Match) {
-    this.send('load', data);
+    this.send('load', {match:data});
   }
   
   start(data:Match) {
-    this.send('start', data);
+    this.send('start', {match:data});
   }
 }

@@ -1,6 +1,5 @@
 package model
 
-
 type Match struct {
 	Id           string `json:"id"`
 	MatchNumber  int    `json:"matchNumber"`
@@ -15,4 +14,3 @@ type Match struct {
 	Blue2        int    `json:"blue2"`
 	Blue3        int    `json:"blue3"`
 }
-
