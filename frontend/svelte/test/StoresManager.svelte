@@ -1,26 +1,31 @@
 <script lang="ts">
-    import matchData from "@store"
+    import matchData, {matchTime, matchPeriod, remainingTimeInPeriod, elapsedTimeInPeriod} from "@store";
     import StoreView from "./Store.svelte";
+	import Button from "./Button.svelte";
+    import configureAudio from "audio";
+    configureAudio()
 </script>
 
-<h1>Stores Test Page</h1>
+<h1>Test Page</h1>
 <div class=horizontalflow>
     
     
-    <div id=matchStores>
-        <h2>Match</h2>
+    <div class=section>
+        <h2>Match Data</h2>
         <div>
             {#each Object.entries(matchData) as [key, value]}
             <StoreView {key} store={value}></StoreView>
             {/each}
         </div>
     </div>
-    <div id=matchStores>
-        <h2>Teams</h2>
+    <div class=section>
+        <h2>Match State</h2>
         <div>
-            <!-- {#each Object.entries(matchData) as [key, value]}
-            <StoreView {key} store={value}></StoreView>
-            {/each} -->
+            <StoreView key="MatchState" store={matchPeriod}></StoreView>
+            <StoreView key="Elapsed Match" store={matchTime}></StoreView>
+            <StoreView key="Remaining Period" store={remainingTimeInPeriod}></StoreView>
+            <StoreView key="Elapsed Period" store={elapsedTimeInPeriod}></StoreView>
+            <Button key="Reset" onclick={() => {matchData.startTime.set(Date.now())}}></Button>
         </div>
     </div>
 </div>
@@ -32,7 +37,7 @@
         flex-flow:row nowrap;
         justify-content:space-evenly;
     }
-    #matchStores {
+    .section {
         width: 300px;
         margin: 10px;
     }

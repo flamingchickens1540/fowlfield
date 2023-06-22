@@ -36,10 +36,8 @@ let ctx = await esbuild.context({
             preprocess: sveltePreprocess({sourceMap:true}),
         }),
     ],
-    alias: {
-        "@fowlutils":"../common/utils",
-        "@fowltypes":"../common/types",
-    }
+    logLevel:"error"
+
 })
 
 await ctx.rebuild()
