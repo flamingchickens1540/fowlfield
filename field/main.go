@@ -20,7 +20,7 @@ const (
 )
 
 func main() {
-	fmt.Println("Starting")
+	fmt.Println("starting")
 	var err error
 	arena, err = field.NewArena()
 	if err != nil {
