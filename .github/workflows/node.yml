@@ -16,6 +16,12 @@ jobs:
     - name: Install Packages
       working-directory: ./backend
       run: npm ci
+    - name: Set up Go (for tygo)
+      uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+    - name: Install Tygo
+      run: go install github.com/gzuidhof/tygo@latest
     - name: Build
       working-directory: ./backend
       run: npm run build
