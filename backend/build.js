@@ -1,8 +1,20 @@
-import {buildSync} from "esbuild"
+import {context} from "esbuild"
 
-buildSync({
+const ctx = await context({
     entryPoints: ["src/index.ts"],
     outfile: "index.cjs",
     bundle: true,
-    platform:"node"
+    platform:"node",
+    logLevel: "info"
 })
+
+
+const mode = process.argv[2]
+
+if (mode == "watch") {
+    await ctx.watch()
+    console.log("watching")
+} else {
+    await ctx.rebuild()
+    await ctx.dispose()
+}

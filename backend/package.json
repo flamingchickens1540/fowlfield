@@ -5,9 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "build": "node build.js",
-    "updateTypes": "cd ../field && ./generateTypes.sh",
-    "reload": "npm run updateTypes && npm run build && node index.cjs"
+    "build": "npm run updateTypes && node build.js",
+    "updateTypes": "cd ../field && tygo generate",
+    "start": "npm run build && node index.cjs",
+    "dev": "node build.js watch & nodemon index.cjs"
   },
   "author": "",
   "license": "ISC",
@@ -22,6 +23,7 @@
     "brackets-memory-db": "^1.0.4",
     "express": "^4.18.2",
     "mongo": "^0.1.0",
+    "nodemon": "^2.0.22",
     "socket.io": "^4.6.2"
   }
 }
