@@ -1,11 +1,11 @@
-import { Match } from "../ipc/ipctypes";
+
 import { BracketsManager } from "brackets-manager";
 import { InMemoryDatabase } from "brackets-memory-db";
 import express from "express"
 const storage = new InMemoryDatabase()
 const manager = new BracketsManager(storage)
 import * as db from "./db"
-import { ExtendedMatch, PartialMatch } from "../types";
+import { ExtendedMatch, PartialMatch } from "../../../types/types";
 
 console.log("matches")
 
@@ -55,18 +55,18 @@ export class DBMatch implements ExtendedMatch {
     }
 }
 
-const server = express()
+// const server = express()
 
-server.get("/bracket", async (req, res) => {
-    const data = await manager.get.tournamentData(0)
-    res.set("Access-Control-Allow-Origin", "*")
-    res.json({
-        stages: data.stage,
-        matches: data.match,
-        matchGames: data.match_game,
-        participants: data.participant
-    })
-})
+// server.get("/bracket", async (req, res) => {
+//     const data = await manager.get.tournamentData(0)
+//     res.set("Access-Control-Allow-Origin", "*")
+//     res.json({
+//         stages: data.stage,
+//         matches: data.match,
+//         matchGames: data.match_game,
+//         participants: data.participant
+//     })
+// })
 
 
 export async function configureBracket() {
@@ -77,7 +77,7 @@ export async function configureBracket() {
         seeding: ['Alliance 1', 'Alliance 2', 'Alliance 3', 'Alliance 4'],
         settings: { grandFinal: 'double' },
       });
-    server.listen(3000)
+
     await manager.update.match({
         id: 0, // First match of winner bracket (round 1)
         opponent1: { score: 16, result: 'win' },
