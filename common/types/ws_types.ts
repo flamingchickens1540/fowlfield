@@ -1,10 +1,16 @@
 import type { Server, Socket } from "socket.io";
-import { ExtendedMatch, PartialMatch } from "./types";
+import type { ExtendedMatch, PartialMatch } from "./types";
 
 
 export interface ServerToClientEvents {
     match: (data:ExtendedMatch) => void
     matches: (data:ExtendedMatch[]) => void
+    /**
+     * 
+     * @param time the current server-side time (ms)
+     * @returns 
+     */
+    syncTime: (time:number) => void
     /**
      * Switches the client to the given match
      * @param data The match data

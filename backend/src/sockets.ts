@@ -14,13 +14,12 @@ export default function startServer(server:http.Server) {
         }
     })
 
-    
-
     io.on("connection", (socket) => {
         if (socket.handshake.auth.key !== consts.socket.key) {
             socket.disconnect(true)
         }
         socket.emit("setMatch", matchmanager.getCurrentMatch().getData())
+        socket.emit("syncTime", Date.now()) // Account for time zone differences
         socket.on("partialMatch", (data:PartialMatch) => {
             console.log("recived", data)
             if (!data.id) {console.warn("recieved bad match data", data);return}
