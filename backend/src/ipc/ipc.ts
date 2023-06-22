@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 import {dirname, join} from 'path'
-import { AllianceStationStatus, IPCData, IPCMessage, Match } from '../../../types/ipctypes';
+import { IPCData, IPCMessage, Match } from '@fowltypes';
 
 
 interface IPCHandlers {

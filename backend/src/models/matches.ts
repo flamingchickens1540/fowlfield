@@ -1,13 +1,7 @@
 
-import { BracketsManager } from "brackets-manager";
-import { InMemoryDatabase } from "brackets-memory-db";
-import express from "express"
-const storage = new InMemoryDatabase()
-const manager = new BracketsManager(storage)
-import * as db from "./db"
-import { ExtendedMatch, PartialMatch } from "../../../types/types";
+import { ExtendedMatch, PartialMatch } from "@fowltypes";
+import * as db from "./db";
 
-console.log("matches")
 
 
 export class DBMatch implements ExtendedMatch {
@@ -42,7 +36,11 @@ export class DBMatch implements ExtendedMatch {
     get blue3() {return this.data.blue3}
     set blue3(value) {this.data.blue3 = value, db.updateMatch({id:this.data.id, blue3:value})}
 
+    get startTime() {return this.data.startTime}
+    set startTime(value) {this.data.startTime = value, db.updateMatch({id:this.data.id, startTime:value})}
+
     constructor(private data:ExtendedMatch){}
+    
 
 
     getData() {
@@ -53,34 +51,4 @@ export class DBMatch implements ExtendedMatch {
         this.data = {...this.data, ...data},
         db.updateMatch(data)
     }
-}
-
-// const server = express()
-
-// server.get("/bracket", async (req, res) => {
-//     const data = await manager.get.tournamentData(0)
-//     res.set("Access-Control-Allow-Origin", "*")
-//     res.json({
-//         stages: data.stage,
-//         matches: data.match,
-//         matchGames: data.match_game,
-//         participants: data.participant
-//     })
-// })
-
-
-export async function configureBracket() {
-    await manager.create({
-        tournamentId: 0,
-        name: 'Elimination Matches',
-        type: 'double_elimination',
-        seeding: ['Alliance 1', 'Alliance 2', 'Alliance 3', 'Alliance 4'],
-        settings: { grandFinal: 'double' },
-      });
-
-    await manager.update.match({
-        id: 0, // First match of winner bracket (round 1)
-        opponent1: { score: 16, result: 'win' },
-        opponent2: { score: 12 },
-      });
 }

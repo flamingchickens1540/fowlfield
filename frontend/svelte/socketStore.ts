@@ -1,8 +1,9 @@
-import { get, Readable, Subscriber, Unsubscriber, Updater, writable, type Writable } from "svelte/store";
+import type { Subscriber, Unsubscriber, Readable, Updater, Writable } from "svelte/store";
+import {get, writable} from "svelte/store"
 
-import { ExtendedMatch } from '../../types/types';
-import { socket } from "./socket";
-import matchData from "./store";
+import type { ExtendedMatch } from '@fowltypes';
+import socket from "@socket";
+import matchData from "@store";
 
 
 

@@ -1,7 +1,7 @@
 import {mongo} from "../../secrets.json"
 import mongoDB from "mongodb"
 import { DBMatch } from "./matches";
-import { ExtendedMatch, PartialMatch } from "../../../types/types";
+import { ExtendedMatch, PartialMatch } from "@fowltypes";
 
 const mongoURL = `mongodb://${mongo.username}:${mongo.password}@127.0.0.1:27017/${mongo.database}`
 const mongoClient =  new mongoDB.MongoClient(mongoURL);

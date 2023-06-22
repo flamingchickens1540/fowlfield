@@ -1,5 +1,5 @@
-import { Writable } from "svelte/store";
-import { ExtendedMatch } from '../../types/types';
+import type { Writable } from "svelte/store";
+import type { ExtendedMatch } from '@fowltypes';
 import { FowlMatchStore } from "./socketStore";
 
 
@@ -11,9 +11,12 @@ export function getCurrentMatchID() {
 
 
 const matchDataPrivate: { [key in keyof ExtendedMatch]: FowlMatchStore<key, ExtendedMatch[key]> } = {
+    id: new FowlMatchStore("id", currentMatchID),
+    startTime:new FowlMatchStore("startTime", 0),
+
     redScore: new FowlMatchStore("redScore", 0),
     blueScore: new FowlMatchStore("blueScore", 0),
-    id: new FowlMatchStore("id", currentMatchID),
+    
     matchNumber: new FowlMatchStore("matchNumber", 0),
     elimRound: new FowlMatchStore("elimRound", 0),
     elimGroup: new FowlMatchStore("elimGroup", 0),

@@ -1,13 +1,11 @@
-import {Server} from "socket.io"
-import consts from "../secrets.json"
-import { PartialMatch } from "../../types/types";
+import type { ClientToServerEvents, PartialMatch, ServerToClientEvents } from '@fowltypes';
+import * as http from "http";
+import { Server } from "socket.io";
+import consts from "../secrets.json";
 import matchmanager from "./matchmanager";
-import type { ThisServer } from '../../types/ws_types';
-import * as http from "http"
 
 
-
-let io:ThisServer 
+let io:Server<ClientToServerEvents,ServerToClientEvents> 
 
 export default function startServer(server:http.Server) {
     io = new Server(server, {

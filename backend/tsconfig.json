@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "baseUrl": "./src",
+		"paths": {
+			"@fowlutils/*": ["../../common/utils/*"],
+			"@fowltypes": ["../../common/types/index"]
+		},
+		"resolveJsonModule":true,
+		"esModuleInterop": true,
+	
+    },
+	"include": ["**/*.ts"]
+	
+}

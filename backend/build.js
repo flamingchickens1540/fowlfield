@@ -1,11 +1,21 @@
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import {context} from "esbuild"
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 
 const ctx = await context({
     entryPoints: ["src/index.ts"],
     outfile: "index.cjs",
     bundle: true,
     platform:"node",
-    logLevel: "info"
+    logLevel: "info",
+    absWorkingDir: __dirname,
+    alias: {
+        "@fowlutils":"../common/utils",
+        "@fowltypes":"../common/types"
+    }
 })
 
 

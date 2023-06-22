@@ -3,12 +3,12 @@ import { io, type Socket } from "socket.io-client";
 import { getCookie, setCookie} from 'typescript-cookie';
 import { backend_url } from "../consts.json";
 
-import {  updateCurrentMatch, updateMatchStores } from './store';
-import { ClientToServerEvents, ServerToClientEvents } from '../../types/ws_types';
+import { updateCurrentMatch, updateMatchStores } from '@store';
+import type { ClientToServerEvents, ServerToClientEvents } from '@fowltypes';
 
 
 
-export const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(backend_url || window.location.origin, {
+const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(backend_url || window.location.origin, {
     auth: {
         key: getCookie("auth")
     },
@@ -37,3 +37,5 @@ socket.on("disconnect", (reason) => {
 
 
 socket.connect()
+
+export default socket

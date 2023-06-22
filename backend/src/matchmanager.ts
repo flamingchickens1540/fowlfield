@@ -1,6 +1,6 @@
 import { DBMatch } from "./models/matches";
 import * as db from "./models/db"
-import { PartialMatch } from "../../types/types";
+import { PartialMatch } from "@fowltypes";
 
 
     let matches:{[key:string]:DBMatch}
@@ -13,9 +13,6 @@ function getMatch(id:string) {
     return matches[id]
 }
 
-function addMatch(match:DBMatch) {
-    matches[match.id] = match
-}
 
 function updateMatch(data:PartialMatch) {
     matches[data.id].update(data)
@@ -29,7 +26,6 @@ function getCurrentMatch():DBMatch {
 export default {
     loadMatches,
     getMatch,
-    addMatch,
     updateMatch,
     getCurrentMatch
 }

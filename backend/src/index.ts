@@ -1,23 +1,19 @@
 
-import * as db from "./models/db"
-import { IPCClient } from "./ipc/ipc"
-import { IPCData, AllianceStationStatus } from '../../types/ipctypes';
-import {DBMatch, configureBracket} from "./models/matches"
-import { DriverStation } from '../../types/types';
-import matchmanager from "./matchmanager";
-import startSockets from "./sockets";
+import { AllianceStationStatus, DriverStation, IPCData } from '@fowltypes';
 import * as http from 'http';
+import { IPCClient } from "./ipc/ipc";
+import matchmanager from "./matchmanager";
+import * as db from "./models/db";
+import startSockets from "./sockets";
 
 let driverStatuses:{[key in DriverStation]:AllianceStationStatus};
 
 const server = http.createServer()
 
-
 const ipc = new IPCClient({
     dsStatus: handleDSStatus,
 })
 async function configure() {
-    await configureBracket()
     await db.connect()
     await matchmanager.loadMatches()
     await startSockets(server)
