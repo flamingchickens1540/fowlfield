@@ -7,10 +7,20 @@ export type PartialMatch = Pick<ExtendedMatch, "id"> & Partial<ExtendedMatch>
 
 export interface ExtendedMatch extends Match {
     redScore:number
-    blueScore:number
-    startTime:number
+    blueScore:number,
+    redAlliance:number,
+    blueAlliance:number,
+    startTime:number,
+    state:MatchState
 }
-
+	export enum MatchState {
+		PENDING = "pending",
+		PRELOADED = "preload",
+		LOADED = "load",
+		IN_PROGRESS = "active",
+		COMPLETE = "completed",
+		POSTED = "posted",
+	}
 export enum MatchPeriod {
     PREMATCH="pre",
     AUTO="auto",

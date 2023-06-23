@@ -1,8 +1,9 @@
-import { derived, writable, type Writable } from "svelte/store";
+import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { MatchState, type ExtendedMatch } from '@fowltypes';
 import { FowlMatchStore } from "./socketStore";
-import { getMatchState, getRemainingTimeInPeriod, getElapsedTimeInPeriod } from "@fowlutils/match_timer";
+import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod } from "@fowlutils/match_timer";
 import { listen } from "svelte/internal";
+import socket from "@socket";
 
 
 
@@ -20,11 +21,13 @@ export function setPreloadingTrack(shouldPreload:boolean) {
 
 const matchDataPrivate: { [key in keyof ExtendedMatch]: FowlMatchStore<key, ExtendedMatch[key]> } = {
     id: new FowlMatchStore("id", currentMatchID),
-    startTime: new FowlMatchStore("startTime", 0, (t) => t-serverTimeOffset),
+    startTime: new FowlMatchStore("startTime", 0),
     state: new FowlMatchStore("state", MatchState.PENDING),
 
     redScore: new FowlMatchStore("redScore", 0),
     blueScore: new FowlMatchStore("blueScore", 0),
+    redAlliance: new FowlMatchStore("redAlliance", 0),
+    blueAlliance: new FowlMatchStore("blueAlliance", 0),
 
     matchNumber: new FowlMatchStore("matchNumber", 0),
     elimRound: new FowlMatchStore("elimRound", 0),
@@ -46,7 +49,7 @@ export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {
     return () => clearInterval(interval)
 }, 0)
 
-export const matchPeriod = derived(matchTime, ($time) => getMatchState($time));
+export const matchPeriod = derived(matchTime, ($time) => getMatchPeriod($time));
 export const remainingTimeInPeriod = derived(matchTime, ($time) => {return getRemainingTimeInPeriod($time)});
 export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time));
 
@@ -59,6 +62,18 @@ export const matchList:Writable<{[key:string]:ExtendedMatch}> = writable({})
 export function updateTimeOffset(time:number) {
     serverTimeOffset = Date.now() - time
     console.log(serverTimeOffset)
+}
+
+export function startMatch() {
+    socket.emit("startMatch", currentMatchID)
+}
+
+export function abortMatch() {
+    socket.emit("abortMatch", currentMatchID)
+}
+
+export function commitMatch() {
+    socket.emit("commitMatch", currentMatchID)
 }
 
 
@@ -79,7 +94,7 @@ export function updateMatchList(data:{[key:string]:ExtendedMatch}) {
     matchList.set(data)
 }
 export function updateMatchStores(data: ExtendedMatch) {
-    matchList[data.id] = data
+    matchList.update((list) => {list[data.id] = data; return list})
     if (data.id !== currentMatchID) { return }
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
         (store as FowlMatchStore<any, any>).setQuiet(data[key])
@@ -87,7 +102,8 @@ export function updateMatchStores(data: ExtendedMatch) {
 }
 
 
-const matchData: { [key in keyof ExtendedMatch]: Writable<ExtendedMatch[key]> } = {
-    ...matchDataPrivate
+const matchData: { [key in keyof Omit<ExtendedMatch, "state">]: Writable<ExtendedMatch[key]> } & {state:Writable<MatchState>} = {
+    ...matchDataPrivate,
+    // state:matchDataPrivate.state
 }
 export default matchData

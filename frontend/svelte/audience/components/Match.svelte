@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { formatDuration } from "@fowlutils/format";
 	import matchData, {remainingTimeInPeriod} from "@store";
 	import { derived } from "svelte/store";
 
-	const {red1, red2, red3, blue1, blue2, blue3, redScore, blueScore, matchNumber, type} = matchData
+	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, id, type} = matchData
 
 
 	const scoreHeight = derived(type, ($type) => $type == "qualification" ? "1946px": "1978px");
@@ -93,9 +94,9 @@
     <path d="M541.5 214H107.259V0H320.5L431 107L541.5 214Z" fill="#ED1C24" />
   </svg>
 
-<div class="timer">{Math.max(Math.floor($remainingTimeInPeriod),0)}</div>
+<div class="timer">{formatDuration(Math.max(Math.floor($remainingTimeInPeriod),0))}</div>
 
-<div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$matchNumber}</div>
+<div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$id}</div>
 
 <div class="event-text">BunnyBots 2023: PLACEHOLDER</div>
 
@@ -103,7 +104,7 @@
 
 <div class="blue-score" style="top:{$scoreHeight}">{$blueScore}</div>
 
-<div class="red-alliance" style="display:{$allianceDisplay}">Alliance 1</div>
+<div class="red-alliance" style="display:{$allianceDisplay}">Alliance {$redAlliance}</div>
 
-<div class="blue-alliance" style="display:{$allianceDisplay}">Alliance 2</div>
+<div class="blue-alliance" style="display:{$allianceDisplay}">Alliance {$blueAlliance}</div>
 </div>

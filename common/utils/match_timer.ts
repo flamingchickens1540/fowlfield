@@ -26,8 +26,8 @@ export function getElapsedTimeInPeriod(time: number) {
 }
 
 
-export function getMatchState(time: number): MatchPeriod {
-    return getTimingInfo(time)[0]
+export function getMatchPeriod(seconds: number): MatchPeriod {
+    return getTimingInfo(seconds)[0]
 }
 
 function getTimingInfo(time: number): [MatchPeriod, number] {

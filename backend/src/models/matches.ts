@@ -4,7 +4,7 @@ import * as db from "./db";
 
 
 
-export class DBMatch implements ExtendedMatch {
+export class DBMatch {
     get id() {return this.data.id}
     
     get redScore() {return this.data.redScore}
@@ -23,6 +23,12 @@ export class DBMatch implements ExtendedMatch {
     get elimInstance() {return this.data.elimInstance}
     set elimInstance(value) {this.data.elimInstance = value, db.updateMatch({id:this.data.id, elimInstance:value})}
     
+    
+    get redAlliance() {return this.data.redAlliance}
+    set redAlliance(value) {this.data.redAlliance = value, db.updateMatch({id:this.data.id, redAlliance:value})}
+    get blueAlliance() {return this.data.blueAlliance}
+    set blueAlliance(value) {this.data.blueAlliance = value, db.updateMatch({id:this.data.id, blueAlliance:value})}
+
     get red1() {return this.data.red1}
     set red1(value) {this.data.red1 = value, db.updateMatch({id:this.data.id, red1:value})}
     get red2() {return this.data.red2}
@@ -38,6 +44,9 @@ export class DBMatch implements ExtendedMatch {
 
     get startTime() {return this.data.startTime}
     set startTime(value) {this.data.startTime = value, db.updateMatch({id:this.data.id, startTime:value})}
+
+    get state() {return this.data.state}
+    set state(value) {this.data.state = value, db.updateMatch({id:this.data.id, state:value})}
 
     constructor(private data:ExtendedMatch){}
     

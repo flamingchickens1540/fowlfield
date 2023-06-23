@@ -58,7 +58,11 @@ export class FowlMatchStore<K extends keyof ExtendedMatch, T extends ExtendedMat
     }
 
     getReadonly(): Readable<T> {
-        return { subscribe: this.subscribe }
+        return { 
+            subscribe: (run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber => {
+                return this.value.subscribe(run, invalidate)
+            }
+        }
     }
 
 
