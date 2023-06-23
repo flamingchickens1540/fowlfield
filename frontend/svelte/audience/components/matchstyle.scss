@@ -1,0 +1,152 @@
+.match,
+.match * {
+  box-sizing: border-box;
+}
+.match {
+  background: #ffffff;
+  width: 3840px;
+  height: 2160px;
+  position: relative;
+  overflow: hidden;
+}
+
+.rectangle-info {
+  background: #5a5a5a;
+  width: 3840px;
+  height: 104px;
+  position: absolute;
+  left: 0px;
+  top: 1842px;
+}
+.rectangle-red {
+  background: #ed767b;
+  width: 1920px;
+  height: 214px;
+  position: absolute;
+  left: 0px;
+  top: 1946px;
+}
+.rectangle-blue {
+  background: #3c84ba;
+  width: 1920px;
+  height: 215px;
+  position: absolute;
+  left: 1920px;
+  top: 1946px;
+}
+@mixin team($left-value) {
+  
+  color: #ffffff;
+  text-align: center;
+  font: 800 120px "Poppins", sans-serif;
+  position: absolute;
+  top: 1946px;
+  left:$left-value;
+  width: 478px;
+  height: 214px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.team-blue-1 {@include team(2404px)}
+.team-blue-2 {@include team(2884px)}
+.team-blue-3 {@include team(3362px)}
+.team-red-3 {@include team(0px)}
+.team-red-2 {@include team(480px)}
+.team-red-1 {@include team(958px)}
+
+.vector-timer {
+  position: absolute;
+  left: 1635px;
+  top: 1792px;
+  overflow: visible;
+}
+.vector-scores {
+  position: absolute;
+  left: 1380px;
+  top: 1946px;
+  overflow: visible;
+}
+.timer {
+  color: #ffffff;
+  text-align: center;
+  font: 800 120px "Poppins", sans-serif;
+  position: absolute;
+  left: 1535px;
+  top: 1791px;
+  width: 764px;
+  height: 156px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.match-text {
+  color: #d9d9d9;
+  text-align: center;
+  font: 500 55px "Poppins", sans-serif;
+  position: absolute;
+  left: 2172px;
+  top: 1842px;
+  width: 1668px;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.event-text {
+  color: #d9d9d9;
+  text-align: center;
+  font: 500 55px "Poppins", sans-serif;
+  position: absolute;
+  left: 0px;
+  top: 1842px;
+  width: 1672px;
+  height: 104px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin score {
+  top: 1946px;
+  width: 436px;
+  height: 214px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  text-align: center;
+  font: 800 120px "Poppins", sans-serif;
+  position: absolute;
+}
+.red-score {
+  @include score;
+  left: 1484px;
+}
+.blue-score {
+  @include score;
+  left: 1920px;
+}
+
+@mixin alliance-header {
+  color: #ffffff;
+  text-align: center;
+  font: 800 50px "Poppins", sans-serif;
+  position: absolute;
+  top: 1950px;
+  width: 436px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.red-alliance {
+  @include alliance-header;
+  left: 1484px;
+
+}
+.blue-alliance {
+  @include alliance-header;
+  left: 1924px;
+}

@@ -1,0 +1,109 @@
+<script lang="ts">
+	import matchData, {remainingTimeInPeriod} from "@store";
+	import { derived } from "svelte/store";
+
+	const {red1, red2, red3, blue1, blue2, blue3, redScore, blueScore, matchNumber, type} = matchData
+
+
+	const scoreHeight = derived(type, ($type) => $type == "qualification" ? "1946px": "1978px");
+	const allianceDisplay = derived(type, ($type) => $type == "qualification" ? "none": "block");
+</script>
+
+<style lang=scss>
+	@import url('https://fonts.googleapis.com/css2?family=Monomaniac+One&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+	@import "./matchstyle.scss";
+
+	.match {
+		background-color: #0f0;
+	}
+	
+</style>
+
+<div class=match>
+	<div class="rectangle-info"></div>
+	
+	<div class="rectangle-red"></div>
+	
+	<div class="rectangle-blue"></div>
+	
+	<div class="team-blue-1">{$blue1 ?? ""}</div> <!--Blue 1-->
+	<div class="team-blue-2">{$blue2 ?? ""}</div> <!--Blue 2-->
+	<div class="team-blue-3">{$blue3 ?? ""}</div> <!--Blue 3-->
+	<div class="team-red-3">{$red3 ?? ""}</div>  <!--Red 3-->
+	<div class="team-red-2">{$red2 ?? ""}</div> <!--Red 2-->
+	<div class="team-red-1">{$red1 ?? ""}</div> <!--Red 1-->
+	
+	<svg
+    class="vector-timer"
+    width="573"
+    height="154"
+    viewBox="0 0 573 154"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="#5A5A5A" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="#5A5A5A" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="#5A5A5A" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="#5A5A5A" />
+    <path d="M57.8716 0V154H0L57.8716 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="#5A5A5A" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="#5A5A5A" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="#5A5A5A" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="#5A5A5A" />
+    <path d="M515.128 0V154H573L515.128 0Z" fill="black" fill-opacity="0.24" />
+    <path d="M57.8716 0H515.128V154H57.8716V0Z" fill="#5A5A5A" />
+    <path
+      d="M57.8716 0H515.128V154H57.8716V0Z"
+      fill="black"
+      fill-opacity="0.24"
+    />
+  </svg>
+
+  <svg
+    class="vector-scores"
+    width="1083"
+    height="214"
+    viewBox="0 0 1083 214"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M541 214L651.5 107L762 0H541V214Z" fill="#0066B3" />
+    <path d="M541 214L651.5 107L762 0H541V214Z" fill="#0066B3" />
+    <path d="M541 214L651.5 107L762 0H541V214Z" fill="#0066B3" />
+    <path d="M541 214L651.5 107L762 0H541V214Z" fill="#0066B3" />
+    <path d="M975.241 214V0H1082.5L975.241 214Z" fill="#0066B3" />
+    <path d="M975.241 214V0H1082.5L975.241 214Z" fill="#0066B3" />
+    <path d="M975.241 214V0H1082.5L975.241 214Z" fill="#0066B3" />
+    <path d="M975.241 214V0H1082.5L975.241 214Z" fill="#0066B3" />
+    <path d="M541 214H975.241V0H762L651.5 107L541 214Z" fill="#0066B3" />
+    <path d="M541.5 214L431 107L320.5 0H541.5V214Z" fill="#ED1C24" />
+    <path d="M541.5 214L431 107L320.5 0H541.5V214Z" fill="#ED1C24" />
+    <path d="M541.5 214L431 107L320.5 0H541.5V214Z" fill="#ED1C24" />
+    <path d="M541.5 214L431 107L320.5 0H541.5V214Z" fill="#ED1C24" />
+    <path d="M107.259 214V0H0L107.259 214Z" fill="#ED1C24" />
+    <path d="M107.259 214V0H0L107.259 214Z" fill="#ED1C24" />
+    <path d="M107.259 214V0H0L107.259 214Z" fill="#ED1C24" />
+    <path d="M107.259 214V0H0L107.259 214Z" fill="#ED1C24" />
+    <path d="M541.5 214H107.259V0H320.5L431 107L541.5 214Z" fill="#ED1C24" />
+  </svg>
+
+<div class="timer">{Math.max(Math.floor($remainingTimeInPeriod),0)}</div>
+
+<div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$matchNumber}</div>
+
+<div class="event-text">BunnyBots 2023: PLACEHOLDER</div>
+
+<div class="red-score" style="top:{$scoreHeight}">{$redScore}</div>
+
+<div class="blue-score" style="top:{$scoreHeight}">{$blueScore}</div>
+
+<div class="red-alliance" style="display:{$allianceDisplay}">Alliance 1</div>
+
+<div class="blue-alliance" style="display:{$allianceDisplay}">Alliance 2</div>
+</div>

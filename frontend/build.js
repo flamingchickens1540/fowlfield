@@ -10,7 +10,8 @@ import express from "express"
 
 let pages = {
     'test':"Stores Test",
-    'bogus':"Bogus Page", // TODO: remove bogus once another page is ready
+    'match':"Match Control", // TODO: remove bogus once another page is ready
+    'audience': "Audience Display"
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 console.log("ABVF",entryPoints)
@@ -30,6 +31,7 @@ let ctx = await esbuild.context({
     mainFields: ["svelte", "browser", "module", "main"],
     bundle: true,
     outdir: "./dist",
+    minify:true,
     sourcemap:"inline",
     plugins: [
         esbuildSvelte({
@@ -66,7 +68,6 @@ if (mode == "serve" || mode == "dev") {
     })
     server.get("/:page", (req, res) => {
         const page = req.params.page.replace(/\/+$/, "");
-        console.log(page, req.params.page)
         res.send(`
         <!DOCTYPE html>
         <html lang="en">
