@@ -6,7 +6,6 @@ import (
 
 	"team1540.org/fowlfield/ipc"
 	"team1540.org/fowlfield/lib/field"
-	"team1540.org/fowlfield/model"
 )
 
 var client *ipc.NodeIPC
