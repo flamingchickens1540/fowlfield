@@ -1,42 +1,51 @@
-import type { Server, Socket } from "socket.io";
-import type { ExtendedMatch, PartialMatch } from "./types";
-import { abortMatch, startMatch, commitMatch } from '../../frontend/svelte/store';
-
+import type { IPCData } from "./ipctypes";
+import type {
+    DSStatuses,
+    ExtendedTeam,
+    MatchData,
+    PartialMatch,
+    PartialTeam,
+    TeamData,
+} from "./types";
 
 export interface ServerToClientEvents {
-    match: (data:ExtendedMatch) => void
-    matches: (data:{[key:string]:ExtendedMatch}) => void
+    match(data: MatchData): void;
+    matches(data: { [key: string]: MatchData }): void;
+    team(data: ExtendedTeam): void;
+    teams(data: { [key: string]: ExtendedTeam }): void;
     /**
-     * 
+     *
      * @param time the current server-side time (ms)
-     * @returns 
+     * @returns
      */
-    syncTime: (time:number) => void
-        /*
-        Update displays that are used before the match
-    */
-        preloadMatch: (data:ExtendedMatch) => void
-        /*
-            Update displays that are used during and after the match
-        */
-        loadMatch: (matdatach:ExtendedMatch) => void
-        abortMatch: (data:ExtendedMatch) => void;
+    syncTime(time: number): void;
+    /**
+     * Update displays that are used before the match
+     */
+    preloadMatch(data: MatchData): void;
+    /**
+     * Update displays that are used during and after the match
+     */
+    loadMatch(matdatach: MatchData): void;
+    abortMatch(data: MatchData): void;
+    dsStatus(data:DSStatuses):void
 }
 
 export interface ClientToServerEvents {
-    partialMatch: (data:PartialMatch) => void
-    /*
-        Update displays that are used before the match
-    */
-    preloadMatch: (id:string) => void
-    /*
-        Update displays that are used during and after the match
-    */
-    loadMatch: (id:string) => void
-    abortMatch: (id:string) => void;
-    startMatch: (id:string) => void;
-    commitMatch: (id:string) => void;
-}
+    partialMatch(data: PartialMatch): void;
+    partialTeam(data: PartialTeam): void;
 
-export type ThisSocket = Socket<ClientToServerEvents, ServerToClientEvents>;
-export type ThisServer = Server<ClientToServerEvents, ServerToClientEvents>;
+    newTeam(data: TeamData): void;
+    deleteTeam(id:number): void;
+    /*
+    Update displays that are used before the match
+    */
+    preloadMatch(id: string): void;
+    /*
+    Update displays that are used during and after the match
+    */
+    loadMatch(id: string): void;
+    abortMatch(id: string): void;
+    startMatch(id: string): void;
+    commitMatch(id: string): void;
+}

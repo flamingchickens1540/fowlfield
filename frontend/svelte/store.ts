@@ -1,7 +1,7 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { MatchState, type ExtendedMatch } from '@fowltypes';
-import { FowlMatchStore } from "./socketStore";
-import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod } from "@fowlutils/match_timer";
+import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam } from '@fowltypes';
+import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, type WritableTeamData } from "./socketStore";
+import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
 import { listen } from "svelte/internal";
 import socket from "@socket";
 
@@ -11,15 +11,14 @@ let currentMatchID: string = ""
 let serverTimeOffset:number = 0;
 
 let listenForPreload:boolean = false;
-let preloadedMatchId:string = ""
-let loadedMatchId:string = ""
-
+const preloadedMatch = gettableStore("")
+const loadedMatch = gettableStore("")
 export function setPreloadingTrack(shouldPreload:boolean) {
     listenForPreload = shouldPreload;
-    matchDataPrivate.id.set(shouldPreload ? preloadedMatchId : loadedMatchId)
+    matchDataPrivate.id.set((shouldPreload ? preloadedMatch : loadedMatch).get())
 }
 
-const matchDataPrivate: { [key in keyof ExtendedMatch]: FowlMatchStore<key, ExtendedMatch[key]> } = {
+const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchData[key]> } = {
     id: new FowlMatchStore("id", currentMatchID),
     startTime: new FowlMatchStore("startTime", 0),
     state: new FowlMatchStore("state", MatchState.PENDING),
@@ -51,10 +50,15 @@ export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {
 
 export const matchPeriod = derived(matchTime, ($time) => getMatchPeriod($time));
 export const remainingTimeInPeriod = derived(matchTime, ($time) => {return getRemainingTimeInPeriod($time)});
+export const remainingTimeInDisplayPeriod = derived(matchTime, ($time) => {return getRemainingTimeInDisplayPeriod($time)});
 export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time));
 
 
-export const matchList:Writable<{[key:string]:ExtendedMatch}> = writable({})
+export function isMatchLoaded(match:string) {return match == loadedMatch.get()}
+export function isMatchPreloaded(match:string) {return match == preloadedMatch.get()}
+
+export const matchList:Writable<{[key:string]:MatchData}> = writable({})
+export const teamList:Writable<{[key:string]:WritableTeamData}> = writable({})
 
 
 
@@ -79,21 +83,49 @@ export function commitMatch() {
 
 matchDataPrivate.id.subscribeLocal((value) => currentMatchID = value)
 
-export function updateLoadedMatch(isPreload:boolean, data: ExtendedMatch) {
+export function updateLoadedMatch(isPreload:boolean, data: MatchData) {
     if (isPreload) {
-        preloadedMatchId = data.id;
+        preloadedMatch.set(data.id);
     } else {
-        loadedMatchId = data.id;
+        loadedMatch.set(data.id);
     }
-    currentMatchID = listenForPreload ? preloadedMatchId : loadedMatchId;
+    currentMatchID = (listenForPreload ? preloadedMatch : loadedMatch).get()
     updateMatchStores(data)
 }
 
-export function updateMatchList(data:{[key:string]:ExtendedMatch}) {
+export const loadedMatches = {
+    preloaded:getReadonlyStore(preloadedMatch),
+    loaded:getReadonlyStore(loadedMatch),
+}
+
+export function updateTeamList(data:{[key:number]:ExtendedTeam}) {
+    teamList.update((list) => {
+        list = {}
+    Object.values(data).forEach(element => {
+        list[element.id] = getFowlTeamStore(element)
+    });
+    console.log("TEMAUD", list)
+    return list
+    })
+}
+export function updateTeamStores(data:ExtendedTeam) {
+    teamList.update((list) => {
+        if (list[data.id]==null) {
+            list[data.id] = getFowlTeamStore(data)
+        } else {
+            list[data.id].setQuiet(data)
+        }
+        return list;
+    })
+    
+    
+}
+
+export function updateMatchList(data:{[key:string]:MatchData}) {
     console.log(data)
     matchList.set(data)
 }
-export function updateMatchStores(data: ExtendedMatch) {
+export function updateMatchStores(data: MatchData) {
     matchList.update((list) => {list[data.id] = data; return list})
     if (data.id !== currentMatchID) { return }
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
@@ -102,7 +134,7 @@ export function updateMatchStores(data: ExtendedMatch) {
 }
 
 
-const matchData: { [key in keyof Omit<ExtendedMatch, "state">]: Writable<ExtendedMatch[key]> } & {state:Writable<MatchState>} = {
+const matchData: { [key in keyof MatchData]: Writable<MatchData[key]> } = {
     ...matchDataPrivate,
     // state:matchDataPrivate.state
 }

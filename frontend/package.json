@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "node build.js dev",
     "build": "node build.js",
-    "serve": "node build.js serve"
+    "serve": "node build.js serve",
+    "watch": "node build.js watch"
   },
   "dependencies": {
     "express": "^4.18.2",
@@ -11,6 +12,7 @@
     "sass": "^1.63.6",
     "socket.io-client": "^4.6.2",
     "svelte": "^3.59.2",
+    "svelte-writable-derived": "^3.1.0",
     "typescript": "^5.1.3",
     "typescript-cookie": "^1.0.6"
   },

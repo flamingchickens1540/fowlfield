@@ -1,5 +1,5 @@
 packages:
   - path: "team1540.org/fowlfield/model"
-    output_path: "../types/ipctypes.ts"
+    output_path: "../common/types/ipctypes.ts"
     frontmatter: |
-      import {DriverStation} from "./types"
+      import type {DriverStation} from "./types"

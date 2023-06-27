@@ -1,69 +1,51 @@
 import { DBMatch } from "./models/matches";
 import * as db from "./models/db"
 import { MatchState, PartialMatch } from "@fowltypes";
+import { DBSettings } from "models/settings";
 
 
 let matches:{[key:string]:DBMatch}
-let preloaded:string = ""
-let loaded:string = ""
-let isLoaded:boolean = false;
-async function loadMatches() {
+let isReady:boolean = false;
+let settings:DBSettings
+
+export async function loadMatches() {
     matches = await db.getMatches()
-    const matchlist = Object.values(matches)
-    preloaded = matchlist.find((match) => match.state == MatchState.IN_PROGRESS || match.state == MatchState.LOADED || match.state == MatchState.PRELOADED)?.id ?? matchlist[0].id
-    loaded = matchlist.find((match) => match.state == MatchState.IN_PROGRESS || match.state == MatchState.LOADED)?.id ?? matchlist[0].id
-    isLoaded = true;
+    settings = await DBSettings.getInstance()
+    isReady = true;
 }
 
-function isDBLoaded() {
-    return isLoaded
+export function isDBLoaded() {
+    return isReady
 }
-function getMatch(id:string) {
+export function getMatch(id:string) {
     return matches[id]
 }
 
-function getMatches():{[key:string]:DBMatch} {
+export function getMatches():{[key:string]:DBMatch} {
     return matches;
 }
 
-function updateMatch(data:PartialMatch) {
-    if (matches[data.id] == null)
+export function updateMatch(data:PartialMatch) {
+    if (matches[data.id] == null) {console.warn("cannot find match with id", data.id);return}
     matches[data.id]?.update(data)
     return matches[data.id]
 }
 
-function getCurrentMatch():DBMatch {
-    return getMatch(loaded)
+export function getCurrentMatch():DBMatch {
+    return getMatch(settings.loadedMatch) ?? Object.values(matches)[0]
 }
 
-function getPreloadMatch():DBMatch {
-    return getMatch(preloaded)
+export function getPreloadMatch():DBMatch {
+    return getMatch(settings.preloadedMatch) ?? Object.values(matches)[0]
 }
 
-function setPreloadMatch(id:string):DBMatch {
-    if (getPreloadMatch().state == MatchState.PRELOADED) {getPreloadMatch().state = MatchState.PENDING}
-    preloaded = id;
+export function setPreloadMatch(id:string):DBMatch {
+    settings.preloadedMatch = id;
     return getPreloadMatch()
 }
-function setLoadedMatch(id:string):DBMatch {
-    if (getCurrentMatch().state == MatchState.LOADED) {getPreloadMatch().state = MatchState.PENDING}
-    loaded = id;
+export function setLoadedMatch(id:string):DBMatch {
+    
+    settings.loadedMatch = id;
     return getCurrentMatch()
 }
 
-function getLoadedMatchID():string {
-    return loaded
-}
-
-export default {
-    loadMatches,
-    getMatch,
-    updateMatch,
-    getCurrentMatch,
-    getMatches,
-    getPreloadMatch,
-    getLoadedMatchID,
-    setPreloadMatch,
-    setLoadedMatch,
-    isDBLoaded
-}

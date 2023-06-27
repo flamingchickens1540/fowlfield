@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 import {dirname, join} from 'path'
-import { IPCData, IPCMessage, Match } from '@fowltypes';
+import { IPCData, IPCMessage, IPCMatch } from '@fowltypes';
 
 
 interface IPCHandlers {
@@ -48,11 +48,11 @@ export class IPCClient {
     }
   }
   
-  load(data:Match) {
+  load(data:IPCMatch) {
     this.send('load', {match:data});
   }
   
-  start(data:Match) {
+  start(data:IPCMatch) {
     this.send('start', {match:data});
   }
 }

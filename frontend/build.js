@@ -11,7 +11,8 @@ import express from "express"
 let pages = {
     'test':"Stores Test",
     'match':"Match Control", // TODO: remove bogus once another page is ready
-    'audience': "Audience Display"
+    'audience': "Audience Display",
+    "event": "Team Management"
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 console.log("ABVF",entryPoints)
@@ -43,13 +44,13 @@ let ctx = await esbuild.context({
 })
 
 await ctx.rebuild()
-if (mode == "serve" || mode == "dev") {
+if (mode == "serve" || mode == "dev" || mode =="watch") {
     const server = express()
 
     server.use("/", express.static("public"))
-
+    if (mode == "dev" || mode=="watch") {await ctx.watch()}
     if (mode == "dev") {
-        await ctx.watch()
+        
         let { host, port } = await ctx.serve({
             servedir:"dist"
         })

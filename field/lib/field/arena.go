@@ -101,6 +101,7 @@ func (arena *Arena) LoadMatch(match *model.Match) error {
 	if err != nil {
 		return err
 	}
+	arena.CurrentMatch = match
 
 	return nil
 }
@@ -301,7 +302,7 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 func (arena *Arena) checkAllianceStationsReady(stations ...string) error {
 	for _, station := range stations {
 		allianceStation := arena.AllianceStations[station]
-		if !allianceStation.Bypass {
+		if allianceStation.TeamNumber != 0 {
 			if allianceStation.DsConn == nil || !allianceStation.DsConn.RobotLinked {
 				return fmt.Errorf("cannot start match until all robots are connected or bypassed")
 			}

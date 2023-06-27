@@ -6,6 +6,7 @@ import (
 
 	"team1540.org/fowlfield/ipc"
 	"team1540.org/fowlfield/lib/field"
+	"team1540.org/fowlfield/model"
 )
 
 var client *ipc.NodeIPC
@@ -31,7 +32,9 @@ func main() {
 	ticker := time.NewTicker(loopInterval)
 
 	loopChan := make(chan struct{})
+
 	go func() {
+		loop()
 		for {
 			select {
 			case <-ticker.C:
@@ -42,7 +45,7 @@ func main() {
 			}
 		}
 	}()
-
+	go arena.Run()
 	for {
 		client.Loop()
 	}

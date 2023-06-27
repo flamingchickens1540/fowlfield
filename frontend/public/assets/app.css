@@ -92,6 +92,9 @@ input[type=number] {
   padding: 40px;
   bottom: 0px;
   background-color: #303030;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content:flex-start;
 }
 .sidebar-l {
   position: absolute;

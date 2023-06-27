@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { MatchPeriod } from "@fowltypes";
 	import { formatDuration } from "@fowlutils/format";
-	import matchData, {remainingTimeInPeriod} from "@store";
+	import matchData, {remainingTimeInDisplayPeriod, matchPeriod} from "@store";
 	import { derived } from "svelte/store";
 
 	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, id, type} = matchData
@@ -8,9 +9,19 @@
 
 	const scoreHeight = derived(type, ($type) => $type == "qualification" ? "1946px": "1978px");
 	const allianceDisplay = derived(type, ($type) => $type == "qualification" ? "none": "block");
+
+
+	const icons:{[key in MatchPeriod]:string} = {
+		[MatchPeriod.PREMATCH]: "hourglass_top",
+		[MatchPeriod.AUTO]: "smart_toy",
+		[MatchPeriod.PAUSE]: "",
+		[MatchPeriod.TELEOP]: "sports_esports",
+		[MatchPeriod.POSTMATCH]: "hourglass_bottom"
+	}
 </script>
 
 <style lang=scss>
+	@import url("https://fonts.googleapis.com/icon?family=Material+Icons");
 	@import url('https://fonts.googleapis.com/css2?family=Monomaniac+One&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 	@import "./matchstyle.scss";
 
@@ -94,7 +105,11 @@
     <path d="M541.5 214H107.259V0H320.5L431 107L541.5 214Z" fill="#ED1C24" />
   </svg>
 
-<div class="timer">{formatDuration(Math.max(Math.floor($remainingTimeInPeriod),0))}</div>
+<div class="timer">
+	{Math.max(Math.floor($remainingTimeInDisplayPeriod),0)}
+	
+</div>
+<span class="period-icon material-icons">{icons[$matchPeriod]}</span>
 
 <div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$id}</div>
 
@@ -107,4 +122,22 @@
 <div class="red-alliance" style="display:{$allianceDisplay}">Alliance {$redAlliance}</div>
 
 <div class="blue-alliance" style="display:{$allianceDisplay}">Alliance {$blueAlliance}</div>
+
+<!-- <svg
+class="vector5"
+width="220"
+height="129"
+viewBox="0 0 220 129"
+fill="none"
+xmlns="http://www.w3.org/2000/svg"
+>
+<path
+  d="M0.500977 0.000244141L49.001 129H219.501L171.001 0.000244141H0.500977Z"
+  fill="#2F2F2F"
+/>
+</svg> -->
+
+<!-- <span class="t material-icons">
+	smart_toy
+</span> -->
 </div>

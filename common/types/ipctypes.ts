@@ -46,7 +46,4 @@ export interface Match {
 
 export interface Team {
   id: number /* int */;
-  name: string;
-  robotname: string;
-  description: string;
 }
