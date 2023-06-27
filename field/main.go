@@ -16,7 +16,7 @@ func loop() {
 }
 
 const (
-	loopInterval = 5 * time.Second
+	loopInterval = 1 * time.Second
 )
 
 func main() {

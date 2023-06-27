@@ -22,7 +22,7 @@ async function configure() {
     await DBSettings.getInstance()
     await matchmanager.loadMatches()
     await teammanager.loadTeams()
-    sockets = await startSockets(server)
+    sockets = await startSockets(server, ipc)
 
 }
 

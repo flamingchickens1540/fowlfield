@@ -38,7 +38,8 @@ func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
 	}
 	fmt.Println(msgContents)
 
-	processCommand(msgContents.Command, msg.Message)
+	processCommand(msgContents.Command, msgContents.Data)
+	client.SendDsStatus(arena.GetAllianceStationStatuses())
 	client.hasSentAck = false
 	return err
 }

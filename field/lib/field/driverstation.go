@@ -16,7 +16,7 @@ import (
 	"team1540.org/fowlfield/lib/game"
 )
 
-const ( 
+const (
 	ServerIpAddress = "10.0.100.5" // The DS will try to connect to this address only.
 )
 
@@ -144,7 +144,7 @@ func (dsConn *DriverStationConnection) close() {
 func (dsConn *DriverStationConnection) signalMatchStart() error {
 	// Zero out missed packet count and begin logging.
 	dsConn.missedPacketOffset = dsConn.MissedPacketCount
-	return nil;
+	return nil
 }
 
 // Serializes the control information into a packet.

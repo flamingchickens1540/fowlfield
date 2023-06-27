@@ -55,4 +55,8 @@ export class IPCClient {
   start(data:IPCMatch) {
     this.send('start', {match:data});
   }
+
+  abort() {
+    this.send('abort', {});
+  }
 }

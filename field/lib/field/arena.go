@@ -254,6 +254,7 @@ func (arena *Arena) Run() {
 // Loads a team into an alliance station, cleaning up the previous team there if there is one.
 func (arena *Arena) assignTeam(teamId int, station string) error {
 	// Reject invalid station values.
+	log.Printf("Assigning Team %d to station %s", teamId, station)
 	if _, ok := arena.AllianceStations[station]; !ok {
 		return fmt.Errorf("invalid alliance station '%s'", station)
 	}
@@ -275,10 +276,6 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 
 // Returns nil if the match can be started, and an error otherwise.
 func (arena *Arena) checkCanStartMatch() error {
-	if arena.MatchState != PreMatch {
-		return fmt.Errorf("cannot start match while there is a match still in progress or with results pending")
-	}
-
 	err := arena.checkAllianceStationsReady("R1", "R2", "R3", "B1", "B2", "B3")
 	if err != nil {
 		return err

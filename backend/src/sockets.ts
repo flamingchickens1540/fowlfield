@@ -7,6 +7,7 @@ import { getMatchPeriod } from '@fowlutils/match_timer';
 import * as teammanager from './teammanager';
 import { buildStats } from 'models/teams';
 import { getDsStatus } from 'index';
+import { IPCClient } from 'ipc/ipc';
 
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -30,7 +31,7 @@ function buildExtendedTeams():{ [key: number]: ExtendedTeam } {
     return teams
 }
 
-export default function startServer(server: http.Server) {
+export default function startServer(server: http.Server, ipc:IPCClient) {
     io = new Server(server, {
         cors: {
             origin: "*"
@@ -75,6 +76,7 @@ export default function startServer(server: http.Server) {
         socket.on("loadMatch", (id: string) => {
             console.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
+            ipc.load(match.getData())
             io.emit("loadMatch", match.getData())
         })
 
@@ -86,12 +88,12 @@ export default function startServer(server: http.Server) {
             if (match != null) {
                 io.emit("match", match.getData())
             }
-            if (data.red1 != null) { io.emit("team", await teammanager.getTeam(data.red1).getExtendedData()) }
-            if (data.red2 != null) { io.emit("team", await teammanager.getTeam(data.red2).getExtendedData()) }
-            if (data.red3 != null) { io.emit("team", await teammanager.getTeam(data.red3).getExtendedData()) }
-            if (data.blue1 != null) { io.emit("team", await teammanager.getTeam(data.blue1).getExtendedData()) }
-            if (data.blue2 != null) { io.emit("team", await teammanager.getTeam(data.blue2).getExtendedData()) }
-            if (data.blue3 != null) { io.emit("team", await teammanager.getTeam(data.blue3).getExtendedData()) }
+            if (data.red1 != null && data.red1 != 0) { io.emit("team", await teammanager.getTeam(data.red1).getExtendedData()) }
+            if (data.red2 != null && data.red2 != 0) { io.emit("team", await teammanager.getTeam(data.red2).getExtendedData()) }
+            if (data.red3 != null && data.red3 != 0) { io.emit("team", await teammanager.getTeam(data.red3).getExtendedData()) }
+            if (data.blue1 != null && data.blue1 != 0) { io.emit("team", await teammanager.getTeam(data.blue1).getExtendedData()) }
+            if (data.blue2 != null && data.blue2 != 0) { io.emit("team", await teammanager.getTeam(data.blue2).getExtendedData()) }
+            if (data.blue3 != null && data.blue3 != 0) { io.emit("team", await teammanager.getTeam(data.blue3).getExtendedData()) }
         })
 
         socket.on("partialTeam", async (data: PartialTeam) => {
@@ -134,6 +136,7 @@ export default function startServer(server: http.Server) {
             if (id != match.id) { console.warn("Started non-loaded match"); return; }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
+            ipc.start(match.getData())
             // TODO: NOTIFY IPC
             io.emit("match", match.getData())
         })
@@ -143,6 +146,7 @@ export default function startServer(server: http.Server) {
             if (id != match.id) { console.warn("Aborted non-loaded match"); return; }
             match.startTime = 0;
             match.state = MatchState.PENDING
+            ipc.abort()
             // TODO: NOTIFY IPC
             io.emit("abortMatch", match.getData())
         })
@@ -156,6 +160,14 @@ export default function startServer(server: http.Server) {
 
     })
 
+    setInterval(() => {
+        if (!matchmanager.isDBLoaded()) { return; }
+        const match = matchmanager.getCurrentMatch()
+        if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
+            match.state = MatchState.COMPLETE;
+        }
+        io.emit("match", match.getData())
+    }, 50)
     return {
         emitDsStatus(statuses:DSStatuses) {
             io.emit("dsStatus", statuses)
@@ -164,14 +176,7 @@ export default function startServer(server: http.Server) {
 
 }
 
-setInterval(() => {
-    if (!matchmanager.isDBLoaded()) { return; }
-    const match = matchmanager.getCurrentMatch()
-    if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
-        match.state = MatchState.COMPLETE;
-    }
-    io.emit("match", match.getData())
-}, 50)
+
 
 
 
