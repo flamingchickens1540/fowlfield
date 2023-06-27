@@ -12,7 +12,10 @@
 	import type { WritableTeamData } from "socketStore";
 	import writableDerived from "svelte-writable-derived"
 	import TeamEntry from "./components/TeamEntry.svelte";
+	import configureAudio from "audio";
 	setPreloadingTrack(true)
+
+	configureAudio()
 	
 	const {loaded:loadedMatch, preloaded:preloadedMatch }= loadedMatches
 	const statusColors:{[key in MatchState]:string} = {
