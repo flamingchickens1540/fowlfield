@@ -294,7 +294,7 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 	for _, station := range stations {
 		allianceStation := arena.AllianceStations[station]
 		statuses[station] =
-			model.AllianceStationStatus{DsConnected: allianceStation.DsConn != nil, RobotConnected: allianceStation.DsConn != nil && allianceStation.DsConn.RobotLinked}
+			model.AllianceStationStatus{Bypassed: allianceStation.TeamNumber == 0, DsConnected: allianceStation.DsConn != nil, RobotConnected: allianceStation.DsConn != nil && allianceStation.DsConn.RobotLinked}
 	}
 	return statuses
 }

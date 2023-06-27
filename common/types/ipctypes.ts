@@ -6,6 +6,7 @@ import type {DriverStation} from "./types"
 export interface AllianceStationStatus {
   dsConnected: boolean;
   robotConnected: boolean;
+  bypassed: boolean;
 }
 
 //////////

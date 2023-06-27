@@ -1,5 +1,5 @@
 
-import { IPCAllianceStationStatus, DriverStation, IPCData, DSStatuses } from '@fowltypes';
+import { AllianceStationStatus, DriverStation, IPCData, DSStatuses } from '@fowltypes';
 import * as http from 'http';
 import { IPCClient } from "./ipc/ipc";
 import * as matchmanager from "./matchmanager";
@@ -9,7 +9,7 @@ import startSockets from "./sockets";
 import { DBSettings } from 'models/settings';
 import isEqual from "lodash.isequal"
 
-let driverStatuses:{[key in DriverStation]:IPCAllianceStationStatus};
+let driverStatuses:{[key in DriverStation]:AllianceStationStatus};
 
 const server = http.createServer()
 
@@ -39,10 +39,15 @@ function canMatchStart() {
 
 function handleDSStatus(data:DSStatuses) {
     if (!isEqual(driverStatuses, data)) {
+        console.log(data)
         sockets.emitDsStatus(data)
     }
     driverStatuses = data
     
+}
+
+export function getDsStatus() {
+    return driverStatuses
 }
 
 

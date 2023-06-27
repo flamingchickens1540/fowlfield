@@ -11,6 +11,7 @@
 	import TeamDatalistEntry from "./components/TeamDatalistEntry.svelte";
 	import type { WritableTeamData } from "socketStore";
 	import writableDerived from "svelte-writable-derived"
+	import TeamEntry from "./components/TeamEntry.svelte";
 	setPreloadingTrack(true)
 	
 	const {loaded:loadedMatch, preloaded:preloadedMatch }= loadedMatches
@@ -89,21 +90,12 @@
 			return storevalue;
 		})
 	}
-	let teamRed1;
-	let teamRed2;
-	let teamRed3;
-	let teamBlue1;
-	let teamBlue2;
-	let teamBlue3;
+	let showTeams = false
 	let teamlistunsub:Unsubscriber;
+	const {red1, red2, red3, blue1, blue2, blue3} = matchData
 	teamlistunsub = teamList.subscribe((value) => {
 		if (Object.values(value).length > 0) {
-			teamRed1 = getTeamDerived(matchData.red1)
-			teamRed2 = getTeamDerived(matchData.red2)
-			teamRed3 = getTeamDerived(matchData.red3)
-			teamBlue1 = getTeamDerived(matchData.blue1)
-			teamBlue2 = getTeamDerived(matchData.blue2)
-			teamBlue3 = getTeamDerived(matchData.blue3)
+			showTeams = true
 			teamlistunsub()
 		}
 	})
@@ -155,19 +147,20 @@
 					<div class=item>Red</div>
 					<div class=item>Blue</div>
 				</div>
+				{#if showTeams}
 				<div class=row>
-					<div class=item><input bind:value={$teamRed1} list=teams/></div>
-					<div class=item><input bind:value={$teamBlue1} list=teams/></div>
+					<div class=item><TeamEntry store={red1} station=R1></TeamEntry></div>
+					<div class=item><TeamEntry store={blue1} station=B1></TeamEntry></div>
 				</div>
 				<div class=row>
-					<div class=item><input bind:value={$teamRed2} list=teams/></div>
-					<div class=item><input bind:value={$teamBlue2} list=teams/></div>
+					<div class=item><TeamEntry store={red2} station=R2></TeamEntry></div>
+					<div class=item><TeamEntry store={blue2} station=B2></TeamEntry></div>
 				</div>
 				<div class=row>
-					<div class=item><input  bind:value={$teamRed3} list=teams/></div>
-					<div class=item><input  bind:value={$teamBlue3} list=teams/></div>
+					<div class=item><TeamEntry store={red3} station=R3></TeamEntry></div>
+					<div class=item><TeamEntry store={blue3} station=B3></TeamEntry></div>
 				</div>
-				
+				{/if}
 			</div>
 			<br>
 			<br>
@@ -199,13 +192,7 @@
 			.row {
 				display:contents;
 				.item {
-					input {
-						width:80%;
-						border:0px;
-						height:20px;
-						padding:3px 5px;
-						margin:5px;
-					}
+					
 					border:none;
 					&:first-child {
 						

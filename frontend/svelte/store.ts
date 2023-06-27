@@ -1,9 +1,9 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam } from '@fowltypes';
+import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses } from '@fowltypes';
 import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, type WritableTeamData } from "./socketStore";
 import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
-import { listen } from "svelte/internal";
 import socket from "@socket";
+import type { AllianceStationStatus } from "@fowltypes";
 
 
 
@@ -60,6 +60,8 @@ export function isMatchPreloaded(match:string) {return match == preloadedMatch.g
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
 export const teamList:Writable<{[key:string]:WritableTeamData}> = writable({})
 
+const defaultstatus:AllianceStationStatus={dsConnected: false, robotConnected: false, bypassed:false}
+export const dsStatuses:Writable<DSStatuses> = writable({R1:defaultstatus, R2:defaultstatus,R3:defaultstatus,B1:defaultstatus, B2:defaultstatus, B3:defaultstatus})
 
 
 
@@ -79,8 +81,9 @@ export function abortMatch() {
 export function commitMatch() {
     socket.emit("commitMatch", currentMatchID)
 }
-
-
+export function updateDSStatuses(data:DSStatuses) {
+    dsStatuses.set(data)
+}
 matchDataPrivate.id.subscribeLocal((value) => currentMatchID = value)
 
 export function updateLoadedMatch(isPreload:boolean, data: MatchData) {

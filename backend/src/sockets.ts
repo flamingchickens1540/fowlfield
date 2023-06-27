@@ -6,6 +6,7 @@ import * as matchmanager from "./matchmanager";
 import { getMatchPeriod } from '@fowlutils/match_timer';
 import * as teammanager from './teammanager';
 import { buildStats } from 'models/teams';
+import { getDsStatus } from 'index';
 
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -62,7 +63,7 @@ export default function startServer(server: http.Server) {
         });
         socket.emit("matches", matches)
         socket.emit("teams", teams)
-
+        socket.emit("dsStatus", getDsStatus())
 
 
         socket.on("preloadMatch", (id: string) => {
