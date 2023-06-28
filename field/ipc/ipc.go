@@ -2,7 +2,7 @@ package ipc
 
 import (
 	"encoding/json"
-	"fmt"
+	"log"
 
 	"github.com/zealic/go2node"
 	"team1540.org/fowlfield/lib/field"
@@ -20,7 +20,7 @@ func NewClient(field_arena *field.Arena) *NodeIPC {
 	channel, err := go2node.RunAsNodeChild()
 	arena = field_arena
 	if err != nil {
-		fmt.Println("could not create channel!")
+		log.Println("could not create channel!")
 		panic(err)
 	}
 
@@ -34,10 +34,8 @@ func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
 	msgContents := new(model.IPCMessage)
 	err := msg.Unmarshal(msgContents)
 	if err != nil {
-		fmt.Println("COULD NOT PARSE MSG", err, msg, msgContents)
+		log.Println("COULD NOT PARSE MSG", err, msg, msgContents)
 	}
-	fmt.Println(msgContents)
-
 	processCommand(msgContents.Command, msgContents.Data)
 	client.SendDsStatus(arena.GetAllianceStationStatuses())
 	client.hasSentAck = false
@@ -47,7 +45,7 @@ func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
 func (client *NodeIPC) send(message model.IPCMessage) {
 	bytes, err := json.Marshal(message)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 	client.channel.Write(&go2node.NodeMessage{
 		Message: bytes,
@@ -66,7 +64,7 @@ func (client *NodeIPC) SendDsStatus(statuses map[string]model.AllianceStationSta
 func (client *NodeIPC) Loop() {
 	msg, err := client.channel.Read()
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Println(err.Error())
 	}
 	client.LoadMessage(msg)
 }

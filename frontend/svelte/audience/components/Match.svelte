@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { MatchPeriod } from "@fowltypes";
 	import { formatDuration } from "@fowlutils/format";
-	import matchData, {remainingTimeInDisplayPeriod, matchPeriod} from "@store";
+	import matchData, {remainingTimeInDisplayPeriod, matchPeriod, teamList} from "@store";
 	import { derived } from "svelte/store";
 
-	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, id, type} = matchData
+	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, matchNumber, type} = matchData
 
 
 	const scoreHeight = derived(type, ($type) => $type == "qualification" ? "1946px": "1978px");
 	const allianceDisplay = derived(type, ($type) => $type == "qualification" ? "none": "block");
 
+	const teamNumberMap = {}
+
+	$: {
+		Object.values($teamList).forEach((team) => {teamNumberMap[team.id] = team.displaynum.get()})
+	}
 
 	const icons:{[key in MatchPeriod]:string} = {
 		[MatchPeriod.PREMATCH]: "hourglass_top",
@@ -38,12 +43,12 @@
 	
 	<div class="rectangle-blue"></div>
 	
-	<div class="team-blue-1">{$blue1 ?? ""}</div> <!--Blue 1-->
-	<div class="team-blue-2">{$blue2 ?? ""}</div> <!--Blue 2-->
-	<div class="team-blue-3">{$blue3 ?? ""}</div> <!--Blue 3-->
-	<div class="team-red-3">{$red3 ?? ""}</div>  <!--Red 3-->
-	<div class="team-red-2">{$red2 ?? ""}</div> <!--Red 2-->
-	<div class="team-red-1">{$red1 ?? ""}</div> <!--Red 1-->
+	<div class="team-blue-1">{teamNumberMap[$blue1] ?? ""}</div> <!--Blue 1-->
+	<div class="team-blue-2">{teamNumberMap[$blue2] ?? ""}</div> <!--Blue 2-->
+	<div class="team-blue-3">{teamNumberMap[$blue3] ?? ""}</div> <!--Blue 3-->
+	<div class="team-red-3">{teamNumberMap[$red3 ]?? ""}</div>  <!--Red 3-->
+	<div class="team-red-2">{teamNumberMap[$red2 ]?? ""}</div> <!--Red 2-->
+	<div class="team-red-1">{teamNumberMap[$red1 ]?? ""}</div> <!--Red 1-->
 	
 	<svg
     class="vector-timer"
@@ -111,7 +116,7 @@
 </div>
 <span class="period-icon material-icons">{icons[$matchPeriod]}</span>
 
-<div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$id}</div>
+<div class="match-text">{$type == "qualification" ? "Qualification" : "Elimination"} Match {$matchNumber}</div>
 
 <div class="event-text">BunnyBots 2023: PLACEHOLDER</div>
 

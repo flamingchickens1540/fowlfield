@@ -8,6 +8,7 @@ import * as teammanager from './teammanager';
 import { buildStats } from 'models/teams';
 import { getDsStatus } from 'index';
 import { IPCClient } from 'ipc/ipc';
+import Socket from 'socket.io';
 
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -121,19 +122,19 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 id:data.id,
                 displaynum:data.displaynum ?? data.id.toString(),
                 alliance:data.alliance ?? 0,
+                alliancePosition: data.alliancePosition ?? 0,
                 name: data.name ?? "Team "+data.displaynum ?? data.id.toString(),
                 robotname:data.robotname
             })
             if (team != null) {
             const extended = await team.getExtendedData()
-            console.log(extended)
             io.emit("team", extended)
             }
         })
 
         socket.on("startMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
-            if (id != match.id) { console.warn("Started non-loaded match"); return; }
+            if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
             ipc.start(match.getData())
@@ -143,7 +144,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("abortMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
             console.log("aborting", id)
-            if (id != match.id) { console.warn("Aborted non-loaded match"); return; }
+            if (id != match.id) { alert("Aborted non-loaded match"); return; }
             match.startTime = 0;
             match.state = MatchState.PENDING
             ipc.abort()
@@ -158,6 +159,16 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             io.emit("match", match.getData())
         })
 
+        socket.on("nextMatch", (type) => {
+            const newmatch = matchmanager.advanceMatches(type)
+            if (newmatch != null) {
+                io.emit("match", newmatch.getData())
+            }
+        })
+        function alert(message:string) {
+            console.warn(message)
+            socket.emit("alert", message)
+        }
     })
 
     setInterval(() => {
@@ -168,6 +179,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         }
         io.emit("match", match.getData())
     }, 50)
+
     return {
         emitDsStatus(statuses:DSStatuses) {
             io.emit("dsStatus", statuses)

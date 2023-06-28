@@ -56,7 +56,6 @@ export async function getTeams(): Promise<{ [key: string]: DBTeam }> {
     for await (const team of teams.find()) {
         result[team.id] = new DBTeam(team as unknown as TeamData)
     }
-    console.log(result)
     return result
 }
 export async function updateSetting<K extends keyof Settings, T extends Settings[K]>(key: K, value: T) {

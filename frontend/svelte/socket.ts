@@ -41,6 +41,10 @@ socket.on("disconnect", (reason) => {
     }
 })
 
+socket.on("alert", (msg) => {
+    window.alert(msg)
+})
+
 
 socket.connect()
 

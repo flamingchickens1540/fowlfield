@@ -2,10 +2,13 @@
 	import type { TeamData } from "@fowltypes";
 	import socket from "@socket";
 	import type { WritableTeamData } from "socketStore";
+	import writableDerived from "svelte-writable-derived";
 	import { writable, type Writable } from "svelte/store";
 	export let team: WritableTeamData;
-	const {id, displaynum, name, alliance, robotname} = team
-	const alliancestring:Writable<string> = writable($alliance?.toString() ?? "0")
+	const {id, displaynum, name, alliance, robotname, alliancePosition} = team
+	const alliancestring:Writable<string> = writableDerived(alliance, (currentalliance) => currentalliance?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
+	const allianceposstring:Writable<string> = writableDerived(alliancePosition, (current) => current?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
+		
 
 	let nobodymove:boolean = false
 	alliance.subscribe((value) => {
@@ -34,6 +37,13 @@
 		<option value=2>Alliance 2</option>
 		<option value=3>Alliance 3</option>
 		<option value=4>Alliance 4</option>
+	</select>
+	<select class="tableitem" bind:value={$allianceposstring}>
+		<option value=0>None</option>
+		<option value=1>Captain</option>
+		<option value=2>Pick 1</option>
+		<option value=3>Pick 2</option>
+		<option value=4>Pick 3</option>
 	</select>
 	<button class="tableitem" on:click={() => socket.emit("deleteTeam", id)}>-</button>
 </div>

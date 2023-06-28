@@ -246,7 +246,6 @@ func (arena *Arena) Run() {
 // Loads a team into an alliance station, cleaning up the previous team there if there is one.
 func (arena *Arena) assignTeam(teamId int, station string) error {
 	// Reject invalid station values.
-	log.Printf("Assigning Team %d to station %s", teamId, station)
 	if _, ok := arena.AllianceStations[station]; !ok {
 		return fmt.Errorf("invalid alliance station '%s'", station)
 	}

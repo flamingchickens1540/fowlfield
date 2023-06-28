@@ -1,16 +1,23 @@
 import { DBMatch } from "./models/matches";
 import * as db from "./models/db"
-import { MatchState, PartialMatch } from "@fowltypes";
+import { MatchState, PartialMatch, MatchData } from '@fowltypes';
 import { DBSettings } from "models/settings";
+import { MatchMaker } from "matchmaker";
 
 
 let matches:{[key:string]:DBMatch}
 let isReady:boolean = false;
 let settings:DBSettings
-
+let matchMaker:MatchMaker
 export async function loadMatches() {
     matches = await db.getMatches()
     settings = await DBSettings.getInstance()
+    matchMaker = new MatchMaker()
+    if (Object.keys(matches).length == 0) {
+        const match = matchMaker.advanceQualsMatch()
+        settings.loadedMatch = match.id;
+        settings.preloadedMatch = match.id;
+    }
     isReady = true;
 }
 
@@ -44,8 +51,32 @@ export function setPreloadMatch(id:string):DBMatch {
     return getPreloadMatch()
 }
 export function setLoadedMatch(id:string):DBMatch {
-    
     settings.loadedMatch = id;
     return getCurrentMatch()
 }
 
+export function getMatchMaker():MatchMaker {
+    return matchMaker
+}
+
+export function newMatch(data:MatchData) {
+    if (matches[data.id] != null) {console.warn("already have match with id", data.id);return matches[data.id]}
+    db.setMatch(data)
+    matches[data.id] = new DBMatch(data)
+    return matches[data.id]
+}
+
+export function advanceMatches(type:'qualification'|"elimination") {
+    if (type == "qualification") {
+        return matchMaker.advanceQualsMatch()
+    } else {
+        return matchMaker.advanceElimMatch()
+    }
+}
+
+
+export function notifyMatchUpdated(match:DBMatch) {
+    if (match.state == MatchState.POSTED) {
+        matchMaker.updateBracket(match.getData())
+    }
+}

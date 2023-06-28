@@ -1,7 +1,6 @@
 package ipc
 
 import (
-	"fmt"
 	"log"
 
 	"team1540.org/fowlfield/model"
@@ -19,16 +18,12 @@ func processCommand(cmd string, message model.IPCData) {
 }
 
 func loadMatch(match model.Match) {
-	fmt.Println("LOADING", match)
+	log.Println("loading", match.Id)
 	arena.LoadMatch(&match)
 }
 
 func startMatch(match model.Match) {
-	fmt.Println(match)
+	log.Println("starting", match.Id)
 	arena.LoadMatch(&match)
-	if arena.CurrentMatch.Id != match.Id {
-		panic("WRONG MATCH")
-	}
 	log.Println(arena.StartMatch())
-
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"team1540.org/fowlfield/ipc"
@@ -20,7 +20,8 @@ const (
 )
 
 func main() {
-	fmt.Println("starting")
+	log.SetPrefix("[GO] ")
+	log.Println("Starting RMS")
 	var err error
 	arena, err = field.NewArena()
 	if err != nil {

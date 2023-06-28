@@ -20,6 +20,7 @@ export interface TeamData extends Team {
     displaynum:string
     robotname?:string
     alliance:0|1|2|3|4
+    alliancePosition:0|1|2|3|4
 }
 export interface TeamMatchStats {
     win:number,

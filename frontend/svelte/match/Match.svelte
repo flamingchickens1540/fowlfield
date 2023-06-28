@@ -95,7 +95,7 @@
 	}
 	let showTeams = false
 	let teamlistunsub:Unsubscriber;
-	const {red1, red2, red3, blue1, blue2, blue3} = matchData
+	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance} = matchData
 	teamlistunsub = teamList.subscribe((value) => {
 		if (Object.values(value).length > 0) {
 			showTeams = true
@@ -130,6 +130,9 @@
 			{/each}
 			
 		</div>
+
+		<button on:click={() => socket.emit("nextMatch", "qualification")}>Next Quals</button>
+		<button on:click={() => socket.emit("nextMatch", "elimination")}>Next Elims</button>
 	</div>
 	<div class="sidebar-r">
 		<h2>Match {($matchid ?? "HELP")}</h2>
@@ -146,10 +149,17 @@
 			</div>
 			<p id="teams-header">Teams</p>
 			<div id=teamsgrid>
+				{#if $redAlliance == 0}
 				<div class=row>
 					<div class=item>Red</div>
 					<div class=item>Blue</div>
 				</div>
+				{:else}
+				<div class=row>
+					<div class=item>Red ({$redAlliance})</div>
+					<div class=item>Blue ({$blueAlliance})</div>
+				</div>
+				{/if}
 				{#if showTeams}
 				<div class=row>
 					<div class=item><TeamEntry store={red1} station=R1></TeamEntry></div>

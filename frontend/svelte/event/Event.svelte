@@ -9,14 +9,22 @@
         name: "",
         displaynum: "",
         alliance: 0,
+        alliancePosition:0,
         id: null
     }
     function addTeam() {
-        socket.emit("newTeam", nextTeam)
+        socket.emit("newTeam", {
+            name:nextTeam.name,
+            displaynum:nextTeam.displaynum,
+            alliance: parseInt(nextTeam.alliance as any) as any,
+            alliancePosition:parseInt(nextTeam.alliancePosition as any) as any,
+            id:nextTeam.id
+        })
         nextTeam = {
             name: "",
             displaynum: "",
             alliance: 0,
+            alliancePosition:0,
             id: null
         }
     }
@@ -37,6 +45,7 @@
             <div class=tableitem>Robot Name</div>
             <div class=tableitem>Alliance</div>
             <div class=tableitem></div>
+            <div class=tableitem></div>
         </div>
         {#key $teamList}
         {#each $teams as team, i }
@@ -55,6 +64,13 @@
                 <option value=3>Alliance 3</option>
                 <option value=4>Alliance 4</option>
             </select>
+            <select class="tableitem" bind:value={nextTeam.alliancePosition}>
+                <option value=0>None</option>
+                <option value=1>Captain</option>
+                <option value=2>Pick 1</option>
+                <option value=3>Pick 2</option>
+                <option value=4>Pick 3</option>
+            </select>
             <button class="tableitem" on:click={addTeam}>+</button>
         </div>
         
@@ -65,7 +81,7 @@
 <style lang="scss">
     #teamlist {
         display:grid;
-        grid-template-columns:100px 100px auto auto 150px 50px; 
+        grid-template-columns:100px 100px auto auto 150px 150px 50px; 
         grid-auto-flow: row;
     }
     

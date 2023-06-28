@@ -29,6 +29,8 @@ export interface ServerToClientEvents {
     loadMatch(matdatach: MatchData): void;
     abortMatch(data: MatchData): void;
     dsStatus(data:DSStatuses):void
+    alert(message:string):void
+    
 }
 
 export interface ClientToServerEvents {
@@ -48,4 +50,6 @@ export interface ClientToServerEvents {
     abortMatch(id: string): void;
     startMatch(id: string): void;
     commitMatch(id: string): void;
+
+    nextMatch(type:"qualification"|"elimination"):void
 }

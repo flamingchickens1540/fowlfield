@@ -44,6 +44,7 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
         displaynum: gettableStore(data.displaynum),
         robotname: gettableStore(data.robotname ?? ""),
         alliance: gettableStore(data.alliance),
+        alliancePosition: gettableStore(data.alliancePosition),
     }
     let blockUpdates = true
     Object.entries(props).forEach(([property, store]) => {
@@ -67,6 +68,7 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
             props.displaynum.set(value.displaynum)
             props.robotname.set(value.robotname ?? "")
             props.alliance.set(value.alliance)
+            props.alliancePosition.set(value.alliancePosition)
             blockUpdates = false
         }
 
