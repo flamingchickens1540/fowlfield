@@ -39,7 +39,6 @@ function canMatchStart() {
 
 function handleDSStatus(data:DSStatuses) {
     if (!isEqual(driverStatuses, data)) {
-        console.log(data)
         sockets.emitDsStatus(data)
     }
     driverStatuses = data

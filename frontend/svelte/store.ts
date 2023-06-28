@@ -60,8 +60,7 @@ export function isMatchPreloaded(match:string) {return match == preloadedMatch.g
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
 export const teamList:Writable<{[key:string]:WritableTeamData}> = writable({})
 
-const defaultstatus:AllianceStationStatus={dsConnected: false, robotConnected: false, bypassed:false}
-export const dsStatuses:Writable<DSStatuses> = writable({R1:defaultstatus, R2:defaultstatus,R3:defaultstatus,B1:defaultstatus, B2:defaultstatus, B3:defaultstatus})
+export const dsStatuses:Writable<DSStatuses> = writable()
 
 
 

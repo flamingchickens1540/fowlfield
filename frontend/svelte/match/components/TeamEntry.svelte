@@ -15,6 +15,7 @@
         let dsColor
         let robotColor
         dsStatuses.subscribe((statuses) => {
+            if (statuses == null) {return}
             const status = statuses[station] 
             console.log(station, status)
             dsColor = status.dsConnected ? "#005700" : status.bypassed ? "#000000" : "#570000"

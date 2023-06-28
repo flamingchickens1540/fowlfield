@@ -50,10 +50,8 @@ type Arena struct {
 
 type AllianceStation struct {
 	DsConn     *DriverStationConnection
-	Ethernet   bool
 	Astop      bool
 	Estop      bool
-	Bypass     bool
 	TeamNumber int
 }
 
@@ -134,12 +132,6 @@ func (arena *Arena) AbortMatch() error {
 
 // Clears out the match and resets the arena state unless there is a match underway.
 func (arena *Arena) ResetMatch() error {
-	arena.AllianceStations["R1"].Bypass = false
-	arena.AllianceStations["R2"].Bypass = false
-	arena.AllianceStations["R3"].Bypass = false
-	arena.AllianceStations["B1"].Bypass = false
-	arena.AllianceStations["B2"].Bypass = false
-	arena.AllianceStations["B3"].Bypass = false
 	arena.MatchState = PreMatch
 	return nil
 }
@@ -290,8 +282,24 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 	statuses := make(map[string]model.AllianceStationStatus, len(stations))
 	for _, station := range stations {
 		allianceStation := arena.AllianceStations[station]
-		statuses[station] =
-			model.AllianceStationStatus{Bypassed: allianceStation.TeamNumber == 0, DsConnected: allianceStation.DsConn != nil, RobotConnected: allianceStation.DsConn != nil && allianceStation.DsConn.RobotLinked}
+		if allianceStation.DsConn == nil {
+			statuses[station] = model.AllianceStationStatus{
+				Bypassed: allianceStation.TeamNumber == 0,
+			}
+		} else {
+			statuses[station] =
+				model.AllianceStationStatus{
+					Bypassed:       allianceStation.TeamNumber == 0,
+					DsConnected:    allianceStation.DsConn != nil,
+					Enabled:        allianceStation.DsConn.Enabled,
+					IsAuto:         allianceStation.DsConn.Auto,
+					TripTime:       allianceStation.DsConn.DsRobotTripTimeMs,
+					MissedPackets:  allianceStation.DsConn.MissedPacketCount,
+					BatteryVoltage: allianceStation.DsConn.BatteryVoltage,
+					RadioConnected: allianceStation.DsConn.RadioLinked,
+					RobotConnected: allianceStation.DsConn.RobotLinked,
+				}
+		}
 	}
 	return statuses
 }
@@ -314,7 +322,7 @@ func (arena *Arena) sendDsPacket(auto bool, enabled bool) {
 		dsConn := allianceStation.DsConn
 		if dsConn != nil {
 			dsConn.Auto = auto
-			dsConn.Enabled = enabled && !allianceStation.Estop && !allianceStation.Astop && !allianceStation.Bypass
+			dsConn.Enabled = enabled && !allianceStation.Estop && !allianceStation.Astop
 			dsConn.Estop = allianceStation.Estop
 			err := dsConn.update(arena)
 			if err != nil {

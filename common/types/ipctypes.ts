@@ -5,8 +5,14 @@ import type {DriverStation} from "./types"
 
 export interface AllianceStationStatus {
   dsConnected: boolean;
+  radioConnected: boolean;
   robotConnected: boolean;
+  enabled: boolean;
+  isAuto: boolean;
+  tripTime: number /* int */;
+  missedPackets: number /* int */;
   bypassed: boolean;
+  battery: number /* float64 */;
 }
 
 //////////

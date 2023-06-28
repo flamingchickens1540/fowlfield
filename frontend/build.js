@@ -10,9 +10,10 @@ import express from "express"
 
 let pages = {
     'test':"Stores Test",
-    'match':"Match Control", // TODO: remove bogus once another page is ready
+    'match':"Match Control",
     'audience': "Audience Display",
-    "event": "Team Management"
+    "event": "Team Management",
+    "monitor": "Field Monitor"
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 console.log("ABVF",entryPoints)

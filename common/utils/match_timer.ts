@@ -1,4 +1,5 @@
 import { MatchPeriod } from "../types";
+import { roundToPlaces } from "./format";
 
 
 
@@ -25,23 +26,23 @@ export function getPeriodDuration(period: MatchPeriod): number {
 }
 export function getRemainingTimeInPeriod(time: number) {
     const [period, totaltime] = getTimingInfo(time)
-    return round(totaltime - time, 3)
+    return roundToPlaces(totaltime - time, 3)
 }
 
 export function getRemainingTimeInDisplayPeriod(time: number):number {
     const [period, totaltime] = getTimingInfo(time)
     switch (period) {
         case MatchPeriod.PREMATCH: return getPeriodDuration(MatchPeriod.AUTO);
-        case MatchPeriod.AUTO: return round(totaltime - time, 3);
+        case MatchPeriod.AUTO: return roundToPlaces(totaltime - time, 3);
         case MatchPeriod.PAUSE: return getPeriodDuration(MatchPeriod.TELEOP);
-        case MatchPeriod.TELEOP: return round(totaltime - time, 3);
+        case MatchPeriod.TELEOP: return roundToPlaces(totaltime - time, 3);
         case MatchPeriod.POSTMATCH: return 0;
     }
 }
 
 export function getElapsedTimeInPeriod(time: number) {
     const [period, totaltime] = getTimingInfo(time)
-    return round(time - totaltime + getPeriodDuration(period), 3)
+    return roundToPlaces(time - totaltime + getPeriodDuration(period), 3)
 }
 
 
@@ -58,7 +59,3 @@ function getTimingInfo(time: number): [MatchPeriod, number] {
     return [output ?? MatchPeriod.POSTMATCH, cumulative];
 }
 
-function round(value: number, places: number): number {
-    const pad = 10 ** places
-    return Math.round(value * pad) / pad
-}
