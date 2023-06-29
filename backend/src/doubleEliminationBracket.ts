@@ -1,3 +1,5 @@
+import rootLogger from "logger";
+const bracketLogger = rootLogger.getLoggerWithLevel("bracket", "debug")
 export type DoubleEliminationAlliance = 0|1|2|3|4
 
 export type DoubleEliminationMatch = {
@@ -9,6 +11,8 @@ export type DoubleEliminationMatch = {
     red: DoubleEliminationAlliance;
     blue: DoubleEliminationAlliance;
 };
+
+
 
 export class DoubleEliminationBracket {
     private schedule: DoubleEliminationMatch[] = [
@@ -99,9 +103,9 @@ export class DoubleEliminationBracket {
     private recordedMatches = []
 
     update(matchNumber: number, winner: "red" | "blue") {
-        console.log("recording", matchNumber)
+        bracketLogger.debug("recording match", matchNumber)
         //the logic to make double elimination work
-        if (this.recordedMatches.includes(matchNumber)) {console.log("already recorded", matchNumber); return}
+        if (this.recordedMatches.includes(matchNumber)) {bracketLogger.warn("already recorded", matchNumber); return}
         const match = this.schedule[matchNumber - 1]
         
         const winningAlliance = winner === "red" ? match.red : match.blue;
@@ -159,14 +163,14 @@ export class DoubleEliminationBracket {
     getNextMatch(): DoubleEliminationMatch {
         
         if (this.scheduleIndex >= this.schedule.length ||(this.scheduleIndex == 6 && this.netFinalWins != 0)) {
-            console.error("Bracket is over")
+            bracketLogger.error("Cannot get next match, bracket is over")
             return
         }
         if (this.schedule[this.scheduleIndex].red == 0 || this.schedule[this.scheduleIndex].blue == 0) {
-            console.error("Must update before requesting next match");
+            bracketLogger.warn("Must update before requesting next match");
             return
         }
-        console.log(this.scheduleIndex, this.schedule[this.scheduleIndex])
+        bracketLogger.debug("CURRENT SCHEDULE", this.scheduleIndex, this.schedule[this.scheduleIndex])
         this.scheduleIndex++;
         return this.schedule[this.scheduleIndex-1];
     }

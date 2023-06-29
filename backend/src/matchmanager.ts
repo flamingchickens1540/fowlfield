@@ -3,6 +3,9 @@ import * as db from "./models/db"
 import { MatchState, PartialMatch, MatchData } from '@fowltypes';
 import { DBSettings } from "models/settings";
 import { MatchMaker } from "matchmaker";
+import rootLogger from "logger";
+
+const logger = rootLogger.getLogger("matchmanager")
 
 
 let matches:{[key:string]:DBMatch}
@@ -33,7 +36,7 @@ export function getMatches():{[key:string]:DBMatch} {
 }
 
 export function updateMatch(data:PartialMatch) {
-    if (matches[data.id] == null) {console.warn("cannot find match with id", data.id);return}
+    if (matches[data.id] == null) {logger.warn("cannot find match with id", data.id);return}
     matches[data.id]?.update(data)
     return matches[data.id]
 }
@@ -60,7 +63,7 @@ export function getMatchMaker():MatchMaker {
 }
 
 export function newMatch(data:MatchData) {
-    if (matches[data.id] != null) {console.warn("already have match with id", data.id);return matches[data.id]}
+    if (matches[data.id] != null) {logger.warn("already have match with id", data.id);return matches[data.id]}
     db.setMatch(data)
     matches[data.id] = new DBMatch(data)
     return matches[data.id]

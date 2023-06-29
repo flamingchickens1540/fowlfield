@@ -8,8 +8,9 @@ import * as teammanager from './teammanager';
 import { buildStats } from 'models/teams';
 import { getDsStatus } from 'index';
 import { IPCClient } from 'ipc/ipc';
-import Socket from 'socket.io';
+import logger from "./logger"
 
+const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
@@ -69,13 +70,13 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
 
 
         socket.on("preloadMatch", (id: string) => {
-            console.log("preloading", id)
+            matchLogger.log("preloading", id)
             const match = matchmanager.setPreloadMatch(id)
             io.emit("preloadMatch", match.getData())
         })
 
         socket.on("loadMatch", (id: string) => {
-            console.log("loading", id)
+            matchLogger.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
             ipc.load(match.getData())
             io.emit("loadMatch", match.getData())
@@ -83,8 +84,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
 
         socket.emit("syncTime", Date.now()) // Account for time zone differences
         socket.on("partialMatch", async (data: PartialMatch) => {
-            console.debug("reciving match", data)
-            if (!data.id) { console.warn("recieved bad match data", data); return }
+            logger.debug("reciving match", data)
+            if (!data.id) { logger.warn("recieved bad match data", data); return }
             let match = matchmanager.updateMatch(data)
             if (match != null) {
                 io.emit("match", match.getData())
@@ -98,8 +99,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         })
 
         socket.on("partialTeam", async (data: PartialTeam) => {
-            console.debug("recivin team", data)
-            if (!data.id) { console.warn("recieved bad team", data); return }
+            logger.debug("receiving team", data)
+            if (!data.id) { logger.warn("received bad team", data); return }
             let team = teammanager.updateTeam(data)
             if (team != null) {
                 io.emit("team", await team.getExtendedData())
@@ -107,15 +108,15 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         })
 
         socket.on("deleteTeam", async (id:number) => {
-            console.log("deleting", id)
+            logger.log("deleting team", id)
             teammanager.deleteTeam(id)
 
             io.emit("teams", buildExtendedTeams())
         })
 
         socket.on("newTeam", async (data: TeamData) => {
-            console.debug("reciving full team", data)
-            if (!data.id) { console.warn("recieved bad team", data); return }
+            logger.debug("receiving full team", data)
+            if (!data.id) { logger.warn("received bad team", data); return }
             if (data.displaynum == "") {delete data.displaynum}
             if (data.name == "") {delete data.name}
             let team = teammanager.newTeam({
@@ -142,24 +143,21 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 if (message.cmd == "matchhold") {
                     match.startTime = 0;
                     match.state = MatchState.PENDING;
-                    alert("Not all teams connected")
+                    alert("Match not ready")
                 } else {
-                    console.log("match confirmed")
+                    matchLogger.log(match.id, "start confirmed")
                 }
             }).catch((reason) => {
                 alert("Did not recieve IPC response:", reason)
                 match.startTime = 0;
                     match.state = MatchState.PENDING;
             }).finally(() => {
-                console.log("sending match")
                 io.emit("match", match.getData())
             })
-            // TODO: NOTIFY IPC
-            
         })
         socket.on("abortMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
-            console.log("aborting", id)
+            matchLogger.log("aborting", id)
             if (id != match.id) { alert("Aborted non-loaded match"); return; }
             match.startTime = 0;
             match.state = MatchState.PENDING
@@ -182,7 +180,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             }
         })
         function alert(...message:string[]) {
-            console.warn("ALERT", ...message)
+            matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
     })
@@ -192,6 +190,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         const match = matchmanager.getCurrentMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
+            matchLogger.log("Transitioning match", match.id, "to completed")
             io.emit("match", match.getData())
         }
     }, 50)

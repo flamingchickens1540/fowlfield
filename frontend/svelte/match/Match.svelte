@@ -72,13 +72,6 @@
 	$: $loadedMatch, $matchLoadState = getMatchData($matchid)
 	$: $preloadedMatch, $matchLoadState = getMatchData($matchid)
 	
-	function setTeam(value:string, position:`${"red"|"blue"}${"1"|"2"|"3"}`) {
-		const team = Object.values($teamList).find((team) => team.displaynum.get() == value)
-		console.log(team, value, position)
-		if (team != null) {
-			matchData[position].set(team.id)
-		}
-	}
 	let showTeams = false
 	let teamlistunsub:Unsubscriber;
 	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance} = matchData

@@ -17,7 +17,6 @@
         dsStatuses.subscribe((statuses) => {
             if (statuses == null) {return}
             const status = statuses[station] 
-            console.log(station, status)
             dsColor = status.dsConnected ? "#005700" : status.bypassed ? "#000000" : "#570000"
             robotColor = status.robotConnected ? "#005700" : status.bypassed ? "#000000" : "#570000"
         })
@@ -27,7 +26,6 @@
             return $teamList[storevalue]?.displaynum.get()
         }, 
         (value, storevalue) => {
-            console.log(value)
             if (value == "") {return 0}
             const team = Object.values($teamList).find((team) => team.displaynum.get() == value)
             if (team != null) {return team.id}

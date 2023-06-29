@@ -4,7 +4,9 @@ import { getMatches } from "./models/db";
 import { DBMatch } from "./models/matches";
 import * as matchmanager from "./matchmanager"
 import * as teammanager from './teammanager';
+import rootLogger from "logger";
 
+const logger = rootLogger.getLogger("MatchMaker")
 
 export class MatchMaker {
     private bracket: DoubleEliminationBracket | null = null;
@@ -60,12 +62,12 @@ export class MatchMaker {
     }
     
     advanceElimMatch(): DBMatch {
-        if (this.bracket == null) {console.error("Must initialize elims before advancing");return}
+        if (this.bracket == null) {logger.error("Must initialize elims before advancing");return}
         
         let match = this.bracket.getNextMatch();
         if (match == null) {return null}
         const alliances = teammanager.getAlliances()
-        console.log(match, match.red, match.blue, alliances)
+        logger.debug("ELIM DATA", match, match.red, match.blue, alliances)
         return matchmanager.newMatch({
             id: match.matchId,
             matchNumber: match.matchNumber,

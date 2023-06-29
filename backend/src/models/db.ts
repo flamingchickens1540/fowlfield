@@ -4,7 +4,9 @@ import { DBMatch } from "./matches";
 import { ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from "@fowltypes";
 import { DBSettings, Settings } from "models/settings";
 import { DBTeam, buildStats } from "models/teams";
+import rootLogger from "logger";
 
+const logger = rootLogger.getLogger("DB")
 const mongoURL = `mongodb://${mongo.username}:${mongo.password}@127.0.0.1:27017/${mongo.database}`
 const mongoClient = new mongoDB.MongoClient(mongoURL);
 
@@ -61,7 +63,7 @@ export async function getTeams(): Promise<{ [key: string]: DBTeam }> {
 export async function updateSetting<K extends keyof Settings, T extends Settings[K]>(key: K, value: T) {
     const resp = await settings.replaceOne({ key }, { key, value }, { upsert: true })
     if (!resp.acknowledged) {
-        console.warn("Could not store setting", key, value)
+        logger.warn("Could not store setting", key, value)
     }
 }
 
@@ -78,14 +80,14 @@ export async function readSettings() {
 export async function updateMatch(match: PartialMatch) {
     const resp = await matches.updateOne({ id: match.id }, { $set: match })
     if (!resp.acknowledged) {
-        console.warn("Could not update match", match.id)
+        logger.warn("Could not update match", match.id)
     }
 }
 
 export async function setMatch(match: MatchData) {
     const resp = await matches.replaceOne({ id: match.id }, match, { upsert: true })
     if (!resp.acknowledged) {
-        console.warn("Could not store match", match.id)
+        logger.warn("Could not store match", match.id)
     }
 }
 
@@ -93,20 +95,20 @@ export async function setMatch(match: MatchData) {
 export async function updateTeam(team: PartialTeam) {
     const resp = await teams.updateOne({ id: team.id }, { $set: team })
     if (!resp.acknowledged) {
-        console.warn("Could not update team", team.id)
+        logger.warn("Could not update team", team.id)
     }
 }
 
 export async function setTeam(team: TeamData) {
     const resp = await teams.replaceOne({ id: team.id }, team, {upsert:true})
     if (!resp.acknowledged) {
-        console.warn("Could not update team", team.id)
+        logger.warn("Could not update team", team.id)
     }
 }
 
 export async function deleteTeam(id:number) {
     const resp = await teams.deleteOne({ id: id })
     if (!resp.acknowledged) {
-        console.warn("Could not delete team", id)
+        logger.warn("Could not delete team", id)
     }
 }

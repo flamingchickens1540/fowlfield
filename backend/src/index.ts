@@ -8,38 +8,40 @@ import * as db from "./models/db";
 import startSockets from "./sockets";
 import { DBSettings } from 'models/settings';
 import isEqual from "lodash.isequal"
+import rootLogger from 'logger';
 
-let driverStatuses:{[key in DriverStation]:AllianceStationStatus};
+let driverStatuses:DSStatuses
 
 const server = http.createServer()
 
 const ipc = new IPCClient({
     dsStatus: handleDSStatus,
 })
-let sockets:{emitDsStatus:(data:DSStatuses) => void};
+let socketCallbacks:{emitDsStatus:(data:DSStatuses) => void};
 async function configure() {
     await db.connect()
     await DBSettings.getInstance()
     await matchmanager.loadMatches()
     await teammanager.loadTeams()
-    sockets = await startSockets(server, ipc)
+    socketCallbacks = await startSockets(server, ipc)
 
 }
 
-function canMatchStart() {
-    let canStart = true;
-    Object.values(driverStatuses).forEach((ds) => {
-        if (!(ds.dsConnected && ds.robotConnected)) {
-            canStart = false
-        }
-    })
-
-    return canStart
+function isNewStatus(a:AllianceStationStatus, b:AllianceStationStatus) {
+    const properties:(keyof AllianceStationStatus)[] = ["bypassed", "dsConnected", "enabled", "isAuto", "isEstopped", "radioConnected", "robotConnected"]
+    return !properties.every((property) => a[property] == b[property])
 }
 
+function areNewStatuses(data:DSStatuses) {
+    if (driverStatuses == null) {return true}
+    return Object.keys(data).some((key) => isNewStatus(data[key], driverStatuses[key]))
+}
+let lastSentTime = Date.now()
 function handleDSStatus(data:DSStatuses) {
-    if (!isEqual(driverStatuses, data)) {
-        sockets.emitDsStatus(data)
+    const currentTime = Date.now()
+    if (areNewStatuses(data) || currentTime-lastSentTime > 2_000) {
+        lastSentTime = currentTime;
+        socketCallbacks.emitDsStatus(data)
     }
     driverStatuses = data
     
@@ -51,30 +53,8 @@ export function getDsStatus() {
 
 
 configure()
-// db.storeMatch({
-//     redScore:20,
-//     blueScore:3,
-//     id: "abcde",
-//     matchNumber: 1,
-//     elimRound: -1,
-//     elimGroup: -1, 
-//     elimInstance: -1,
-//     type: 'qualification',
-//     red1: 1,
-//     red2: 2,
-//     red3: 3,
-//     blue1: 4,
-//     blue2: 5,
-//     blue3: 6,
-// })
 
-// db.updateMatch({
-//     redScore:15,
-//     id: "abcde",
-// })
 
-// console.log(await db.getMatches())
-
-console.log("starting node")
+rootLogger.log("starting node")
 
 server.listen(3000)

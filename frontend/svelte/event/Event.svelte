@@ -28,9 +28,6 @@
             id: null
         }
     }
-    $: {
-        console.log("TEAMS", $teamList)
-    }
 
     const teams = derived(teamList, ($teams) => Object.values($teams).sort((a, b) => get(a.displaynum).localeCompare(get(b.displaynum), undefined, {numeric:true, sensitivity:"base"})) )
 </script>
