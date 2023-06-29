@@ -26,7 +26,7 @@ export class MatchMaker {
 
         this.initElims(elimMatches.length);
         elimMatches.forEach((match) => {
-            if (match.state == MatchState.COMPLETE) {
+            if (match.state == MatchState.COMPLETE || match.state == MatchState.POSTED) {
             this.bracket.update(
                 match.matchNumber,
                 match.redScore > match.blueScore ? "red" : "blue"

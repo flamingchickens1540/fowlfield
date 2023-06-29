@@ -154,7 +154,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
 
         socket.on("commitMatch", (id) => {
             const match = matchmanager.getMatch(id)
-            matchmanager.getMatch(id).state = MatchState.POSTED
+            match.state = MatchState.POSTED
             // TODO: Actually commit
             io.emit("match", match.getData())
         })

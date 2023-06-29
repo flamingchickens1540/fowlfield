@@ -97,10 +97,11 @@ export class DoubleEliminationBracket {
         this.schedule[1].blue = this.alliances[2];
     }
     private recordedMatches = []
+
     update(matchNumber: number, winner: "red" | "blue") {
         console.log("recording", matchNumber)
         //the logic to make double elimination work
-        if (this.recordedMatches.includes(matchNumber)) {return}
+        if (this.recordedMatches.includes(matchNumber)) {console.log("already recorded", matchNumber); return}
         const match = this.schedule[matchNumber - 1]
         
         const winningAlliance = winner === "red" ? match.red : match.blue;

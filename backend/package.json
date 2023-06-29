@@ -8,7 +8,7 @@
     "build": "npm run updateTypes && node build.js",
     "updateTypes": "cd ../field && tygo generate",
     "start": "npm run build && node index.cjs",
-    "dev": "node build.js watch & nodemon index.cjs"
+    "dev": "node build.js watch & nodemon --inspect index.cjs"
   },
   "author": "",
   "license": "ISC",
