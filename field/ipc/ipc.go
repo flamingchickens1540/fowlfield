@@ -36,7 +36,7 @@ func (client *NodeIPC) LoadMessage(msg *go2node.NodeMessage) error {
 	if err != nil {
 		log.Println("COULD NOT PARSE MSG", err, msg, msgContents)
 	}
-	processCommand(msgContents.Command, msgContents.Data)
+	processCommand(client, msgContents.Command, msgContents.Data)
 	client.SendDsStatus(arena.GetAllianceStationStatuses())
 	client.hasSentAck = false
 	return err
@@ -60,6 +60,25 @@ func (client *NodeIPC) SendDsStatus(statuses map[string]model.AllianceStationSta
 		},
 	})
 }
+
+func (client *NodeIPC) SendMatchHold(statuses map[string]model.AllianceStationStatus) {
+	client.send(model.IPCMessage{
+		Command: "matchhold",
+		Data: model.IPCData{
+			DsStatus: &statuses,
+		},
+	})
+}
+
+func (client *NodeIPC) SendMatchConfirm(statuses map[string]model.AllianceStationStatus) {
+	client.send(model.IPCMessage{
+		Command: "matchconfirm",
+		Data: model.IPCData{
+			DsStatus: &statuses,
+		},
+	})
+}
+
 
 func (client *NodeIPC) Loop() {
 	msg, err := client.channel.Read()

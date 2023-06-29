@@ -138,8 +138,24 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
             ipc.start(match.getData())
+            ipc.awaitResponse(["matchhold", "matchconfirm"]).then((message) => {
+                if (message.cmd == "matchhold") {
+                    match.startTime = 0;
+                    match.state = MatchState.PENDING;
+                    alert("Not all teams connected")
+                } else {
+                    console.log("match confirmed")
+                }
+            }).catch((reason) => {
+                alert("Did not recieve IPC response:", reason)
+                match.startTime = 0;
+                    match.state = MatchState.PENDING;
+            }).finally(() => {
+                console.log("sending match")
+                io.emit("match", match.getData())
+            })
             // TODO: NOTIFY IPC
-            io.emit("match", match.getData())
+            
         })
         socket.on("abortMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
@@ -165,9 +181,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 io.emit("match", newmatch.getData())
             }
         })
-        function alert(message:string) {
-            console.warn(message)
-            socket.emit("alert", message)
+        function alert(...message:string[]) {
+            console.warn("ALERT", ...message)
+            socket.emit("alert", message.join(" "))
         }
     })
 
@@ -176,8 +192,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         const match = matchmanager.getCurrentMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
+            io.emit("match", match.getData())
         }
-        io.emit("match", match.getData())
     }, 50)
 
     return {

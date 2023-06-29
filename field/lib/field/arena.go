@@ -106,7 +106,7 @@ func (arena *Arena) LoadMatch(match *model.Match) error {
 
 // Starts the match if all conditions are met.
 func (arena *Arena) StartMatch() error {
-	err := arena.checkCanStartMatch()
+	err := arena.CheckCanStartMatch()
 	if err == nil {
 		// Save the match start time and game-specifc data to the database for posterity.
 
@@ -266,7 +266,7 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 }
 
 // Returns nil if the match can be started, and an error otherwise.
-func (arena *Arena) checkCanStartMatch() error {
+func (arena *Arena) CheckCanStartMatch() error {
 	err := arena.checkAllianceStationsReady("R1", "R2", "R3", "B1", "B2", "B3")
 	if err != nil {
 		return err

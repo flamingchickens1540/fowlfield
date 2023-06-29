@@ -6,14 +6,14 @@ import (
 	"team1540.org/fowlfield/model"
 )
 
-func processCommand(cmd string, message model.IPCData) {
+func processCommand(client *NodeIPC, cmd string, message model.IPCData) {
 	switch cmd {
 	case "abort":
 		arena.AbortMatch()
 	case "load":
 		loadMatch(*message.Match)
 	case "start":
-		startMatch(*message.Match)
+		startMatch(client, *message.Match)
 	}
 }
 
@@ -22,8 +22,14 @@ func loadMatch(match model.Match) {
 	arena.LoadMatch(&match)
 }
 
-func startMatch(match model.Match) {
+func startMatch(client *NodeIPC, match model.Match) {
 	log.Println("starting", match.Id)
 	arena.LoadMatch(&match)
-	log.Println(arena.StartMatch())
+	if arena.CheckCanStartMatch() == nil {
+		client.SendMatchConfirm(arena.GetAllianceStationStatuses())
+		arena.StartMatch()
+	} else {
+		client.SendMatchHold(arena.GetAllianceStationStatuses())
+	}
+
 }

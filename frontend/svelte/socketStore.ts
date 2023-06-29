@@ -51,8 +51,6 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
         store.subscribe((value:string|(1|2|3|4|0)) => {
             if (!blockUpdates) {
                 socket.emit("partialTeam", {id, [property]:value})
-            } else {
-                console.log("not broadcasting team", id)
             }
         })
     })
@@ -89,9 +87,11 @@ export class FowlMatchStore<K extends keyof MatchData, T extends MatchData[K]> i
             if (!this.blockUpdates) {
                 
                 const sentValue = typeof initialValue === "number" && typeof value === "string" ? parseInt(value) as T : value
-                console.log("sending", value, sentValue)
+                console.debug("SENDING MATCHDATA", this.key, sentValue)
                 socket.emit("partialMatch", { id: get(matchData.id), [this.key]: sentValue})
-            } else {console.log("not updating")}
+            } else {
+                console.debug("RECIEVING MATCHDATA", this.key, value)
+            }
         })
         this.blockUpdates = false;
     }
