@@ -13,6 +13,7 @@ export interface AllianceStationStatus {
   missedPackets: number /* int */;
   bypassed: boolean;
   battery: number /* float64 */;
+  isEstopped: boolean;
 }
 
 //////////

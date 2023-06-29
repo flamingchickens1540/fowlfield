@@ -1,5 +1,5 @@
 <script lang=ts>
-	import matchData, { teamList } from "@store";
+	import matchData from "@store";
 	import RobotMonitor from "./components/RobotMonitor.svelte";
 
     

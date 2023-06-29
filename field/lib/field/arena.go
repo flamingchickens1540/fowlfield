@@ -291,6 +291,7 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 					Bypassed:       allianceStation.TeamNumber == 0,
 					DsConnected:    allianceStation.DsConn != nil,
 					Enabled:        allianceStation.DsConn.Enabled,
+					IsEstopped:     allianceStation.DsConn.Estop,
 					IsAuto:         allianceStation.DsConn.Auto,
 					TripTime:       allianceStation.DsConn.DsRobotTripTimeMs,
 					MissedPackets:  allianceStation.DsConn.MissedPacketCount,

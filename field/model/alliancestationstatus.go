@@ -10,4 +10,5 @@ type AllianceStationStatus struct {
 	MissedPackets  int     `json:"missedPackets"`
 	Bypassed       bool    `json:"bypassed"`
 	BatteryVoltage float64 `json:"battery"`
+	IsEstopped     bool    `json:"isEstopped"`
 }
