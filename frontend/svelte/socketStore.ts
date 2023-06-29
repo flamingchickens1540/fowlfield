@@ -136,6 +136,3 @@ export class FowlMatchStore<K extends keyof MatchData, T extends MatchData[K]> i
 
 
 
-export function getPrettyTeamStore(property:`${"red"|"blue"}${1|2|3}`):Readable<string> {
-    return derived([matchData[property], teamList], ([$teamid, $teams]) => $teams[$teamid]?.displaynum?.get() ?? "0")
-}

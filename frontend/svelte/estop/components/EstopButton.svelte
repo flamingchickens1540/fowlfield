@@ -1,28 +1,26 @@
 <script lang="ts">
-	import { getPrettyTeamStore } from "socketStore";
-	import { onMount } from "svelte";
-    // TODO:Implement estops
+	import matchData, { teamList } from "@store";
+	import { derived } from "svelte/store";
+
     export let pos:`${"red"|"blue"}${1|2|3}`
 
+    let isPressed:boolean = false
 
-    const store = getPrettyTeamStore(pos)
+    const store = derived([matchData[pos], teamList], ([$teamid, $teams]) => $teams[$teamid]?.displaynum?.get() ?? "0")
 
     const onclick = () => {
+        isPressed = true
         console.log("pressed")
         element.style.backgroundColor = "#000000c5"
     };
 
     let element:HTMLDivElement
 
-    onMount(() => {
-        element.addEventListener("click", onclick)
-        element.addEventListener("tap", onclick)
-    })
     
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div bind:this={element} class="noselect estop-button">
+<div on:click={onclick} bind:this={element} class="noselect estop-button">
     {$store}
 </div>
 
@@ -34,6 +32,10 @@
         justify-content: center;
         align-items: center;
         font-size:20vh;
+
+        &.pressed {
+            background-color: #000000c5;
+        }
     }
 
     .noselect {

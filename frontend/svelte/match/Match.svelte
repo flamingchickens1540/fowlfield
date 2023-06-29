@@ -13,25 +13,13 @@
 	import writableDerived from "svelte-writable-derived"
 	import TeamEntry from "./components/TeamEntry.svelte";
 	import configureAudio from "audio";
+	import { statusColors, statusMessages } from "consts";
 	setPreloadingTrack(true)
 
 	configureAudio()
 	
 	const {loaded:loadedMatch, preloaded:preloadedMatch }= loadedMatches
-	const statusColors:{[key in MatchState]:string} = {
-		[MatchState.PENDING]:     "#dc0000",
-		[MatchState.IN_PROGRESS]: "#baba02",
-		[MatchState.COMPLETE]: 	  "#0000ff",
-		[MatchState.POSTED]:      "#009f22",
-	}
-	
-	const statusMessages:{[key in MatchState]:string} = {
-		[MatchState.PENDING]: 		"Pending",
-		[MatchState.IN_PROGRESS]: 	"In Progress",
-		[MatchState.COMPLETE]: 		"Complete",
-		[MatchState.POSTED]:   		"Posted",
-	}
-	
+
 	const buttonData:{[key in MatchState]:{text:string, color:string}} = {
 		[MatchState.PENDING]: 		{text:"Start", color:"#02ae02"},
 		[MatchState.IN_PROGRESS]: 	{text:"Abort", color:"#b30000"},

@@ -88,7 +88,7 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
             <meta name="apple-mobile-web-app-capable" content="yes">
             <link rel="manifest" href="/${page}.webmanifest" />
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-            <script>document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });</script>
+            
             `:''}
 
             <title>${title}</title>

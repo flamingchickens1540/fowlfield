@@ -10,11 +10,16 @@
     height: 100%;
     overscroll-behavior-y: none;
 }
+.centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .header {
     background-color: black;
     color:white;
 }
-$tableheight: 95vh;
+$tableheight: 92vh;
 #teammonitorgrid {
     background-color: white;
     color:black;
@@ -25,7 +30,7 @@ $tableheight: 95vh;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     
-    grid-template-rows: 3vh repeat(6, min(calc(#{$tableheight}/6), calc(100vw/10)));
+    grid-template-rows: 5vh 3vh repeat(6, min(calc(#{$tableheight}/6), calc(100vw/10)));
     grid-template-columns: repeat(10, min(calc(#{$tableheight}/6), calc(100vw/10)));
     grid-auto-flow: row;
     
@@ -35,16 +40,16 @@ $tableheight: 95vh;
             filter:grayscale(100%);
         }
 
-    .row:nth-child(-n+4):nth-child(n+1) {
+    .row:nth-child(-n+5):nth-child(n+2) {
         .entry:nth-child(-n+3) {
-            background-color: var(--blue);
+            background-color: #60ADFF;
         }
     }
     
     
-    .row:nth-child(1n+5) {
+    .row:nth-child(n+6) {
         .entry:nth-child(-n+3){
-            background-color: var(--red);
+            background-color: #FF6060;
         }
     }
 }

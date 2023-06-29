@@ -64,22 +64,22 @@
             bottom:10%;
             left:10%;
             right:10%;
-            background-color: #c80000;
-            border:5px solid   #610000;
+            background-color: #C0504E;
+            border:5px solid   #943735;
             &[data-value=true] {
-                background-color: #008000;
-                border:5px solid  #004300;
+                background-color: #9BBB59;
+                border:5px solid  #839758;
                 border-radius: 50%;
             }
             
             &[data-estop=true] {
                 background-color: #5f5f5f;
                 border:5px solid  #000000;
-                width: 70%;
-                height: 70%;
+                width: 65%;
+                height: 65%;
                 box-sizing: border-box;
-                margin-left:5%;
-                margin-top:5%;
+                margin-left:8.5%;
+                margin-top:6%;
 
                 transform: rotate(-45deg);
             }
