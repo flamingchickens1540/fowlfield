@@ -22,6 +22,9 @@ jobs:
         go-version: 1.19
     - name: Install Tygo
       run: go install github.com/gzuidhof/tygo@latest
+    - name: Copy Secrets
+      working-directory: ./backend
+      run: cp secrets.example.json secrets.json
     - name: Build
       working-directory: ./backend
       run: npm run build
