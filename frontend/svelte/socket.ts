@@ -36,7 +36,9 @@ socket.on("dsStatus", updateDSStatuses)
 socket.on("disconnect", (reason) => {
     console.log(reason)
     if (reason == "io server disconnect") {
-        setCookie("auth", prompt("Input your key"))
+        setCookie("auth", prompt("Input your key"), {
+            expires:365
+        })
         window.location.reload()
     }
 })
