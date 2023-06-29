@@ -9,14 +9,14 @@ import express from "express"
 
 
 let pages = {
-    'test':"Stores Test",
-    'match':"Match Control",
-    'audience': "Audience Display",
-    "event": "Team Management",
-    "monitor": "Field Monitor"
+    'test':     ["Stores Test",false],
+    'match':    ["Match Control",false],
+    'audience': ["Audience Display",false],
+    "event":    ["Team Management",false],
+    "monitor":  ["Field Monitor",true],
+    "estop":    ["Estop Panel",true]
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
-console.log("ABVF",entryPoints)
 //// Loads all subdirectories of /svelte
 // fs.readdirSync("svelte/").forEach(function (filepath) {
 //     let file = fs.statSync('svelte/'+filepath)
@@ -70,6 +70,10 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
     })
     server.get("/:page", (req, res) => {
         const page = req.params.page.replace(/\/+$/, "");
+        if (!(page in pages)) {res.status(404).send("Page not found");return;}
+        const title = pages[page][0] ?? "FowlField"
+        const showManifest = pages[page][1] ?? false
+        console.log(page, title, showManifest)
         res.send(`
         <!DOCTYPE html>
         <html lang="en">
@@ -78,8 +82,16 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <script type="module" src="/assets/${page}/index.js"></script>
             <link rel="stylesheet" href="/assets/${page}/index.css"></link>
+            
             <link rel="stylesheet" href="/assets/app.css"></link>
-            <title>${pages[page] ?? "FowlField"}</title>
+            ${showManifest ? `
+            <meta name="apple-mobile-web-app-capable" content="yes">
+            <link rel="manifest" href="${page}.webmanifest" />
+            <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+            <script>document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });</script>
+            `:''}
+
+            <title>${title}</title>
             ${mode == "dev" ? "<script>new EventSource('/esbuild').addEventListener('change', () => location.reload())</script>":""}
         </head>
         <body>

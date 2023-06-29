@@ -13,6 +13,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
+  overscroll-behavior: none;
 
   --red: #ED1C24;
   --blue:#0066b3;
@@ -33,6 +34,7 @@ body {
   bottom:0;
   left:0;
   right:0;
+  height:100%;
   text-align: center;
 }
 

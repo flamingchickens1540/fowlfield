@@ -79,20 +79,6 @@
 			matchData[position].set(team.id)
 		}
 	}
-	function getTeamDerived(store:Writable<number>) {
-		return writableDerived(store, 
-		(storevalue) => {
-			return $teamList[storevalue]?.displaynum.get()
-		}, 
-		(value, storevalue) => {
-			console.log(value)
-			if (value == "") {return null}
-			const team:WritableTeamData = Object.values($teamList).find((team) => team.displaynum.get() == value)
-			if (team != null) {return team.id}
-
-			return storevalue;
-		})
-	}
 	let showTeams = false
 	let teamlistunsub:Unsubscriber;
 	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance} = matchData

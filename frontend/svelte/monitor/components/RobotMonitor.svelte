@@ -23,10 +23,10 @@
 <div class=entry > <div class="stateIndicator" data-value={dsStatus?.dsConnected}></div></div>
 <div class=entry><div class="stateIndicator" data-value={dsStatus?.radioConnected}></div></div>
 <div class=entry><div class="stateIndicator" data-value={dsStatus?.robotConnected}></div></div>
-<div class="entry">{roundToPlaces(dsStatus?.battery,1)}</div>
+<div class="entry">{roundToPlaces(dsStatus?.battery,1) ?? ""}</div>
 <div class=entry><span style="font-size:60px;">{dsStatus?.isAuto ? "A": "T"}</span><div class="stateIndicator" data-value={dsStatus?.enabled}></div></div>
-<div class="entry">{dsStatus?.tripTime}</div>
-<div class="entry">{dsStatus?.missedPackets}</div>
+<div class="entry">{dsStatus?.tripTime ?? ""}</div>
+<div class="entry">{dsStatus?.missedPackets ?? ""}</div>
 <div class="overlay" style="--zindex:{dsStatus?.bypassed ? "15": "auto"}; --color:{dsStatus?.bypassed ? "#949494d6" : dsStatus?.robotConnected ? "#ffffff00" : "#FFFF01aa"}"></div>
 </div>
 

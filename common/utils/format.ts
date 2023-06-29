@@ -6,6 +6,7 @@ export function formatDuration(duration:number) {
 }
 
 export function roundToPlaces(value: number, places: number): number {
+    if (value == null) {return null}
     const pad = 10 ** places
     return Math.round(value * pad) / pad
 }
