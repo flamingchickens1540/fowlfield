@@ -33,13 +33,15 @@ socket.on("dsStatus", updateDSStatuses)
 // })
 // socket.on("matchEnd", updateMatchData)
 
+socket.on("connect_error", (err) => alert("Could not connect to socket server. "+err))
 socket.on("disconnect", (reason) => {
-    console.log(reason)
     if (reason == "io server disconnect") {
         setCookie("auth", prompt("Input your key"), {
             expires:365
         })
         window.location.reload()
+    } else {
+        alert("Disconnected from socket server")
     }
 })
 
