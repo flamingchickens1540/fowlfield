@@ -24,6 +24,7 @@ async function configure() {
     await matchmanager.loadMatches()
     await teammanager.loadTeams()
     socketCallbacks = await startSockets(server, ipc)
+    ipc.load(matchmanager.getCurrentMatch().getData())
 
 }
 
