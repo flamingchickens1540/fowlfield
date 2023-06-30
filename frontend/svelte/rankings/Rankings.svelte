@@ -1,112 +1,100 @@
 <script lang="ts">
-	import type { TeamData } from "../../common/types";
 	import { derived, type Readable } from "svelte/store";
-	import { teams } from "../store";
-	import jQuery from "jquery";
-	import { onMount } from "svelte";
+	import { matchList, teamList } from "../store";
+	import type { WritableTeamData } from "socketStore";
+	import TeamRanking from "./components/TeamRanking.svelte";
+	import { MatchState } from "../../../common/types/types";
 
-	const sortFunction = (a, b) => b.rankingPoints - a.rankingPoints;
-	let teamsSorted: Readable<TeamData[]> = derived(teams, ($teams) =>
-		($teams ?? []).sort(sortFunction)
+	let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
+		(Object.values($teams) ?? []).sort(
+			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+		)
 	);
-	onMount(() => {
-		const scrollElement = jQuery(".tableContainer");
-		function anim() {
-			var sb = scrollElement.prop("scrollHeight") - scrollElement.innerHeight();
-			scrollElement.animate({ scrollTop:  sb }, $teamsSorted.length*750, () => {
-				scrollElement.animate({ scrollTop: 0 }, 500, anim);
-			});
+
+	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
+		let mostRecent = {id:"never",time:0};
+
+		for (let match of Object.values($matches)) {
+			if (match.state == MatchState.POSTED && match.startTime > mostRecent.time) {
+				mostRecent.id = match.id;
+				mostRecent.time = match.startTime
+			}
 		}
-		function stop() {
-			scrollElement.stop();
-		}
-		anim();
-		scrollElement.hover(stop, anim);
-	});
+		return mostRecent.id
+	})
+	// onMount(() => {
+	// 	const scrollElement = jQuery(".tableContainer");
+	// 	function anim() {
+	// 		var sb = scrollElement.prop("scrollHeight") - scrollElement.innerHeight();
+	// 		scrollElement.animate({ scrollTop:  sb }, $teamsSorted.length*750, () => {
+	// 			scrollElement.animate({ scrollTop: 0 }, 500, anim);
+	// 		});
+	// 	}
+	// 	function stop() {
+	// 		scrollElement.stop();
+	// 	}
+	// 	anim();
+	// 	scrollElement.hover(stop, anim);
+	// });
 </script>
 
-<main>
-	<h1 class="Title">Team Rankings</h1>
-	<div id="test" class="tableContainer">
-		<table>
-			<thead>
-				<tr>
-					<th>Rank</th>
-					<th>Robot Number</th>
-					<th>Team Name</th>
-					<th>Qualification Points</th>
-					<th>W-L-T</th>
-				</tr>
-			</thead>
-			<tbody id="tablebody">
-				{#each $teamsSorted as team, i}
-					<tr>
-						<td>{i + 1}</td>
-						<td>{team.display_id}</td>
-						<td>{team.name}</td>
-						<td>{team.rankingPoints}</td>
-						<td>{team.matchWins}-{team.matchLosses}-{team.matchTies}</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-	</div>
-</main>
+<div class="container">
+	<table>
+		<thead>
+			<tr>
+				<th>Rank</th>
+				<th>Team Number</th>
+				<th>Team Name</th>
+				<th>RP</th>
+				<th>W-L-T</th>
+			</tr>
+		</thead>
+		<tbody id="tablebody">
+			{#each $teamsSorted as team, i}
+				<TeamRanking rank={i + 1} teamData={team} />
+			{/each}
+		</tbody>
+	</table>
+
+	<div class="footer">Last updated after {$lastUpdated}</div>
+</div>
 
 <style lang="scss">
-	.tableContainer {
-		height: 80vh;
-		overflow-y: auto;
-		scrollbar-width: none;
-		transition: linear 1s;
-	}
-	main {
+	@import "./rankings.scss";
+	.container {
+		display: grid;
+		grid-template-rows: auto 25px;
 		position: absolute;
-		left: 0;
-		right: 0;
 		top: 0;
 		bottom: 0;
-		color: black;
+		left: 0;
+		right: 0;
+		width: 100%;
 	}
-	.Title {
-		color: white;
-		font-family: arial;
-		margin-left: 500;
-		margin-right: 500;
+	.footer {
+		height: 100%;
+		box-shadow: 0px 15px 20px 20px hsl(34, 57%, 15%);
+		position: sticky;
+		z-index: 10;
+		bottom: 0;
+		background-color: hsl(34, 57%, 40%);
+	}
+	:global(:root) {
+		overscroll-behavior: none;
+	}
+
+	:global(body) {
+		margin: 0;
+		&::-webkit-scrollbar {
+			display: none;
+		}
+		scroll-behavior: none;
 	}
 
 	table {
 		font-family: arial;
-		margin-left: auto;
-		margin-right: auto;
-		width: 95%;
+
 		border-collapse: collapse;
 		border-spacing: 0;
-	}
-
-	td,
-	th {
-		/* border: 1px solid #989898; */
-		text-align: left;
-
-		padding: 25px;
-		padding-left: 25px;
-		font-size: 35px;
-	}
-	tbody {
-		tr:nth-child(0) {
-			padding-top: 30px;
-		}
-		tr:nth-child(odd) {
-			background-color: hsl(34, 57%, 70%);
-		}
-		tr:nth-child(even) {
-			background-color: hsl(34, 57%, 60%);
-		}
-	}
-	thead tr {
-		background-color: hsl(34, 57%, 55%) !important;
-		position: sticky;
-		top: 0;
 	}
 </style>

@@ -1,7 +1,7 @@
 import type { Subscriber, Unsubscriber, Readable, Updater, Writable } from "svelte/store";
 import { derived, get, writable } from "svelte/store"
 
-import type { MatchData, TeamData } from '@fowltypes';
+import type { ExtendedTeam, MatchData, TeamData, TeamMatchStats } from '@fowltypes';
 import socket from "@socket";
 import matchData, { teamList } from "@store";
 
@@ -35,9 +35,9 @@ export function gettableStore<T>(initialValue:T): WritableGettableStore<T>{
 
 export type WritableTeamData = {
     [Property in keyof Omit<TeamData, "id">]: WritableGettableStore<TeamData[Property]>;
-} & {readonly id: number, setQuiet(value:TeamData): void}
+} & {readonly id: number, setQuiet(value:ExtendedTeam): void, matchStats:GettableStore<TeamMatchStats>}
 
-export function getFowlTeamStore(data:TeamData): WritableTeamData {
+export function getFowlTeamStore(data:ExtendedTeam): WritableTeamData {
     const id = data.id
     const props = {
         name: gettableStore(data.name),
@@ -45,6 +45,10 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
         robotname: gettableStore(data.robotname ?? ""),
         alliance: gettableStore(data.alliance),
         alliancePosition: gettableStore(data.alliancePosition),
+    }
+
+    const readonlyprops = {
+        matchStats: gettableStore(data.matchStats),
     }
     let blockUpdates = true
     Object.entries(props).forEach(([property, store]) => {
@@ -58,6 +62,7 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
     
     return {
         ...props,
+        matchStats:getReadonlyStore(readonlyprops.matchStats),
         id,
         setQuiet(value){
             console.log("local updating team", id)
@@ -67,6 +72,7 @@ export function getFowlTeamStore(data:TeamData): WritableTeamData {
             props.robotname.set(value.robotname ?? "")
             props.alliance.set(value.alliance)
             props.alliancePosition.set(value.alliancePosition)
+            readonlyprops.matchStats.set(value.matchStats)
             blockUpdates = false
         }
 
