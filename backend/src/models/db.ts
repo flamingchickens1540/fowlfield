@@ -33,8 +33,8 @@ export async function getMatches(): Promise<{ [key: string]: DBMatch }> {
     return result
 }
 
-export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "matches"> & Pick<ExtendedTeam, "matchStats">> {
-    let teammatches: string[] = []
+export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "matchStats">> {
+    
     let stats = {
         win: 0,
         loss: 0,
@@ -45,10 +45,8 @@ export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "
     for await (const match of matches.find({ $or: [{ red1: team }, { red2: team }, { red3: team }, { blue1: team }, { blue2: team }, { blue3: team }] })) {
         const isRed = team == match.red1 || team == match.red2 || team == match.red3;
         buildStats(match, isRed, stats)
-        teammatches.push(match.id)
     }
     return {
-        matches: teammatches,
         matchStats: stats
     }
 }

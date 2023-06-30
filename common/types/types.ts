@@ -30,7 +30,7 @@ export interface TeamMatchStats {
 }
 
 export interface ExtendedTeam extends TeamData {
-    matches:string[]
+    // matches:string[]
     matchStats: TeamMatchStats
 }
 

@@ -1,6 +1,7 @@
 import type { IPCData } from "./ipctypes";
 import type {
     DSStatuses,
+    DriverStation,
     ExtendedTeam,
     MatchData,
     PartialMatch,
@@ -52,4 +53,5 @@ export interface ClientToServerEvents {
     commitMatch(id: string): void;
 
     nextMatch(type:"qualification"|"elimination"):void
+    estop(station:DriverStation):void
 }

@@ -25,9 +25,7 @@ export interface IPCMessage {
 }
 export interface IPCData {
   match?: Match;
-  matches?: Match[];
-  team?: Team;
-  teams?: Team[];
+  alliancestation?: DriverStation;
   ds_status?: { [key in DriverStation]: AllianceStationStatus};
 }
 

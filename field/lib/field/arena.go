@@ -251,6 +251,8 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 	}
 
 	// Do nothing if the station is already assigned to the requested team.
+	arena.AllianceStations[station].Estop = false
+	
 	dsConn := arena.AllianceStations[station].DsConn
 	if dsConn != nil && dsConn.TeamId == teamId {
 		return nil
@@ -259,8 +261,9 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 		dsConn.close()
 		arena.AllianceStations[station].TeamNumber = 0
 		arena.AllianceStations[station].DsConn = nil
+		
 	}
-
+	
 	arena.AllianceStations[station].TeamNumber = teamId
 	return nil
 }
@@ -343,6 +346,13 @@ func (arena *Arena) getAssignedAllianceStation(teamId int) string {
 	}
 
 	return ""
+}
+
+func (arena *Arena) EstopStation(station string) error {
+	allianceStation := arena.AllianceStations[station]
+	if (allianceStation == nil) {return fmt.Errorf("cannot find alliance station %s", station)}
+	allianceStation.Estop = true;
+	return nil
 }
 
 func (arena *Arena) handleEstop(station string, state bool) {

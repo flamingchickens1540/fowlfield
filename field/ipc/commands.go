@@ -8,6 +8,8 @@ import (
 
 func processCommand(client *NodeIPC, cmd string, message model.IPCData) {
 	switch cmd {
+	case "estop": 
+		estopRobot(client, *message.AllianceStation)
 	case "abort":
 		arena.AbortMatch()
 	case "load":
@@ -20,6 +22,11 @@ func processCommand(client *NodeIPC, cmd string, message model.IPCData) {
 func loadMatch(match model.Match) {
 	log.Println("loading", match.Id)
 	arena.LoadMatch(&match)
+}
+
+func estopRobot(client *NodeIPC, station string) {
+	arena.EstopStation(station)
+	client.SendDsStatus(arena.GetAllianceStationStatuses())
 }
 
 func startMatch(client *NodeIPC, match model.Match) {

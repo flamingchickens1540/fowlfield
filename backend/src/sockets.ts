@@ -1,4 +1,4 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
@@ -25,7 +25,6 @@ function buildExtendedTeams():{ [key: number]: ExtendedTeam } {
         const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
         matchteams.forEach((team: number, index: number) => {
             if (teams[team] == null) {return}
-            teams[team].matches.push(match.id)
             buildStats(match, index<3, teams[team].matchStats)
         })
     });
@@ -60,7 +59,6 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
             matchteams.forEach((team: number, index: number) => {
                 if (teams[team] == null) {return}
-                teams[team].matches.push(match.id)
                 buildStats(match, index<3, teams[team].matchStats)
             })
         });
@@ -179,6 +177,12 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 io.emit("match", newmatch.getData())
             }
         })
+
+        socket.on("estop", (station:DriverStation) => {
+            ipc.estop(station)
+            logger.log("estopping", station)
+        })
+
         function alert(...message:string[]) {
             matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))

@@ -6,9 +6,7 @@ type IPCMessage struct {
 }
 
 type IPCData struct {
-	Match    *Match                            `json:"match"`
-	Matches  *[]Match                          `json:"matches"`
-	Team     *Team                             `json:"team"`
-	Teams    *[]Team                           `json:"teams"`
-	DsStatus *map[string]AllianceStationStatus `json:"ds_status" tstype:"{ [key in DriverStation]: AllianceStationStatus}"`
+	Match           *Match                            `json:"match"`
+	AllianceStation *string                           `json:"alliancestation" tstype:"DriverStation"`
+	DsStatus        *map[string]AllianceStationStatus `json:"ds_status" tstype:"{ [key in DriverStation]: AllianceStationStatus}"`
 }

@@ -1,6 +1,6 @@
 import child_process from 'child_process';
 import {dirname, join} from 'path'
-import { IPCData, IPCMessage, IPCMatch } from '@fowltypes';
+import { IPCData, IPCMessage, IPCMatch, DriverStation } from '@fowltypes';
 
 
 interface IPCHandlers {
@@ -66,6 +66,9 @@ export class IPCClient {
     
     abort() {
         this.send('abort', {});
+    }
+    estop(station:DriverStation) {
+        this.send('estop', {alliancestation:station});
     }
     
     async awaitResponse(commands:string[], timeout:number=100):Promise<IPCMessage> {
