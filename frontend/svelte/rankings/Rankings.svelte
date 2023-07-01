@@ -4,16 +4,17 @@
 	import type { WritableTeamData } from "socketStore";
 	import TeamRanking from "./components/TeamRanking.svelte";
 	import { MatchState } from "../../../common/types/types";
-
+	import { onMount } from "svelte";
+	
 	let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
-		(Object.values($teams) ?? []).sort(
-			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
-		)
+	(Object.values($teams) ?? []).sort(
+	(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+	)
 	);
-
+	
 	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
 		let mostRecent = {id:"never",time:0};
-
+		
 		for (let match of Object.values($matches)) {
 			if (match.state == MatchState.POSTED && match.startTime > mostRecent.time) {
 				mostRecent.id = match.id;
@@ -22,40 +23,47 @@
 		}
 		return mostRecent.id
 	})
-	// onMount(() => {
-	// 	const scrollElement = jQuery(".tableContainer");
-	// 	function anim() {
-	// 		var sb = scrollElement.prop("scrollHeight") - scrollElement.innerHeight();
-	// 		scrollElement.animate({ scrollTop:  sb }, $teamsSorted.length*750, () => {
-	// 			scrollElement.animate({ scrollTop: 0 }, 500, anim);
-	// 		});
-	// 	}
-	// 	function stop() {
-	// 		scrollElement.stop();
-	// 	}
-	// 	anim();
-	// 	scrollElement.hover(stop, anim);
-	// });
+	onMount(() => {
+		let isGoingDown = true;
+		setInterval(() => {
+			const distanceToBottom = document.body.scrollHeight-(window.scrollY + window.innerHeight)
+			const distanceToTop = window.scrollY
+			if (isGoingDown) {
+				window.scrollBy(0, 1)
+				if (distanceToBottom == 0) {
+					setTimeout(() => isGoingDown = false, 3000)
+				};
+
+			} else {
+				window.scrollBy(0, -30)
+
+				if (distanceToTop == 0) {
+					setTimeout(() => isGoingDown = true, 3000)
+				};
+			}
+		}, 20)
+	});
 </script>
 
 <div class="container">
-	<table>
-		<thead>
-			<tr>
-				<th>Rank</th>
-				<th>Team Number</th>
-				<th>Team Name</th>
-				<th>RP</th>
-				<th>W-L-T</th>
-			</tr>
-		</thead>
-		<tbody id="tablebody">
-			{#each $teamsSorted as team, i}
+		<table>
+			<thead>
+				<tr>
+					<th>Rank</th>
+					<th>Team Number</th>
+					<th>Team Name</th>
+					<th>RP</th>
+					<th>W-L-T</th>
+				</tr>
+			</thead>
+			<tbody id="tablebody">
+				{#each $teamsSorted as team, i}
 				<TeamRanking rank={i + 1} teamData={team} />
-			{/each}
-		</tbody>
-	</table>
-
+				{/each}
+				<tr id=bottom></tr>
+			</tbody>
+		</table>
+	
 	<div class="footer">Last updated after {$lastUpdated}</div>
 </div>
 
@@ -82,18 +90,18 @@
 	:global(:root) {
 		overscroll-behavior: none;
 	}
-
+	
 	:global(body) {
 		margin: 0;
-		&::-webkit-scrollbar {
-			display: none;
-		}
-		scroll-behavior: none;
+		// &::-webkit-scrollbar {
+		// 	display: none;
+		// }
+		// scroll-behavior: none;
 	}
-
+	
 	table {
 		font-family: arial;
-
+		
 		border-collapse: collapse;
 		border-spacing: 0;
 	}
