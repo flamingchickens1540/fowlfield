@@ -6,7 +6,8 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  backend:
+    name: "Build Backend"
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -32,3 +33,20 @@ jobs:
       with:
         name: index.cjs
         path: ./backend/index.cjs
+  frontend:
+    name: "Build Frontend"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: 20
+    - name: Install Packages
+      working-directory: ./frontend
+      run: npm ci
+    - name: Copy Consts
+      working-directory: ./frontend
+      run: cp consts.example.json consts.json
+    - name: Build
+      working-directory: ./frontend
+      run: npm run build
