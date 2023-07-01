@@ -9,6 +9,5 @@
 		"esModuleInterop": true,
 	
     },
-	"include": ["**/*.ts"]
-	
+	"include": ["**/*.ts"],
 }

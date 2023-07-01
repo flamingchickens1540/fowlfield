@@ -7,7 +7,7 @@ import type { AllianceStationStatus } from "@fowltypes";
 
 
 
-let currentMatchID: string = ""
+let currentMatchID:string = ""
 let serverTimeOffset:number = 0;
 
 let listenForPreload:boolean = false;
@@ -58,7 +58,7 @@ export function isMatchLoaded(match:string) {return match == loadedMatch.get()}
 export function isMatchPreloaded(match:string) {return match == preloadedMatch.get()}
 
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
-export const teamList:Writable<{[key:string]:WritableTeamData}> = writable({})
+export const teamList:Writable<{[key:number]:WritableTeamData}> = writable({})
 
 export const dsStatuses:Writable<DSStatuses> = writable()
 

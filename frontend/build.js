@@ -6,9 +6,8 @@ import path from "node:path"
 import proxy from "http-proxy-middleware"
 import express from "express"
 
-
-
 let pages = {
+    'announcer': ["Announcer Display",false],
     'test':     ["Stores Test",false],
     'match':    ["Match Control",false],
     'audience': ["Audience Display",false],
@@ -25,7 +24,6 @@ let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "in
 //     entryPoints.push("svelte/"+path.basename(filepath)+"/index.ts")
 //     }
 // })
-
 
 const mode = process.argv[2] ?? "build"
 

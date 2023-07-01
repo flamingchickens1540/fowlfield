@@ -2,12 +2,12 @@
 	import EstopButton from "./components/EstopButton.svelte";
 </script>
 <div class=estop-container>
-<div class="red-estop-box"><EstopButton pos=red1></EstopButton></div>
-<div class="red-estop-box"><EstopButton pos=red2></EstopButton></div>
-<div class="red-estop-box"><EstopButton pos=red3></EstopButton></div>
-<div class="blue-estop-box"><EstopButton pos=blue1></EstopButton></div>
-<div class="blue-estop-box"><EstopButton pos=blue2></EstopButton></div>
-<div class="blue-estop-box"><EstopButton pos=blue3></EstopButton></div>
+    <div class="red-estop-box"><EstopButton pos=red1></EstopButton></div>
+    <div class="red-estop-box"><EstopButton pos=red2></EstopButton></div>
+    <div class="red-estop-box"><EstopButton pos=red3></EstopButton></div>
+    <div class="blue-estop-box"><EstopButton pos=blue1></EstopButton></div>
+    <div class="blue-estop-box"><EstopButton pos=blue2></EstopButton></div>
+    <div class="blue-estop-box"><EstopButton pos=blue3></EstopButton></div>
 </div>
 
 
@@ -28,7 +28,7 @@
         left:0;
         right:0;
         top:0;
-        bottom:0;
+        bottom:0;   
         display:grid;
         grid-auto-flow:column;
         grid-template-columns: 50vw 50vw;
