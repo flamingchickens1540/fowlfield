@@ -2,3 +2,5 @@ node_modules
 backend/index.cjs
 frontend/dist
 data
+backend/secrets.json
+frontend/consts.json
