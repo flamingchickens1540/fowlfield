@@ -126,8 +126,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 robotname:data.robotname
             })
             if (team != null) {
-            const extended = await team.getExtendedData()
-            io.emit("team", extended)
+                const extended = await team.getExtendedData()
+                io.emit("team", extended)
             }
         })
 
@@ -138,7 +138,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             match.state = MatchState.IN_PROGRESS
             ipc.start(match.getData())
             ipc.awaitResponse(["matchhold", "matchconfirm"]).then((message) => {
-                if (message.cmd == "matchhold") {
+                if (message.cmd == "matchhold") { // This might need to be commented out for testing
                     match.startTime = 0;
                     match.state = MatchState.PENDING;
                     alert("Match not ready")

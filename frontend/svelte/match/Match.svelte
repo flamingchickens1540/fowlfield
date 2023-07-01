@@ -32,7 +32,7 @@
 	}
 	
 	function transitionLoadState() {
-		if ($preloadedMatch !=$matchid) {
+		if ($preloadedMatch != $matchid) {
 			socket.emit("preloadMatch", $matchid)
 		} else {
 			socket.emit("preloadMatch", $matchid)

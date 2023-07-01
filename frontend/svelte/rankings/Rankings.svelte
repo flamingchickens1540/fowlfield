@@ -7,9 +7,9 @@
 	import { onMount } from "svelte";
 	
 	let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
-	(Object.values($teams) ?? []).sort(
-	(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
-	)
+		(Object.values($teams) ?? []).sort(
+			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+		)
 	);
 	
 	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
@@ -58,7 +58,7 @@
 			</thead>
 			<tbody id="tablebody">
 				{#each $teamsSorted as team, i}
-				<TeamRanking rank={i + 1} teamData={team} />
+					<TeamRanking rank={i + 1} teamData={team} />
 				{/each}
 				<tr id=bottom></tr>
 			</tbody>

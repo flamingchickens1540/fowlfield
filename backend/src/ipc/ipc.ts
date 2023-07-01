@@ -35,7 +35,7 @@ export class IPCClient {
             process.exit(code??1);
         });
         
-        this.child.on("message", (msg, handle) => {
+        this.child.on("message", (msg, _handle) => {
             this.handleMessage(msg as IPCMessage)
         })
     }
@@ -74,14 +74,14 @@ export class IPCClient {
     async awaitResponse(commands:string[], timeout:number=100):Promise<IPCMessage> {
         let promises:Promise<IPCMessage>[] = []
         for (let command of commands) {
-            let cb:(data:IPCMessage) =>void;
+            let cb:(data:IPCMessage) => void;
             promises.push(new Promise((resolve) => {
                 cb = (data) => resolve(data)
             }))
 
             this.listeners[command] = cb
         }
-        promises.push(new Promise(function(resolve, reject){
+        promises.push(new Promise(function(_resolve, reject){
             setTimeout(() => reject('Timed out'), timeout);
         }));
         return Promise.race(promises)

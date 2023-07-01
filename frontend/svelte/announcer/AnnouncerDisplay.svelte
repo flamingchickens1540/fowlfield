@@ -1,12 +1,15 @@
 <script lang="ts">
     import matchData, { teamList } from "@store"
     import { type WritableTeamData } from "socketStore";
-    import { type Readable, derived } from "svelte/store";
+    import { subscribe } from "svelte/internal";
+    import { type Readable, derived, type Writable } from "svelte/store";
 
-	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, type} = matchData
-    let red: number[] = [$red1, $red2, $red3]
-    let blue: number[] = [$blue1, $blue2, $blue3]
+    // I think I'm reading the stores wrong
+	let {red1, red2, red3, blue1, blue2, blue3, type} = matchData
+    $: red = [$red1, $red2, $red3]
+    $: blue = [$blue1, $blue2, $blue3]
 
+    // The team numbers aren't updating, they're all still at their defaults
     function filterTeams(teams: number[]): number[] {
         return teams.filter((team, _index, _array) => team != 0);
     }
@@ -58,17 +61,20 @@
     <div id="red">
         <h1 class="text-red-600">Red Alliance</h1>
         {#if $type == 'elimination'}
-            <div>
+            <div>x
                 <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2>
             </div>
         {/if}
         {#each filterTeams(red) as num, i}
             <div id="">
-                Team Number: {$teamList[num].displaynum.get()}
-                Team Name: {$teamList[num].name.get()}
-                Robot Name: {$teamList[num].robotname.get()}
-                Rank: {rankings_red[i] + 1}
+                <strong>
+                    <div>Team Number: {$teamList[num].displaynum.get()}</div>
+                    <div>Team Name: {$teamList[num].name.get()}</div>
+                    <div>Robot Name: {$teamList[num].robotname.get()}</div>
+                    <div>Rank: {rankings_red[i] + 1}</div>
+                </strong>
             </div>
+            <br>
         {/each}
     </div>
     <div id="blue">
@@ -80,11 +86,14 @@
         {/if} 
         {#each filterTeams(blue) as num, i}
             <div id="">
-                Team Number: {$teamList[num].displaynum.get()}
-                Team Name: {$teamList[num].name.get()}
-                Robot Name: {$teamList[num].robotname.get()}
-                Rank: {rankings_blue[i] + 1}
+                <strong>
+                    <div>Team Number: {$teamList[num].displaynum.get()}</div>
+                    <div>Team Name: {$teamList[num].name.get()}</div>
+                    <div>Robot Name: {$teamList[num].robotname.get()}</div>
+                    <div>Rank: {rankings_blue[i] + 1}</div>
+                </strong>
             </div>
+            <br>
         {/each}
     </div>
 </div>

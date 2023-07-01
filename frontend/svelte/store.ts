@@ -103,11 +103,11 @@ export const loadedMatches = {
 export function updateTeamList(data:{[key:number]:ExtendedTeam}) {
     teamList.update((list) => {
         list = {}
-    Object.values(data).forEach(element => {
-        list[element.id] = getFowlTeamStore(element)
-    });
-    console.log("TEMAUD", list)
-    return list
+        Object.values(data).forEach(element => {
+            list[element.id] = getFowlTeamStore(element)
+        });
+        console.log("TEMAUD", list)
+        return list
     })
 }
 export function updateTeamStores(data:ExtendedTeam) {
