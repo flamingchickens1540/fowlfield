@@ -1,6 +1,7 @@
 <script lang="ts">
-    // Todo: Display team rank
     import matchData, { teamList } from "@store"
+    import { type WritableTeamData } from "socketStore";
+    import { type Readable, derived } from "svelte/store";
 
 	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, type} = matchData
     let red: number[] = [$red1, $red2, $red3]
@@ -9,42 +10,80 @@
     function filterTeams(teams: number[]): number[] {
         return teams.filter((team, _index, _array) => team != 0);
     }
+    let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
+		(Object.values($teams) ?? []).sort(
+			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+		)
+	);
+    // If there's a better way to do this let me know
+    // It might be helpful to just have a rankings store
+    $teamsSorted.forEach((team, index, _array) => {
+        switch (team.id) {
+            case $red1: {
+                rankings_red[1] = index;
+                break;
+            }
+            case $red2: {
+                rankings_red[2] = index;
+                break;
+            }
+            case $red3: {
+                rankings_red[3] = index;
+                break;
+            }
+            case $blue1: {
+                rankings_blue[1] = index;
+                break;
+            }
+            case $blue2: {
+                rankings_blue[2] = index;
+                break;
+            }
+            case $blue3: {
+                rankings_blue[3] = index;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    })
+    let rankings_red:(number | null)[] = [null, null, null]
+    let rankings_blue:(number | null)[] = [null, null, null]
 </script>
 
 <h1>Announcer Display</h1>
-   
+
 <div id="alliances" class="grid">
     <div id="red">
-        <h1 class="text-red-600">Red</h1>
-        <h2>Alliance Number: {$redAlliance}</h2>
+        <h1 class="text-red-600">Red Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                Alliance Position: {$teamList[red[0]].alliancePosition}
+                <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2>
             </div>
         {/if}
-        {#each filterTeams(red) as num}
+        {#each filterTeams(red) as num, i}
             <div id="">
                 Team Number: {$teamList[num].displaynum.get()}
                 Team Name: {$teamList[num].name.get()}
                 Robot Name: {$teamList[num].robotname.get()}
-                Rank: 
+                Rank: {rankings_red[i] + 1}
             </div>
         {/each}
     </div>
     <div id="blue">
-        <h1>Blue</h1>
-        <h2>Alliance Number: {$blueAlliance}</h2>
+        <h1>Blue Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                {$teamList[red[0]].alliancePosition}
+                <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2>
             </div>
         {/if} 
-        {#each filterTeams(blue) as num}
+        {#each filterTeams(blue) as num, i}
             <div id="">
                 Team Number: {$teamList[num].displaynum.get()}
                 Team Name: {$teamList[num].name.get()}
                 Robot Name: {$teamList[num].robotname.get()}
-                Rank: 
+                Rank: {rankings_blue[i] + 1}
             </div>
         {/each}
     </div>
