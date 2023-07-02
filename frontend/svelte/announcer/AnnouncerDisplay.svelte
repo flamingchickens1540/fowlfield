@@ -18,32 +18,33 @@
 			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
 		)
 	);
+    // type.set("elimination");
     // If there's a better way to do this let me know
     // It might be helpful to just have a rankings store
     $teamsSorted.forEach((team, index, _array) => {
         switch (team.id) {
             case $red1: {
-                rankings_red[1] = index;
+                rankings_red[0] = index;
                 break;
             }
             case $red2: {
-                rankings_red[2] = index;
+                rankings_red[1] = index;
                 break;
             }
             case $red3: {
-                rankings_red[3] = index;
+                rankings_red[2] = index;
                 break;
             }
             case $blue1: {
-                rankings_blue[1] = index;
+                rankings_blue[0] = index;
                 break;
             }
             case $blue2: {
-                rankings_blue[2] = index;
+                rankings_blue[1] = index;
                 break;
             }
             case $blue3: {
-                rankings_blue[3] = index;
+                rankings_blue[2] = index;
                 break;
             }
             default: {
@@ -55,42 +56,46 @@
     let rankings_blue:(number | null)[] = [null, null, null]
 </script>
 
-<h1>Announcer Display</h1>
+<h2 class="text-red-600">Announcer Display</h2>
 
-<div id="alliances" class="grid">
-    <div id="red">
-        <h1 class="text-red-600">Red Alliance</h1>
+<div id="alliances" class="grid grid-cols-2">
+    <div class="grid grid-cols-1">
+        <h1>Red Alliance</h1>
         {#if $type == 'elimination'}
-            <div>x
-                <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2>
+            <div>
+                <h3>Alliance Position: {$teamList[filterTeams(red)[0]].alliancePosition.get()}</h3>
             </div>
         {/if}
         {#each filterTeams(red) as num, i}
-            <div id="">
+            <div class="team-card{i + 1} red">
                 <strong>
-                    <div>Team Number: {$teamList[num].displaynum.get()}</div>
-                    <div>Team Name: {$teamList[num].name.get()}</div>
-                    <div>Robot Name: {$teamList[num].robotname.get()}</div>
-                    <div>Rank: {rankings_red[i] + 1}</div>
+                    <div class="team-num">{$teamList[num].displaynum.get()}</div>
+                    <div class="team-info">
+                        <div class="team-info-item">Team Name: {$teamList[num].name.get()}</div>
+                        <div class="team-info-item">Robot Name: {$teamList[num].robotname.get()}</div>
+                        <div>Rank: {rankings_red[i] + 1}</div>
+                    </div>
                 </strong>
             </div>
             <br>
         {/each}
     </div>
-    <div id="blue">
+    <div class="grid grid-cols-1">
         <h1>Blue Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2>
+                <h3>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h3>
             </div>
         {/if} 
         {#each filterTeams(blue) as num, i}
-            <div id="">
+            <div class="team-card{i + 1 } blue">
                 <strong>
-                    <div>Team Number: {$teamList[num].displaynum.get()}</div>
-                    <div>Team Name: {$teamList[num].name.get()}</div>
-                    <div>Robot Name: {$teamList[num].robotname.get()}</div>
-                    <div>Rank: {rankings_blue[i] + 1}</div>
+                    <div class="team-num">{$teamList[num].displaynum.get()}</div>
+                    <div class="team-info">
+                        <div class="team-info-item">Team Name: {$teamList[num].name.get()}</div>
+                        <div class="team-info-item">Robot Name: {$teamList[num].robotname.get()}</div>
+                        <div>Rank: {rankings_blue[i] + 1}</div>
+                    </div>
                 </strong>
             </div>
             <br>
@@ -100,28 +105,50 @@
 
 
 <style>
-    #alliances {
-        display: grid;
-        place-items: center str;
-        grid-column: 2;
-        grid-row: 1;
+    .team-info-item {
+        padding-bottom: 1%;
+    }
+    .team-info {
+        font-size: x-large;
+    }
+    .team-num {
+        font-size: xxx-large;
+        padding-bottom: 2%;
     }
 
-    #red {
-        grid-column: 1;
+    .red {
         background-color: rgb(218, 56, 50);
         border-radius: 25px;
     }
 
-    #blue {
-        grid-column: 2;
+    .blue {
         background-color: rgb(42, 100, 173);
         border-radius: 25px;
+    }
+    
+    .team-card1 {
+        padding-bottom: 2%;
+        padding-top: 2%;
+        grid-row: 2;
+    }
+    .team-card2 {
+        padding-bottom: 2%;
+        padding-top: 2%;
+        grid-row: 3;
+    }
+    .team-card3 {
+        padding-bottom: 2%;
+        padding-top: 2%;
+        grid-row: 4;
     }
 
     .grid {
         display: grid;
         place-items: center str;
         gap: 10px;
+    }
+
+    .grid-cols-2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 </style>

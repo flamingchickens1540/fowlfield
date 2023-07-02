@@ -81,7 +81,7 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <script type="module" src="/assets/${page}/index.js"></script>
             <link rel="stylesheet" href="/assets/${page}/index.css"></link>
-            
+            <link href="/dist/output.css" rel="stylesheet">
             <link rel="stylesheet" href="/assets/app.css"></link>
             ${showManifest ? `
             <meta name="apple-mobile-web-app-capable" content="yes">
