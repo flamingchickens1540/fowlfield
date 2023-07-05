@@ -9,13 +9,14 @@ import express from "express"
 
 
 let pages = {
-    'test':     ["Stores Test",false],
-    'match':    ["Match Control",false],
-    'audience': ["Audience Display",false],
-    "event":    ["Team Management",false],
-    "monitor":  ["Field Monitor",true],
-    "estop":    ["Estop Panel",true],
-    "rankings":    ["Rankings",false]
+    'test':     ["Stores Test",      false],
+    'bracket':  ["Bracket",          false],
+    'match':    ["Match Control",    false],
+    'audience': ["Audience Display", false],
+    "event":    ["Team Management",  false],
+    "monitor":  ["Field Monitor",    true],
+    "estop":    ["Estop Panel",      true],
+    "rankings": ["Rankings",         false]
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 //// Loads all subdirectories of /svelte
