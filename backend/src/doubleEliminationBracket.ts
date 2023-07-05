@@ -111,27 +111,27 @@ export class DoubleEliminationBracket {
         const winningAlliance = winner === "red" ? match.red : match.blue;
         const losingAlliance  = winner === "red" ? match.blue : match.red;
         switch (matchNumber - 1) {
-            case 0: {
-                this.schedule[3].red = winningAlliance
-                this.schedule[2].red = losingAlliance
+            case 0: { // qf1m1
+                this.schedule[3].red = winningAlliance //sf1m1
+                this.schedule[2].red = losingAlliance //qf3m1
                 break;
             }
-            case 1: {
-                this.schedule[3].blue = winningAlliance
-                this.schedule[2].blue = losingAlliance
+            case 1: { // qf2m1
+                this.schedule[3].blue = winningAlliance //sf1m1
+                this.schedule[2].blue = losingAlliance //qf3m1
                 break;
             }
-            case 2: {
-                this.schedule[4].blue = losingAlliance
+            case 2: { // qf3m1
+                this.schedule[4].blue = winningAlliance  // sf1m2
                 break;
             }
             case 3: {
-                this.schedule[5].red = winningAlliance
-                this.schedule[4].red = losingAlliance
+                this.schedule[5].red = winningAlliance // finals
+                this.schedule[4].red = losingAlliance  // sf1m2
                 break;
             }
             case 4: {
-                this.schedule[5].blue = winningAlliance
+                this.schedule[5].blue = winningAlliance // finals
                 break;
             }
             case 5: {
@@ -143,15 +143,15 @@ export class DoubleEliminationBracket {
             }
             case 6: {
                 //finals 2
-                this.schedule[6].red = match.red;
-                this.schedule[6].blue = match.blue;
+                this.schedule[7].red = match.red;
+                this.schedule[7].blue = match.blue;
                 this.netFinalWins += winner === "red" ? 1 : -1;
                 break;
             }
             case 7: {
                 //finals 3
-                this.schedule[6].red = match.red;
-                this.schedule[6].blue = match.blue;
+                this.schedule[8].red = match.red;
+                this.schedule[8].blue = match.blue;
                 break;
             }
         }
