@@ -48,10 +48,10 @@ export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {
     return () => clearInterval(interval)
 }, 0)
 
-export const matchPeriod = derived(matchTime, ($time) => getMatchPeriod($time));
-export const remainingTimeInPeriod = derived(matchTime, ($time) => {return getRemainingTimeInPeriod($time)});
-export const remainingTimeInDisplayPeriod = derived(matchTime, ($time) => {return getRemainingTimeInDisplayPeriod($time)});
-export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time));
+export const matchPeriod:Readable<MatchPeriod> = derived(matchTime, ($time) => getMatchPeriod($time));
+export const remainingTimeInPeriod:Readable<number> = derived(matchTime, ($time) => {return getRemainingTimeInPeriod($time)});
+export const remainingTimeInDisplayPeriod:Readable<number> = derived(matchTime, ($time) => {return getRemainingTimeInDisplayPeriod($time)});
+export const elapsedTimeInPeriod:Readable<number> = derived(matchTime, ($time) => getElapsedTimeInPeriod($time));
 
 
 export function isMatchLoaded(match:string) {return match == loadedMatch.get()}
@@ -59,6 +59,12 @@ export function isMatchPreloaded(match:string) {return match == preloadedMatch.g
 
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
 export const teamList:Writable<{[key:number]:WritableTeamData}> = writable({})
+export const teamsSorted:Readable<WritableTeamData[]> = 
+    derived(teamList, ($teams) =>
+        (Object.values($teams) ?? []).sort(
+                (a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+            )
+        );
 
 export const dsStatuses:Writable<DSStatuses> = writable()
 

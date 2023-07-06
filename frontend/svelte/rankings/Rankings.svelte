@@ -1,16 +1,10 @@
 <script lang="ts">
 	import { derived, type Readable } from "svelte/store";
-	import { matchList, teamList } from "../store";
-	import type { WritableTeamData } from "socketStore";
+	import { matchList } from "../store";
 	import TeamRanking from "./components/TeamRanking.svelte";
 	import { MatchState } from "../../../common/types/types";
 	import { onMount } from "svelte";
-	
-	let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
-		(Object.values($teams) ?? []).sort(
-			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
-		)
-	);
+	import { teamsSorted } from "@store";
 	
 	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
 		let mostRecent = {id:"never",time:0};

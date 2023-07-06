@@ -1,154 +1,105 @@
 <script lang="ts">
     import matchData, { teamList } from "@store"
-    import { type WritableTeamData } from "socketStore";
-    import { subscribe } from "svelte/internal";
-    import { type Readable, derived, type Writable } from "svelte/store";
+    import { teamsSorted } from "@store";
+    import TeamCard from "./components/TeamCard.svelte";
 
-    // I think I'm reading the stores wrong
-	let {red1, red2, red3, blue1, blue2, blue3, type} = matchData
-    $: red = [$red1, $red2, $red3]
-    $: blue = [$blue1, $blue2, $blue3]
+	const {red1, red2, red3, blue1, blue2, blue3, type} = matchData
+    let red: 'red' | 'blue' = 'red'
+    let blue: 'red' | 'blue' = 'blue'
 
-    // The team numbers aren't updating, they're all still at their defaults
-    function filterTeams(teams: number[]): number[] {
-        return teams.filter((team, _index, _array) => team != 0);
-    }
-    let teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
-		(Object.values($teams) ?? []).sort(
-			(a, b) => b.matchStats.get().rp - a.matchStats.get().rp
-		)
-	);
-    // type.set("elimination");
+    // function filterTeams(teams: number[]): number[] {
+    //     return teams.filter((team, _index, _array) => team != 0);
+    // }
+    let rankings_red = {}
+    let rankings_blue = {}
+    type.set('elimination'); // for testing
+    // Rank can't be properly tested until scoring works
     // If there's a better way to do this let me know
     // It might be helpful to just have a rankings store
-    $teamsSorted.forEach((team, index, _array) => {
+    teamsSorted.subscribe((teams) => teams.forEach((team, index, _array) => {
         switch (team.id) {
             case $red1: {
-                rankings_red[0] = index;
+                rankings_red[$red1] = index;
                 break;
             }
             case $red2: {
-                rankings_red[1] = index;
+                rankings_red[$red2] = index;
                 break;
             }
             case $red3: {
-                rankings_red[2] = index;
+                rankings_red[$red3] = index;
                 break;
             }
             case $blue1: {
-                rankings_blue[0] = index;
+                rankings_blue[$blue1] = index;
                 break;
             }
             case $blue2: {
-                rankings_blue[1] = index;
+                rankings_blue[$blue2] = index;
                 break;
             }
             case $blue3: {
-                rankings_blue[2] = index;
+                rankings_blue[$blue3] = index;
                 break;
             }
             default: {
                 break;
             }
         }
-    })
-    let rankings_red:(number | null)[] = [null, null, null]
-    let rankings_blue:(number | null)[] = [null, null, null]
+    }))
+    
 </script>
 
-<h2 class="text-red-600">Announcer Display</h2>
+<h2>Announcer Display</h2>
 
-<div id="alliances" class="grid grid-cols-2">
-    <div class="grid grid-cols-1">
+<div class="grid-cols-2">
+    <div class="grid-rows-flux">
         <h1>Red Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                <h3>Alliance Position: {$teamList[filterTeams(red)[0]].alliancePosition.get()}</h3>
+                <h2>Alliance Position: {$teamList[$red1].alliance.get()}</h2> <!--This isn't working and I can't tell why-->
             </div>
         {/if}
-        {#each filterTeams(red) as num, i}
-            <div class="team-card{i + 1} red">
-                <strong>
-                    <div class="team-num">{$teamList[num].displaynum.get()}</div>
-                    <div class="team-info">
-                        <div class="team-info-item">Team Name: {$teamList[num].name.get()}</div>
-                        <div class="team-info-item">Robot Name: {$teamList[num].robotname.get()}</div>
-                        <div>Rank: {rankings_red[i] + 1}</div>
-                    </div>
-                </strong>
-            </div>
-            <br>
-        {/each}
+        {#if $red1 != 0 || $red2 != 0 || $red3 != 0}
+            <TeamCard bind:alliance={red} bind:team_num={$red1} bind:rank={rankings_red[$red1]}/>
+            <TeamCard bind:alliance={red} bind:team_num={$red2} bind:rank={rankings_red[$red2]}/>
+            <TeamCard bind:alliance={red} bind:team_num={$red3} bind:rank={rankings_red[$red3]}/>
+        {/if}
     </div>
-    <div class="grid grid-cols-1">
+    <div class="grid-rows-flux">
         <h1>Blue Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                <h3>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h3>
+                <h2>Alliance Position: {$teamList[$red1].alliancePosition.get()}</h2> <!--This isn't working and I can't tell why-->
             </div>
         {/if} 
-        {#each filterTeams(blue) as num, i}
-            <div class="team-card{i + 1 } blue">
-                <strong>
-                    <div class="team-num">{$teamList[num].displaynum.get()}</div>
-                    <div class="team-info">
-                        <div class="team-info-item">Team Name: {$teamList[num].name.get()}</div>
-                        <div class="team-info-item">Robot Name: {$teamList[num].robotname.get()}</div>
-                        <div>Rank: {rankings_blue[i] + 1}</div>
-                    </div>
-                </strong>
-            </div>
-            <br>
-        {/each}
+        {#if $blue1 != 0 || $blue2 != 0 || $blue3 != 0}
+            <TeamCard bind:alliance={blue} bind:team_num={$blue1} bind:rank={rankings_blue[$blue1]}/>
+            <TeamCard bind:alliance={blue} bind:team_num={$blue2} bind:rank={rankings_blue[$blue2]}/>
+            <TeamCard bind:alliance={blue} bind:team_num={$blue3} bind:rank={rankings_blue[$blue3]}/>
+        {/if}
     </div>
 </div>
 
 
 <style>
-    .team-info-item {
-        padding-bottom: 1%;
-    }
-    .team-info {
-        font-size: x-large;
-    }
-    .team-num {
-        font-size: xxx-large;
-        padding-bottom: 2%;
-    }
 
-    .red {
-        background-color: rgb(218, 56, 50);
-        border-radius: 25px;
-    }
-
-    .blue {
-        background-color: rgb(42, 100, 173);
-        border-radius: 25px;
-    }
-    
-    .team-card1 {
-        padding-bottom: 2%;
-        padding-top: 2%;
-        grid-row: 2;
-    }
-    .team-card2 {
-        padding-bottom: 2%;
-        padding-top: 2%;
-        grid-row: 3;
-    }
-    .team-card3 {
-        padding-bottom: 2%;
-        padding-top: 2%;
-        grid-row: 4;
-    }
-
-    .grid {
+    .grid-rows-flux {
         display: grid;
         place-items: center str;
         gap: 10px;
+        grid-template-rows: 1fr auto
     }
 
     .grid-cols-2 {
+        display: grid;
+        place-items: center str;
+        gap: 10px;
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .half-row {
+        grid-row-start: 2;
+        grid-row-end: 2.5;
     }
 </style>
