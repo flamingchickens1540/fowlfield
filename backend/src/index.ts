@@ -9,7 +9,7 @@ import startSockets from "./sockets";
 import { DBSettings } from 'models/settings';
 import isEqual from "lodash.isequal"
 import rootLogger from 'logger';
-
+import * as tba from "tba"
 let driverStatuses:DSStatuses
 
 const server = http.createServer()
@@ -25,6 +25,10 @@ async function configure() {
     await teammanager.loadTeams()
     socketCallbacks = await startSockets(server, ipc)
     ipc.load(matchmanager.getCurrentMatch().getData())
+    await tba.reset("team")
+    await tba.updateAlliances()
+    await tba.updateMatches()
+    await tba.updateRankings()
 
 }
 

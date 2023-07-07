@@ -1,8 +1,9 @@
-import { PartialTeam, TeamData } from "@fowltypes";
+import { ExtendedTeam, PartialTeam, TeamData } from "@fowltypes";
 import { DBSettings } from "models/settings";
-import { DBTeam } from "models/teams";
+import { DBTeam, buildStats } from "models/teams";
 import * as db from "./models/db";
-import { DoubleEliminationAlliance } from './doubleEliminationBracket';
+import * as matchmanager from "./matchmanager"
+import { average } from '@fowlutils/index';
 
 
 let teams:{[key:number]:DBTeam}
@@ -55,5 +56,33 @@ export function newTeam(data:TeamData) {
     db.setTeam(data)
     teams[data.id] = new DBTeam(data)
     return teams[data.id]
+}
+
+
+
+
+export function buildExtendedTeams():{ [key: number]: ExtendedTeam } {
+    const teams: { [key: number]: ExtendedTeam & {_matchscores:number[]}} = {}
+    Object.entries(getTeams()).forEach(([key, team]) => {teams[key] = { 
+        ...team.getData(), 
+        matchStats: { win: 0, loss: 0, tie: 0, rp: 0},
+        _matchscores:[]
+    }})
+    Object.values(matchmanager.getMatches()).forEach((match) => {
+        const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
+
+        matchteams.forEach((team: number, index: number) => {
+            if (teams[team] == null) {return}
+            const isRed = index<3
+            teams[team]._matchscores.push(isRed ? match.redScore : match.blueScore)
+            buildStats(match, isRed, teams[team].matchStats)
+        })
+    });
+
+    Object.values(teams).forEach((team) => {
+        team.matchStats.avg_score =  average(team._matchscores)
+    })
+
+    return teams
 }
 

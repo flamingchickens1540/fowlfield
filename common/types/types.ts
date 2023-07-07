@@ -23,10 +23,11 @@ export interface TeamData extends Team {
     alliancePosition:0|1|2|3|4
 }
 export interface TeamMatchStats {
-    win:number,
-    loss:number,
-    tie:number,
+    win:number
+    loss:number
+    tie:number
     rp:number
+    avg_score:number
 }
 
 export interface ExtendedTeam extends TeamData {
@@ -52,3 +53,6 @@ export enum MatchPeriod {
 
 
 export type DSStatuses = IPCData["ds_status"]
+
+
+export type MatchID = `${"qm"|"qf"|"sf"|"f"}${number}m${number}`

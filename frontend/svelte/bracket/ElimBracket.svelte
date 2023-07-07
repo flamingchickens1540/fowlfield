@@ -37,21 +37,21 @@
     type LineData = {line:LeaderLine, startElement:HTMLElement, endElement:HTMLElement}
     let lines:Writable<{[key:string]:[LineData,LineData]}> =writable({})
     onMount(() => {
-        createLines("qf1m1", "sf1m1", "qf3m1")
-        createLines("qf2m1", "sf1m1", "qf3m1")
-        createLines("qf3m1", "sf1m2")
-        createLines("sf1m1", "f1m1", "sf1m2")
-        createLines("sf1m2", "f1m1")
+        createLines("sf1m1", "sf3m1", "sf4m1")
+        createLines("sf2m1", "sf3m1", "sf4m1")
+        createLines("sf4m1", "sf5m1")
+        createLines("sf3m1", "f1m1", "sf5m1")
+        createLines("sf5m1", "f1m1")
     })
 
 </script>
 <div class=estop-container>
     
-        <div class=matchcontainer id="container-qf1m1"><Match {lines} title="Match 1" id=qf1m1></Match></div>
-        <div class=matchcontainer id="container-qf2m1"><Match {lines} title="Match 2" id=qf2m1></Match></div>
-        <div class=matchcontainer id="container-qf3m1"><Match {lines} title="Match 3" id=qf3m1></Match></div>
-        <div class=matchcontainer id="container-sf1m1"><Match {lines} title="Upper Finals" id=sf1m1></Match></div>
-        <div class=matchcontainer id="container-sf1m2"><Match {lines} title="Lower Finals" id=sf1m2></Match></div>
+        <div class=matchcontainer id="container-sf1m1"><Match {lines} title="Match 1" id=sf1m1></Match></div>
+        <div class=matchcontainer id="container-sf2m1"><Match {lines} title="Match 2" id=sf2m1></Match></div>
+        <div class=matchcontainer id="container-sf4m1"><Match {lines} title="Match 3" id=sf4m1></Match></div>
+        <div class=matchcontainer id="container-sf3m1"><Match {lines} title="Upper Finals" id=sf3m1></Match></div>
+        <div class=matchcontainer id="container-sf5m1"><Match {lines} title="Lower Finals" id=sf5m1></Match></div>
         <div class=matchcontainer id="container-f1m1"> <Match {lines} title="Grand Finals" id=f1m1></Match></div>
     
 </div>
@@ -72,23 +72,23 @@
         margin:0 !important;
         padding:0;
     }
-    #container-qf1m1 {
+    #container-sf1m1 {
         grid-column: 1;
         grid-row:1/span 2;
     }   
-    #container-qf2m1 {
+    #container-sf2m1 {
         grid-column: 1;
         grid-row:5/span 2;
     }   
-    #container-qf3m1 {
+    #container-sf4m1 {
         grid-column: 2;
         grid-row:10/span 2;
     }   
-    #container-sf1m1 {
+    #container-sf3m1 {
         grid-column: 3;
         grid-row:3 / span 2;
     }   
-    #container-sf1m2 {
+    #container-sf5m1 {
         grid-column: 3;
         grid-row:9 / span 2;
     }   
