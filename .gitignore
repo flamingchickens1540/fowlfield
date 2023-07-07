@@ -4,3 +4,4 @@ frontend/dist
 data
 backend/secrets.json
 frontend/consts.json
+pi/**/consts.json
