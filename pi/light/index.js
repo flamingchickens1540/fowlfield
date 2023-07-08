@@ -4,26 +4,39 @@
 // gpio=21,13=ip,np
 
 const { Gpio } = require("onoff");
-const { io } = require("socket.io-client");
+const { io } = require("socket.io-client")
 const consts = require("./consts.json")
-const {StackLightState} = require("../../common/types/stack_light_types.ts")
+
 
 class Bulb {
     pin
-    interval = null
+    currentStateData
+    currentStateSolid
 
     constructor(pin) {
         this.pin = new Gpio(pin, "out")
     }
 
-    setSolid(on) {
-        clearInterval(this.interval)
-        this.pin.writeSync(on)
+    checkAndUpdateState(solid, data) {
+        const isNew = this.currentStateData != data|| this.currentStateSolid!=solid
+        this.currentStateData = data;
+        this.currentStateSolid = solid
+        return isNew
     }
 
-    setBlink(interval) {
-        clearInterval(this.interval)
-        this.interval = setInterval(() => {this.pin.writeSync(this.pin.readSync() ^ 1)}, interval)
+    setSolid(on) {
+        if (!this.checkAndUpdateState(true, on)) {return false}
+        this.pin.writeSync(on)
+        return true
+    }
+
+    setBlink() {
+        if (!this.checkAndUpdateState(false, null)) {return false}
+        this.blink()
+        return true
+    }
+    blink() {
+        this.pin.writeSync(this.pin.readSync() ^ 1)
     }
 
 
@@ -31,10 +44,26 @@ class Bulb {
 
 const lights = {}
 
+
+
 consts.pins.forEach(([color, pin]) => {
     lights[color] = new Bulb(pin)
     lights[color].setSolid(1)
 })
+
+const lightList = Object.values(lights);
+let blinkState = false
+const timer = setInterval(() => {
+    lightList.forEach((light) => {
+        if (!light.currentStateSolid) {
+            light.pin.writeSync(blinkState ? 1 :0)
+        }
+        
+    })
+    blinkState = !blinkState
+},500)
+
+
 
 
 const socket = io(consts.socket.host, {
@@ -56,10 +85,13 @@ socket.on("connect_error", (err) => console.log("connect failed", err.message))
 socket.on("disconnect", (reason) => console.log("disconnect", reason))
 socket.on("setLight", (color, state) => {
     const light = lights[color]
+    let result
     switch (state) {
-        case StackLightState.SOLID: light.setSolid(1);break;
-        case StackLightState.OFF: light.setSolid(0);break;
-        case StackLightState.FLASH: light.setBlink(300);break;
+        case "solid": result=light.setSolid(1);break;
+        case "off": result=light.setSolid(0);break;
+        case "flash": result=light.setBlink();break;
     }
+
+    if (result) {console.log("set", color, state)}
 })
 socket.connect()

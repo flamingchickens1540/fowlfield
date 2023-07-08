@@ -61,6 +61,7 @@ const handlePressed = (station) => {
 
 const handleReleased = (station) => {
     console.log(station, "released")
+    socket.emit("unestop", station)
 }
 
 const socket = io(consts.socket.host, {

@@ -348,25 +348,13 @@ func (arena *Arena) getAssignedAllianceStation(teamId int) string {
 	return ""
 }
 
-func (arena *Arena) EstopStation(station string) error {
-	allianceStation := arena.AllianceStations[station]
-	if (allianceStation == nil) {return fmt.Errorf("cannot find alliance station %s", station)}
-	allianceStation.Estop = true;
-	return nil
-}
 
-func (arena *Arena) handleEstop(station string, state bool) {
+
+func (arena *Arena) HandleEstop(station string, state bool) {
 	allianceStation := arena.AllianceStations[station]
 	if state {
-		if arena.MatchState == AutoPeriod {
-			allianceStation.Astop = true
-		} else {
-			allianceStation.Estop = true
-		}
+		allianceStation.Estop = true
 	} else {
-		if arena.MatchState != AutoPeriod {
-			allianceStation.Astop = false
-		}
 		if arena.MatchTimeSec() == 0 {
 			// Don't reset the e-stop while a match is in progress.
 			allianceStation.Estop = false

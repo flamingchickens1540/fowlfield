@@ -57,4 +57,5 @@ export interface ClientToServerEvents {
 
     nextMatch(type:"qualification"|"elimination"):void
     estop(station:DriverStation):void
+    unestop(station:DriverStation):void
 }

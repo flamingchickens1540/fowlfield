@@ -9,14 +9,17 @@ import (
 func processCommand(client *NodeIPC, cmd string, message model.IPCData) {
 	switch cmd {
 	case "estop": 
-		estopRobot(client, *message.AllianceStation)
+		setEstop(client, *message.AllianceStation, true)
 	case "abort":
 		arena.AbortMatch()
 	case "load":
 		loadMatch(*message.Match)
 	case "start":
 		startMatch(client, *message.Match)
+	case "unestop":
+		setEstop(client, *message.AllianceStation, false)
 	}
+
 }
 
 func loadMatch(match model.Match) {
@@ -24,8 +27,8 @@ func loadMatch(match model.Match) {
 	arena.LoadMatch(&match)
 }
 
-func estopRobot(client *NodeIPC, station string) {
-	arena.EstopStation(station)
+func setEstop(client *NodeIPC, station string, estopped bool) {
+	arena.HandleEstop(station, estopped)
 	client.SendDsStatus(arena.GetAllianceStationStatuses())
 }
 

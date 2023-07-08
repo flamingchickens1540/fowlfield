@@ -22,9 +22,18 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             origin: "*"
         }
     })
-    const estopHandler = (station:DriverStation) => {
+    const estopHandler = (station:DriverStation, on:boolean) => {
+        if (on) {
         ipc.estop(station)
         logger.log("estopping", station)
+        } else {
+            if (matchmanager.getCurrentMatch().state != MatchState.IN_PROGRESS) {
+                ipc.unestop(station)
+                logger.log("lifting estop", station)
+            } else {
+                logger.log('not lifting estop', station)
+            }
+        }
     }
     
     
@@ -169,6 +178,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             match.startTime = 0;
             match.state = MatchState.PENDING
             ipc.abort()
+            queryEstops()
             // TODO: NOTIFY IPC
             io.emit("abortMatch", match.getData())
         })
@@ -187,57 +197,59 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             }
         })
         
-        socket.on("estop", estopHandler)
+        socket.on("estop", (s) => estopHandler(s, true))
+        socket.on("unestop", (s) => estopHandler(s, false))
         
         function alert(...message:string[]) {
             matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
-
-        async function queryEstops():Promise<boolean> {
-            const recieved = {
-                "R1": false,
-                "R2": false,
-                "R3": false,
-                "B1": false,
-                "B2": false,
-                "B3": false
-            }
-            let complete:(value:boolean) => void
-            io.to("estop").timeout(300).emit("queryEstop", (err, [data]) => {
-                if (data == null) {console.log("noresponse");return;}
-                if (data.B1) {estopHandler("B1")}
-                if (data.B2) {estopHandler("B2")}
-                if (data.B3) {estopHandler("B3")}
-                if (data.R1) {estopHandler("R1")}
-                if (data.R2) {estopHandler("R2")}
-                if (data.R3) {estopHandler("R3")}
-                Object.keys(data).forEach((key) => recieved[key] =true)
-                let allGood = true;
-                Object.values(recieved).forEach((isStationRecieved) => {
-                    if (!isStationRecieved) {allGood = false}
-                })
-                console.warn("recieved estops", Object.keys(data))
-                if (allGood) {complete(true)}
-            })
-            const success:Promise<boolean> = new Promise((resolve, reject) => {
-                complete = resolve;
-            })
-            const timeout:Promise<boolean> = new Promise((resolve, reject) => {
-                setTimeout(() => resolve(false), 300);
-            });
-
-            return Promise.race([success,timeout])
-
-            
-        }
     })
     
+    async function queryEstops():Promise<boolean> {
+        const recieved = {
+            "R1": false,
+            "R2": false,
+            "R3": false,
+            "B1": false,
+            "B2": false,
+            "B3": false
+        }
+        let complete:(value:boolean) => void
+        io.to("estop").timeout(300).emit("queryEstop", (err, [data]) => {
+            if (data == null) {console.log("noresponse");return;}
+            if (data.B1 != null) {estopHandler("B1", data.B1)}
+            if (data.B2 != null) {estopHandler("B2", data.B2)}
+            if (data.B3 != null) {estopHandler("B3", data.B3)}
+            if (data.R1 != null) {estopHandler("R1", data.R1)}
+            if (data.R2 != null) {estopHandler("R2", data.R2)}
+            if (data.R3 != null) {estopHandler("R3", data.R3)}
+            Object.keys(data).forEach((key) => recieved[key] =true)
+            let allGood = true;
+            Object.values(recieved).forEach((isStationRecieved) => {
+                if (!isStationRecieved) {allGood = false}
+            })
+            console.warn("recieved estops", Object.keys(data))
+            if (allGood) {complete(true)}
+        })
+        const success:Promise<boolean> = new Promise((resolve, reject) => {
+            complete = resolve;
+        })
+        const timeout:Promise<boolean> = new Promise((resolve, reject) => {
+            setTimeout(() => resolve(false), 300);
+        });
+
+        return Promise.race([success,timeout])
+
+        
+    }
+
     setInterval(() => {
         if (!matchmanager.isDBLoaded()) { return; }
         const match = matchmanager.getCurrentMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
+            queryEstops()
             matchLogger.log("Transitioning match", match.id, "to completed")
             io.emit("match", match.getData())
         }

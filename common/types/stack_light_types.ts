@@ -6,7 +6,7 @@ export enum StackLightColor {
 }
 
 export enum StackLightState {
-    OFF,
-    SOLID,
-    FLASH
+    OFF="off",
+    SOLID="solid",
+    FLASH="flash"
 }

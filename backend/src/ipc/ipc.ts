@@ -70,6 +70,9 @@ export class IPCClient {
     estop(station:DriverStation) {
         this.send('estop', {alliancestation:station});
     }
+    unestop(station:DriverStation) {
+        this.send('unestop', {alliancestation:station});
+    }
     
     async awaitResponse(commands:string[], timeout:number=100):Promise<IPCMessage> {
         let promises:Promise<IPCMessage>[] = []
