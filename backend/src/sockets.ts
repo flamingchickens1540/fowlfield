@@ -1,4 +1,4 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
@@ -14,7 +14,7 @@ const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
-
+const skipEstopVerification = true;
 
 export default function startServer(server: http.Server, ipc:IPCClient) {
     io = new Server(server, {
@@ -36,7 +36,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         }
         if ((socket.handshake.auth.role ?? "") == "estop") {
             socket.join("estop")
+        } else if ((socket.handshake.auth.role ?? "") == "light") {
+            socket.join("light")
         }
+        
         
         logger.debug("New connection from", socket.id, socket.handshake.address, socket.handshake.url)
         queryEstops()
@@ -62,7 +65,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.emit("matches", matches)
         socket.emit("teams", teams)
         socket.emit("dsStatus", getDsStatus())
-        
+        socket.emit("syncTime", Date.now()) // Account for time zone differences
         
         socket.on("preloadMatch", (id: string) => {
             matchLogger.log("preloading", id)
@@ -79,7 +82,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             io.emit("loadMatch", match.getData())
         })
         
-        socket.emit("syncTime", Date.now()) // Account for time zone differences
+        
+
         socket.on("partialMatch", async (data: PartialMatch) => {
             logger.debug("reciving match", data)
             if (!data.id) { logger.warn("recieved bad match data", data); return }
@@ -134,7 +138,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             const match = matchmanager.getCurrentMatch()
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
             const areEstopsReady = await queryEstops()
-            if (!areEstopsReady) {
+            if (!areEstopsReady && !skipEstopVerification) {
                 alert("Estop responses not received, check them")
                 return;
             }
@@ -242,6 +246,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
     return {
         emitDsStatus(statuses:DSStatuses) {
             io.emit("dsStatus", statuses)
+        },
+        setLight(light: StackLightColor, state: StackLightState) {
+            // console.log("Setting lights", light, on)
+            io.to("light").emit("setLight", light, state)
         }
     }
     

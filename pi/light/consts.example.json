@@ -1,0 +1,12 @@
+{
+  "socket": {
+    "host": "http://localhost:3000",
+    "key": "fowlfield"
+  },
+  "pins": [
+    ["blue", 2],
+    ["red",3],
+    ["green", 4],
+    ["orange", 14]
+  ]
+}

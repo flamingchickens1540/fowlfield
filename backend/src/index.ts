@@ -1,5 +1,5 @@
 
-import { AllianceStationStatus, DriverStation, IPCData, DSStatuses } from '@fowltypes';
+import { AllianceStationStatus, DriverStation, IPCData, DSStatuses, StackLightState, StackLightColor, MatchState } from '@fowltypes';
 import * as http from 'http';
 import { IPCClient } from "./ipc/ipc";
 import * as matchmanager from "./matchmanager";
@@ -17,7 +17,10 @@ const server = http.createServer()
 const ipc = new IPCClient({
     dsStatus: handleDSStatus,
 })
-let socketCallbacks:{emitDsStatus:(data:DSStatuses) => void};
+let socketCallbacks:{
+    emitDsStatus:(data:DSStatuses) => void,
+    setLight:(color:StackLightColor, state:StackLightState) => void
+};
 async function configure() {
     await db.connect()
     await DBSettings.getInstance()
@@ -43,6 +46,34 @@ function areNewStatuses(data:DSStatuses) {
 }
 let lastSentTime = Date.now()
 function handleDSStatus(data:DSStatuses) {
+    let redReady = true;
+    let blueReady = true;
+    let redEnabled = false;
+    let blueEnabled = false
+    let estopsGood = true;
+    Object.entries(data).forEach(([station, state]) => {
+        const isRed = station == "R1" || station == "R2" || station == "R3"
+        if (!state.robotConnected && !state.bypassed) {
+            if (isRed) {
+                redReady = false
+            } else {
+                blueReady = false
+            }
+        }
+        if (state.enabled) {
+            if (isRed) {
+                redEnabled = true
+            } else {
+                blueEnabled = true
+            }
+        }
+        if (state.isEstopped) {estopsGood = false}
+    })
+    // console.log('status', redGood, blueGood)
+    socketCallbacks.setLight(StackLightColor.RED, redReady ? (redEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
+    socketCallbacks.setLight(StackLightColor.BLUE, blueReady ? (blueEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
+    socketCallbacks.setLight(StackLightColor.ORANGE, estopsGood ? StackLightState.OFF : matchmanager.getCurrentMatch().state == MatchState.PENDING ? StackLightState.FLASH : StackLightState.SOLID)
+    // console.log("lights", !redGood, !blueGood, !estopsGood)
     const currentTime = Date.now()
     if (areNewStatuses(data) || currentTime-lastSentTime > 2_000) {
         lastSentTime = currentTime;

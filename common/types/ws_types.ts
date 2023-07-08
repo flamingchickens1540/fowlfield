@@ -6,8 +6,10 @@ import type {
     MatchData,
     PartialMatch,
     PartialTeam,
+    StackLightColor,
+    StackLightState,
     TeamData,
-} from "./types";
+} from ".";
 
 export interface ServerToClientEvents {
     match(data: MatchData): void;
@@ -32,6 +34,7 @@ export interface ServerToClientEvents {
     dsStatus(data:DSStatuses):void
     alert(message:string):void
     queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
+    setLight(color:StackLightColor, state:StackLightState)
 }
 
 export interface ClientToServerEvents {
