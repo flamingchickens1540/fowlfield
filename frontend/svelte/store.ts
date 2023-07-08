@@ -59,11 +59,18 @@ export function isMatchPreloaded(match:string) {return match == preloadedMatch.g
 
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
 export const teamList:Writable<{[key:number]:WritableTeamData}> = writable({})
-export const teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
+export const teamsSorted:Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
     (Object.values($teams) ?? []).sort(
             (a, b) => b.matchStats.get().rp - a.matchStats.get().rp
         )
     );
+export const teamsMap:Readable<{[key:number]:number}> = derived(teamsSorted, ($teams) => {
+    let map:{[key:number]:number} = {};
+    ($teams ?? []).forEach((team, index, _array) => {
+        map[team.name?.get()] = index
+    });
+    return map;
+})
 
 export const dsStatuses:Writable<DSStatuses> = writable()
 
