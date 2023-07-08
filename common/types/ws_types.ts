@@ -31,7 +31,7 @@ export interface ServerToClientEvents {
     abortMatch(data: MatchData): void;
     dsStatus(data:DSStatuses):void
     alert(message:string):void
-    
+    queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
 }
 
 export interface ClientToServerEvents {

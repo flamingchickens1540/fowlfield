@@ -67,7 +67,7 @@ export class MatchMaker {
         let match = this.bracket.getNextMatch();
         if (match == null) {return null}
         const alliances = teammanager.getAlliances()
-        logger.debug("ELIM DATA", match, match.red, match.blue, alliances)
+        logger.log("ELIM DATA", match, match.red, match.blue, alliances)
         return matchmanager.newMatch({
             id: match.matchId,
             matchNumber: match.matchNumber,
