@@ -3,7 +3,7 @@ import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStat
 import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, type WritableTeamData } from "./socketStore";
 import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
 import socket from "@socket";
-import type { AllianceStationStatus } from "@fowltypes";
+import type { AllianceStationStatus, ExtendedDsStatuses } from "@fowltypes";
 
 
 
@@ -72,7 +72,7 @@ export const teamRankings:Readable<{[key:number]:number}> = derived(teamsSorted,
     return map;
 })
 
-export const dsStatuses:Writable<DSStatuses> = writable()
+export const dsStatuses:Writable<ExtendedDsStatuses> = writable()
 
 
 
@@ -92,7 +92,7 @@ export function abortMatch() {
 export function commitMatch() {
     socket.emit("commitMatch", currentMatchID)
 }
-export function updateDSStatuses(data:DSStatuses) {
+export function updateDSStatuses(data:ExtendedDsStatuses) {
     dsStatuses.set(data)
 }
 matchDataPrivate.id.subscribeLocal((value) => currentMatchID = value)

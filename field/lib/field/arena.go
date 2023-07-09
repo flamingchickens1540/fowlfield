@@ -291,16 +291,18 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 		} else {
 			statuses[station] =
 				model.AllianceStationStatus{
-					Bypassed:       allianceStation.TeamNumber == 0,
-					DsConnected:    allianceStation.DsConn != nil,
-					Enabled:        allianceStation.DsConn.Enabled,
-					IsEstopped:     allianceStation.DsConn.EstopReported,
-					IsAuto:         allianceStation.DsConn.Auto,
-					TripTime:       allianceStation.DsConn.DsRobotTripTimeMs,
-					MissedPackets:  allianceStation.DsConn.MissedPacketCount,
-					BatteryVoltage: allianceStation.DsConn.BatteryVoltage,
-					RadioConnected: allianceStation.DsConn.RadioLinked,
-					RobotConnected: allianceStation.DsConn.RobotLinked,
+					Bypassed:        allianceStation.TeamNumber == 0,
+					TeamNumber:      allianceStation.TeamNumber,
+					DsConnected:     allianceStation.DsConn != nil,
+					Enabled:         allianceStation.DsConn.Enabled,
+					IsEstopped:      allianceStation.DsConn.EstopReported,
+					IsEstopAssigned: allianceStation.DsConn.Estop,
+					IsAuto:          allianceStation.DsConn.Auto,
+					TripTime:        allianceStation.DsConn.DsRobotTripTimeMs,
+					MissedPackets:   allianceStation.DsConn.MissedPacketCount,
+					BatteryVoltage:  allianceStation.DsConn.BatteryVoltage,
+					RadioConnected:  allianceStation.DsConn.RadioLinked,
+					RobotConnected:  allianceStation.DsConn.RobotLinked,
 				}
 		}
 	}

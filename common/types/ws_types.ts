@@ -2,6 +2,7 @@ import type { IPCData } from "./ipctypes";
 import type {
     DSStatuses,
     DriverStation,
+    ExtendedDsStatuses,
     ExtendedTeam,
     MatchData,
     PartialMatch,
@@ -31,7 +32,7 @@ export interface ServerToClientEvents {
      */
     loadMatch(matdatach: MatchData): void;
     abortMatch(data: MatchData): void;
-    dsStatus(data:DSStatuses):void
+    dsStatus(data:ExtendedDsStatuses):void
     alert(message:string):void
     queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
     setLight(color:StackLightColor, state:StackLightState)

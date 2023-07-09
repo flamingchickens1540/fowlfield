@@ -14,6 +14,8 @@ export interface AllianceStationStatus {
   bypassed: boolean;
   battery: number /* float64 */;
   isEstopped: boolean;
+  estopActive: boolean;
+  assignedTeam: number /* int */;
 }
 
 //////////

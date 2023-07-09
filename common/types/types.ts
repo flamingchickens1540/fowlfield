@@ -55,5 +55,11 @@ export enum MatchPeriod {
 
 export type DSStatuses = IPCData["ds_status"]
 
+export type ExtendedDsStatus = DSStatuses[DriverStation]& {
+    hardwareEstopPressed:boolean
+    hardwareEstopOnline:boolean
+}
+export type ExtendedDsStatuses = {[key in DriverStation]:DSStatuses[key]& ExtendedDsStatus}
+
 
 export type MatchID = `${"qm"|"qf"|"sf"|"f"}${number}m${number}`

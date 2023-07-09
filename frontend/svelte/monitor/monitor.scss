@@ -30,8 +30,8 @@ $tableheight: 92vh;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
     
-    grid-template-rows: 5vh 3vh repeat(6, min(calc(#{$tableheight}/6), calc(100vw/10)));
-    grid-template-columns: repeat(10, min(calc(#{$tableheight}/6), calc(100vw/10)));
+    grid-template-rows: 5vh 3vh repeat(6, min(calc(#{$tableheight}/6), calc(100vw/11)));
+    grid-template-columns: repeat(11, min(calc(#{$tableheight}/6), calc(100vw/11)));
     grid-auto-flow: row;
     
 

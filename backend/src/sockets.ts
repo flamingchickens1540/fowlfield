@@ -1,4 +1,4 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
@@ -29,7 +29,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
     
     io.on("connection", (socket) => {
         
-        if (socket.handshake.auth.key !== consts.socket.key) {
+        if (socket.handshake.auth?.key?.trim() !== consts.socket.key) {
             socket.disconnect(true)
             return;
         }
@@ -187,8 +187,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             }
         })
         
-        socket.on("estop", (s) => handleEstop(s, true, false))
-        socket.on("unestop", (s) => handleEstop(s, false, false))
+        socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))
+        socket.on("unestop", (s) => handleEstop(s, false, socket.rooms.has("estop")))
         
         socket.on("disconnect", () => {
             if (socket.rooms.has("estop")) {
@@ -235,9 +235,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             io.emit("match", match.getData())
         }
     }, 50)
+
     
     return {
-        emitDsStatus(statuses:DSStatuses) {
+        emitDsStatus(statuses:ExtendedDsStatuses) {
             io.emit("dsStatus", statuses)
         },
         setLight(light: StackLightColor, state: StackLightState) {

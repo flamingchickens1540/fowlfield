@@ -21,13 +21,14 @@
     <div class=header>Status</div>
     <div class=header>Trip Time (ms)</div>
     <div class=header>Missed Packets</div>
+    <div class=header>Estop</div>
     </div>
-    <RobotMonitor row={3} DSKey="B1" teamID={matchData.blue1}></RobotMonitor>
-    <RobotMonitor row={4} DSKey="B2" teamID={matchData.blue2}></RobotMonitor>
-    <RobotMonitor row={5} DSKey="B3" teamID={matchData.blue3}></RobotMonitor>
-    <RobotMonitor row={6} DSKey="R1" teamID={matchData.red1}></RobotMonitor>
-    <RobotMonitor row={7} DSKey="R2" teamID={matchData.red2}></RobotMonitor>
-    <RobotMonitor row={8} DSKey="R3" teamID={matchData.red3}></RobotMonitor>
+    <RobotMonitor row={3} DSKey="B1"></RobotMonitor>
+    <RobotMonitor row={4} DSKey="B2"></RobotMonitor>
+    <RobotMonitor row={5} DSKey="B3"></RobotMonitor>
+    <RobotMonitor row={6} DSKey="R1"></RobotMonitor>
+    <RobotMonitor row={7} DSKey="R2"></RobotMonitor>
+    <RobotMonitor row={8} DSKey="R3"></RobotMonitor>
     
 </div>
 
@@ -42,7 +43,7 @@
         text-shadow:  1px 1px 5px rgb(199, 199, 199);
     }
     #matchstatus {
-        grid-column: 3/span 8;
+        grid-column: 3/span 9;
         font-size: 20px;
         font-weight:700;
         letter-spacing: 1px;
