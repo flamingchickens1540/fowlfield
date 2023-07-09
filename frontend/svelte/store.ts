@@ -64,10 +64,10 @@ export const teamsSorted:Readable<WritableTeamData[]> = derived(teamList, ($team
             (a, b) => b.matchStats.get().rp - a.matchStats.get().rp
         )
     );
-export const teamsMap:Readable<{[key:number]:number}> = derived(teamsSorted, ($teams) => {
+export const teamRankings:Readable<{[key:number]:number}> = derived(teamsSorted, ($teams) => {
     let map:{[key:number]:number} = {};
     ($teams ?? []).forEach((team, index, _array) => {
-        map[team.name?.get()] = index
+        map[team.id] = index
     });
     return map;
 })

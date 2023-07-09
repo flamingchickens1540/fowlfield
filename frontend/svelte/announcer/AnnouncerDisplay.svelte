@@ -16,15 +16,9 @@
                 <h2>Alliance Position: {$redAlliance}</h2> <!--This isn't working and I can't tell why-->
             </div>
         {/if}
-        {#if $red1 != 0 }
-            <TeamCard alliance={'red'} team_num={$red1}/>
-        {/if}
-        {#if $red2 != 0}
-            <TeamCard alliance={'red'} team_num={$red2}/>
-        {/if}
-        {#if $red3 != 0}
-            <TeamCard alliance={'red'} team_num={$red3}/>
-        {/if}
+        <TeamCard alliance={'red'} team_num={$red1}/>
+        <TeamCard alliance={'red'} team_num={$red2}/>
+        <TeamCard alliance={'red'} team_num={$red3}/>
     </div>
     <div class="grid-rows-flux">
         <h1>Blue Alliance</h1>
@@ -32,16 +26,10 @@
             <div>
                 <h2>Alliance Position: {$blueAlliance}</h2> <!--This isn't working and I can't tell why-->
             </div>
-        {/if} 
-        {#if $blue1 != 0}
-            <TeamCard alliance={'blue'} team_num={$blue1}/>
         {/if}
-        {#if $blue2 != 0}
-            <TeamCard alliance={'blue'} team_num={$blue2}/>
-        {/if}
-        {#if $blue3 != 0}
-            <TeamCard alliance={'blue'} team_num={$blue3}/>
-        {/if}
+        <TeamCard alliance={'blue'} team_num={$blue1}/>
+        <TeamCard alliance={'blue'} team_num={$blue2}/>
+        <TeamCard alliance={'blue'} team_num={$blue3}/>
     </div>
 </div>
 

@@ -1,25 +1,26 @@
 <script lang="ts">
-    import matchData, { teamList, teamsMap } from "@store"
+    import matchData, { teamList, teamRankings } from "@store"
     export let team_num: number;
     export let alliance: 'red' | 'blue'
 
     const { type } = matchData
 </script>
-
-<div class="{alliance} team-card">
-    <strong>
-        <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
-        <div class="team-info">
-            <div class="team-info-item">Team Name: {$teamList[team_num]?.name?.get()}</div>
-            <div class="team-info-item">Robot Name: {$teamList[team_num]?.robotname?.get()}</div>
-            {#if $type == "qualification"}
-                <div>Team Rank: {$teamsMap[team_num] + 1}</div>
-            {:else}
-                <div>Alliance Pick: {$teamList[team_num]?.alliancePosition?.get()}</div>
-            {/if}
-        </div>
-    </strong>
-</div>
+{#if team_num != 0}
+    <div class="{alliance} team-card">
+        <strong>
+            <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
+            <div class="team-info">
+                <div class="team-info-item">Team Name: {$teamList[team_num]?.name?.get()}</div>
+                <div class="team-info-item">Robot Name: {$teamList[team_num]?.robotname?.get()}</div>
+                {#if $type == "qualification"}
+                    <div>Team Rank: {$teamRankings[team_num] + 1}</div>
+                {:else}
+                    <div>Alliance Pick: {$teamList[team_num]?.alliancePosition?.get()}</div>
+                {/if}
+            </div>
+        </strong>
+    </div>
+{/if}
 
 <style>
     .team-info-item {
