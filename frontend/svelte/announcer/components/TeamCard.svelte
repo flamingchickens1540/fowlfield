@@ -4,6 +4,14 @@
     export let alliance: 'red' | 'blue'
 
     const { type } = matchData
+
+    let selectionMap:{[key:number]:string} = {
+        0: "",
+        1: "Captain",
+        2: "First Pick",
+        3: "Second Pick",
+        4: "Third Pick"   
+    }
 </script>
 {#if team_num != 0}
     <div class="{alliance} team-card">
@@ -15,7 +23,7 @@
                 {#if $type == "qualification"}
                     <div>Team Rank: {$teamRankings[team_num] + 1}</div>
                 {:else}
-                    <div>Alliance Pick: {$teamList[team_num]?.alliancePosition?.get()}</div>
+                    <div>Alliance Pick: {selectionMap[$teamList[team_num]?.alliancePosition?.get()]}</div>
                 {/if}
             </div>
         </strong>

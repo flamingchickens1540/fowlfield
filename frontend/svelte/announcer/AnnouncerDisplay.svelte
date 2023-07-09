@@ -3,7 +3,6 @@
     import TeamCard from "./components/TeamCard.svelte";
 
 	const {red1, red2, red3, blue1, blue2, blue3, type, redAlliance, blueAlliance} = matchData
-
 </script>
 
 <h2>Announcer Display</h2>
@@ -32,7 +31,6 @@
         <TeamCard alliance={'blue'} team_num={$blue3}/>
     </div>
 </div>
-
 
 <style>
 
