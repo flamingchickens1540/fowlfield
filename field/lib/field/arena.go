@@ -252,7 +252,7 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 
 	// Do nothing if the station is already assigned to the requested team.
 	arena.AllianceStations[station].Estop = false
-	
+
 	dsConn := arena.AllianceStations[station].DsConn
 	if dsConn != nil && dsConn.TeamId == teamId {
 		return nil
@@ -261,9 +261,9 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 		dsConn.close()
 		arena.AllianceStations[station].TeamNumber = 0
 		arena.AllianceStations[station].DsConn = nil
-		
+
 	}
-	
+
 	arena.AllianceStations[station].TeamNumber = teamId
 	return nil
 }
@@ -294,7 +294,7 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 					Bypassed:       allianceStation.TeamNumber == 0,
 					DsConnected:    allianceStation.DsConn != nil,
 					Enabled:        allianceStation.DsConn.Enabled,
-					IsEstopped:     allianceStation.DsConn.Estop,
+					IsEstopped:     allianceStation.DsConn.EstopReported,
 					IsAuto:         allianceStation.DsConn.Auto,
 					TripTime:       allianceStation.DsConn.DsRobotTripTimeMs,
 					MissedPackets:  allianceStation.DsConn.MissedPacketCount,
@@ -348,12 +348,12 @@ func (arena *Arena) getAssignedAllianceStation(teamId int) string {
 	return ""
 }
 
-
-
 func (arena *Arena) HandleEstop(station string, state bool) {
 	allianceStation := arena.AllianceStations[station]
 	if state {
-		allianceStation.Estop = true
+		if arena.MatchState != PreMatch && arena.MatchState != PostMatch {
+			allianceStation.Estop = true
+		}
 	} else {
 		if arena.MatchTimeSec() == 0 {
 			// Don't reset the e-stop while a match is in progress.
