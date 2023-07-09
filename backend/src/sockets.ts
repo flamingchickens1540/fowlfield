@@ -9,12 +9,15 @@ import { buildStats } from 'models/teams';
 import { getDsStatus } from 'index';
 import { IPCClient } from 'ipc/ipc';
 import logger from "./logger"
+import { isMatchReady, probeEstops } from 'statusmanager';
+import { handleEstop } from './statusmanager';
 
 const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
-const skipEstopVerification = true;
+const skipEstopVerification = false;
+
 
 export default function startServer(server: http.Server, ipc:IPCClient) {
     io = new Server(server, {
@@ -22,19 +25,6 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             origin: "*"
         }
     })
-    const estopHandler = (station:DriverStation, on:boolean) => {
-        if (on) {
-        ipc.estop(station)
-        logger.log("estopping", station)
-        } else {
-            if (matchmanager.getCurrentMatch().state != MatchState.IN_PROGRESS) {
-                ipc.unestop(station)
-                logger.log("lifting estop", station)
-            } else {
-                logger.log('not lifting estop', station)
-            }
-        }
-    }
     
     
     io.on("connection", (socket) => {
@@ -51,7 +41,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         
         
         logger.debug("New connection from", socket.id, socket.handshake.address, socket.handshake.url)
-        queryEstops()
+        probeEstops()
         socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
         socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
         
@@ -87,7 +77,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             const match = matchmanager.setLoadedMatch(id)
             
             ipc.load(match.getData())
-            queryEstops().then((didSucceed) => {if (!didSucceed) alert("Estop responses not received, check online")})
+            probeEstops().then((didSucceed) => {if (!didSucceed) alert("Estop responses not received, check online")})
             io.emit("loadMatch", match.getData())
         })
         
@@ -146,9 +136,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("startMatch", async (id) => {
             const match = matchmanager.getCurrentMatch()
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
-            const areEstopsReady = await queryEstops()
-            if (!areEstopsReady && !skipEstopVerification) {
-                alert("Estop responses not received, check them")
+            await probeEstops()
+            if (!isMatchReady()) {
+                alert("Match not ready")
                 return;
             }
             match.startTime = Date.now();
@@ -156,13 +146,13 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             
             ipc.start(match.getData())
             ipc.awaitResponse(["matchhold", "matchconfirm"]).then((message) => {
-                // if (message.cmd == "matchhold") {
-                //     match.startTime = 0;
-                //     match.state = MatchState.PENDING;
-                //     alert("Match not ready")
-                // } else {
-                //     matchLogger.log(match.id, "start confirmed")
-                // }
+                if (message.cmd == "matchhold") {
+                    match.startTime = 0;
+                    match.state = MatchState.PENDING;
+                    alert("[IPC] Match not ready")
+                } else {
+                    matchLogger.log(match.id, "start confirmed")
+                }
             }).catch((reason) => {
                 alert("Did not recieve IPC response:", reason)
                 match.startTime = 0;
@@ -178,7 +168,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             match.startTime = 0;
             match.state = MatchState.PENDING
             ipc.abort()
-            queryEstops()
+            probeEstops()
             // TODO: NOTIFY IPC
             io.emit("abortMatch", match.getData())
         })
@@ -197,46 +187,37 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             }
         })
         
-        socket.on("estop", (s) => estopHandler(s, true))
-        socket.on("unestop", (s) => estopHandler(s, false))
+        socket.on("estop", (s) => handleEstop(s, true, false))
+        socket.on("unestop", (s) => handleEstop(s, false, false))
         
+        socket.on("disconnect", () => {
+            if (socket.rooms.has("estop")) {
+                probeEstops()
+            }
+        })
         function alert(...message:string[]) {
             matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
     })
     
-    async function queryEstops():Promise<boolean> {
-        const recieved = {
-            "R1": false,
-            "R2": false,
-            "R3": false,
-            "B1": false,
-            "B2": false,
-            "B3": false
-        }
-        let complete:(value:boolean) => void
+    async function pollEstopHosts():Promise<void> {
+        let complete:() => void
         io.to("estop").timeout(300).emit("queryEstop", (err, [data]) => {
             if (data == null) {console.log("noresponse");return;}
-            if (data.B1 != null) {estopHandler("B1", data.B1)}
-            if (data.B2 != null) {estopHandler("B2", data.B2)}
-            if (data.B3 != null) {estopHandler("B3", data.B3)}
-            if (data.R1 != null) {estopHandler("R1", data.R1)}
-            if (data.R2 != null) {estopHandler("R2", data.R2)}
-            if (data.R3 != null) {estopHandler("R3", data.R3)}
-            Object.keys(data).forEach((key) => recieved[key] =true)
-            let allGood = true;
-            Object.values(recieved).forEach((isStationRecieved) => {
-                if (!isStationRecieved) {allGood = false}
-            })
-            console.warn("recieved estops", Object.keys(data))
-            if (allGood) {complete(true)}
+            if (data.B1 != null) {handleEstop("B1", data.B1, true)}
+            if (data.B2 != null) {handleEstop("B2", data.B2, true)}
+            if (data.B3 != null) {handleEstop("B3", data.B3, true)}
+            if (data.R1 != null) {handleEstop("R1", data.R1, true)}
+            if (data.R2 != null) {handleEstop("R2", data.R2, true)}
+            if (data.R3 != null) {handleEstop("R3", data.R3, true)}
+            complete()
         })
-        const success:Promise<boolean> = new Promise((resolve, reject) => {
+        const success:Promise<void> = new Promise((resolve, reject) => {
             complete = resolve;
         })
-        const timeout:Promise<boolean> = new Promise((resolve, reject) => {
-            setTimeout(() => resolve(false), 300);
+        const timeout:Promise<void> = new Promise((resolve, reject) => {
+            setTimeout(() => resolve(), 300);
         });
 
         return Promise.race([success,timeout])
@@ -249,7 +230,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         const match = matchmanager.getCurrentMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
-            queryEstops()
+            probeEstops()
             matchLogger.log("Transitioning match", match.id, "to completed")
             io.emit("match", match.getData())
         }
@@ -262,7 +243,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         setLight(light: StackLightColor, state: StackLightState) {
             // console.log("Setting lights", light, on)
             io.to("light").emit("setLight", light, state)
-        }
+        },
+        pollEstopHosts
     }
     
 }

@@ -56,7 +56,7 @@ async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]) 
         })
         logger.log(response.status, response.statusText, path)
     } catch (e) {
-        logger.error("Request to", path, "failed.", e.response.status, e.response.statusText, e.response.data)
+        logger.error("Request to", path, "failed.", e.response?.status, e.response?.statusText, e.response?.data)
     }
 }
 
