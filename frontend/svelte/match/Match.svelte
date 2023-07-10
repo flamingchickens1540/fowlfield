@@ -1,25 +1,29 @@
 <script lang="ts">
 	// import Teams from "./components/teams/Teams.svelte";
 	
-	
-	import { MatchState, type MatchData, type TeamData } from "@fowltypes";
-	import matchData, { abortMatch, commitMatch, matchList, remainingTimeInPeriod, setPreloadingTrack, startMatch, loadedMatches, teamList } from "@store";
-	import { derived, writable, type Readable, get, type Writable, type Unsubscriber } from "svelte/store";
+	import { MatchState, type MatchData } from "@fowltypes";
+	import matchData, { abortMatch, commitMatch, loadedMatches, matchList, remainingTimeInPeriod, setPreloadingTrack, startMatch, teamList } from "@store";
+	import { onMount } from "svelte";
+	import { derived, get, writable, type Readable, type Unsubscriber, type Writable } from "svelte/store";
 	
 	import { formatDuration } from "@fowlutils/format";
 	import socket from "@socket";
-	import TeamDatalistEntry from "./components/TeamDatalistEntry.svelte";
-	import type { WritableTeamData } from "socketStore";
-	import writableDerived from "svelte-writable-derived"
-	import TeamEntry from "./components/TeamEntry.svelte";
 	import configureAudio from "audio";
 	import { statusColors, statusMessages } from "consts";
+	
+	import TeamDatalistEntry from "./components/TeamDatalistEntry.svelte";
+	import TeamEntry from "./components/TeamEntry.svelte";
+	
+	import Sortable, { Swap } from 'sortablejs';
+	
+	Sortable.mount(new Swap())
+	
 	setPreloadingTrack(true)
-
+	
 	configureAudio()
 	
 	const {loaded:loadedMatch, preloaded:preloadedMatch }= loadedMatches
-
+	
 	const buttonData:{[key in MatchState]:{text:string, color:string}} = {
 		[MatchState.PENDING]: 		{text:"Start", color:"#02ae02"},
 		[MatchState.IN_PROGRESS]: 	{text:"Abort", color:"#b30000"},
@@ -37,6 +41,7 @@
 		} else {
 			socket.emit("preloadMatch", $matchid)
 			socket.emit("loadMatch", $matchid)
+			setSortingEnabled(false)
 		}
 	}
 	
@@ -60,6 +65,8 @@
 	$: $loadedMatch, $matchLoadState = getMatchData($matchid)
 	$: $preloadedMatch, $matchLoadState = getMatchData($matchid)
 	
+
+	
 	let showTeams = false
 	let teamlistunsub:Unsubscriber;
 	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance} = matchData
@@ -72,6 +79,58 @@
 	const matchid = matchData.id
 	const matchstate = derived(matchData.state, ($state) => $state ?? MatchState.PENDING)
 	const matches:Readable<MatchData[]> = derived(matchList, Object.values)
+	
+	let redTeamParent:HTMLElement;
+	let blueTeamParent:HTMLElement;
+	
+	let setSortingEnabled:(enabled:boolean)=>void
+	onMount(() => {
+		function onEnd(event:Sortable.SortableEvent) {
+				const teamA = event.from.children[event.oldIndex].id.replace(/^team-/, "")
+				const teamB = event.item.id.replace(/^team-/, "")
+				const storeA:Writable<number> = matchData[teamA]
+				const storeB:Writable<number> = matchData[teamB]
+				const teamAId = get(storeA)
+				storeA.set(get(storeB))
+				storeB.set(teamAId)
+				console.log(event.item.id, event.oldIndex, redTeamParent.children[event.oldIndex].id)
+			}
+		let lastTarget:HTMLElement;
+		const redSortable = new Sortable(redTeamParent, {
+			draggable:".item",
+			group:"teams",
+			swap:true,
+			onEnd
+		})
+		
+		const blueSortable = new Sortable(blueTeamParent, {
+			draggable:".item",
+			group:"teams",
+			swap:true,
+			onEnd
+		})
+		setSortingEnabled = (enabled) =>{
+			redSortable.option("sort", enabled)
+			redSortable.option("group", {
+				name:"teams",
+				pull:enabled,
+				put:enabled
+			})
+			blueSortable.option("sort", enabled)
+			blueSortable.option("group", {
+				name:"teams",
+				pull:enabled,
+				put:enabled
+			})
+			$isSortingEnabled = enabled
+		}
+
+		matchstate.subscribe(() => setSortingEnabled($matchstate == MatchState.PENDING))
+	})
+
+	let isSortingEnabled = writable(true)
+	
+	
 </script>
 
 <datalist id="teams">
@@ -85,7 +144,7 @@
 		<p>Bunnybots Scoreboard</p>
 	</div>
 	<h2>Scoring</h2>
-	<div class="sidebar-l">
+	<div id="sidebar-l">
 		<h2>Matches</h2>
 		<div id=matchGrid>
 			{#each $matches as match,i}
@@ -97,11 +156,10 @@
 			{/each}
 			
 		</div>
-
 		<button on:click={() => socket.emit("nextMatch", "qualification")}>Next Quals</button>
 		<button on:click={() => socket.emit("nextMatch", "elimination")}>Next Elims</button>
 	</div>
-	<div class="sidebar-r">
+	<div id="sidebar-r">
 		<h2>Match {($matchid ?? "HELP")}</h2>
 		<div class=row>
 			<button on:click={transitionLoadState} class=match-control style="background-color:{$matchLoadState.buttoncolor};">{$matchLoadState.text}</button>
@@ -118,29 +176,31 @@
 			<div id=teamsgrid>
 				{#if $redAlliance == 0}
 				<div class=row>
-					<div class=item>Red</div>
-					<div class=item>Blue</div>
+					<div class="item item-1-1">Red</div>
+					<div class="item item-2-1">Blue</div>
 				</div>
 				{:else}
 				<div class=row>
-					<div class=item>Red ({$redAlliance})</div>
-					<div class=item>Blue ({$blueAlliance})</div>
+					<div class="item item-1-1">Red ({$redAlliance})</div>
+					<div class="item item-2-1">Blue ({$blueAlliance})</div>
 				</div>
 				{/if}
-				{#if showTeams}
-				<div class=row>
-					<div class=item><TeamEntry store={red1} station=R1></TeamEntry></div>
-					<div class=item><TeamEntry store={blue1} station=B1></TeamEntry></div>
+				
+				<div class=col data-alliance="red" bind:this={redTeamParent}>
+					{#if showTeams}
+					<div id=team-red1 class='item item-1-2'><TeamEntry store={red1} station=R1></TeamEntry></div>
+					<div id=team-red2 class='item item-1-3'><TeamEntry store={red2} station=R2></TeamEntry></div>
+					<div id=team-red3 class='item item-1-4'><TeamEntry store={red3} station=R3></TeamEntry></div>
+					{/if}
 				</div>
-				<div class=row>
-					<div class=item><TeamEntry store={red2} station=R2></TeamEntry></div>
-					<div class=item><TeamEntry store={blue2} station=B2></TeamEntry></div>
+				<div class=col data-alliance="blue" bind:this={blueTeamParent}>
+					{#if showTeams}
+					<div id=team-blue1 class="item item-2-2"><TeamEntry store={blue1} station=B1></TeamEntry></div>
+					<div id=team-blue2 class="item item-2-3"><TeamEntry store={blue2} station=B2></TeamEntry></div>
+					<div id=team-blue3 class="item item-2-4"><TeamEntry store={blue3} station=B3></TeamEntry></div>
+					{/if}
 				</div>
-				<div class=row>
-					<div class=item><TeamEntry store={red3} station=R3></TeamEntry></div>
-					<div class=item><TeamEntry store={blue3} station=B3></TeamEntry></div>
-				</div>
-				{/if}
+				<button class=item id=sorting-toggle on:click={() => setSortingEnabled(!$isSortingEnabled)}><span id=lock-icon class="material-symbols-outlined">{$isSortingEnabled?"lock_open_right":"lock"}</span></button>
 			</div>
 			<br>
 			<br>
@@ -150,6 +210,32 @@
 	</main>
 	
 	<style lang="scss">
+		#lock-icon {
+			width:24px;
+
+			text-align:center;
+			overflow:hidden;
+		}
+		@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0");
+		main {
+			position:absolute;
+			left:0;
+			right:0;
+			top:0;
+			bottom:0;
+			display:grid;
+			grid-template-columns: 
+			[left] 340px
+			[center] auto
+			[right] 320px;
+			grid-template-rows:
+			[top] 50%
+			[bottom] 50%;
+		}
+		:global(body) {
+			margin:0;
+			overscroll-behavior: none;
+		}
 		#teamsgrid {
 			margin-left:auto;
 			margin-right:auto;
@@ -157,43 +243,40 @@
 			grid-template-columns: auto auto;
 			grid-auto-flow: row;
 			width:100%;
-			.row:first-child {
-				:first-child {border-top-left-radius: 5px;}
-				:last-child {border-top-right-radius: 5px;}
-			}
-			.row:last-child {
-				> * {padding-bottom:5px;}
-				input {
-					border-radius: 0px !important;
-				}
-				:first-child {border-bottom-left-radius: 5px;}
-				:last-child {border-bottom-right-radius: 5px;}
-			}
-			.row {
+			
+			.col, .row {
 				display:contents;
-				.item {
-					
-					border:none;
-					&:first-child {
-						
-						background-color: var(--red);
+				&:nth-child(1) {
+					.item {
+						border:none;
 					}
-					&:last-child {
-						background-color: var(--blue);
+				}
+
+				&:last-child {
+					&> * {padding-bottom:5px;}
+					input {
+						border-radius: 0px !important;
+					}
+					.item {
+						border:none;
+						
 					}
 				}
 			}
 		}
 		
-		
-		.sidebar-l {
-			padding:10px;
+		#sorting-toggle{
+			grid-column:1/span 2;
+			margin:0;
+			border-radius: 0;
+			border-bottom-left-radius: 5px;
+			border-bottom-right-radius: 5px;
+			background-color: rgb(99, 99, 99);
 		}
 		#matchGrid {
 			display:flex;
 			flex-flow: column nowrap;
 			overflow-y: scroll;
-			max-height:70vh;
 			.matchEntry:first-child {
 				border-top-left-radius:15px;
 				border-top-right-radius:15px;
@@ -203,7 +286,9 @@
 				border-bottom-right-radius:15px;
 			}
 			padding-right:0;
-			width:100%;
+			max-height:82vh;
+			width:320px;
+			// &::-webkit-scrollbar {display: none;}
 		}
 		.matchEntry {
 			background-color: rgba(100,100,100,0.5);
@@ -256,6 +341,43 @@
 			margin-top:20px;
 			width:100%
 		}
+		
+		#sidebar-l {
+			grid-column: 1;
+			grid-row: 1/span 2;
+			background-color: #303030;
+			padding:10px;
+		}
+		#sidebar-r {
+			grid-column: 3;
+			grid-row: 1/span 2;
+			background-color: #303030;
+			padding:40px;
+			display: flex;
+			flex-flow: column nowrap;
+			justify-content:flex-start;
+		}
+
+		.item-1-1 {border-top-left-radius: 5px;}
+		.item-2-1 {border-top-right-radius: 5px;}
+		@mixin team-grid-position {
+			@for $col from 1 through 2 {
+				@for $row from 1 through 4 {
+					.item-#{$col}-#{$row} { 
+						grid-column: $col; 
+						grid-row:$row; 
+						@if $col == 1 {
+							background-color: var(--red);
+						} @else {
+							background-color: var(--blue);
+						}
+					}
+				}
+			}
+		}
+
+		@include team-grid-position()
+
 		
 		// input {
 			// 	width: 20px;

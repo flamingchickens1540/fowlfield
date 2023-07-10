@@ -53,7 +53,8 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
     if (mode == "dev") {
         
         let { host, port } = await ctx.serve({
-            servedir:"dist"
+            servedir:"dist",
+            port:3002
         })
         
         console.log(host, port)
