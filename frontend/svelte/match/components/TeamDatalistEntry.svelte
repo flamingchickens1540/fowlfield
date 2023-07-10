@@ -10,5 +10,5 @@
     
 </script>
 {#if !isAlreadySelected}
-<option value={$displaynum}></option>
+    <option value={$displaynum}></option>
 {/if}

@@ -1,0 +1,59 @@
+<script lang="ts">
+    import matchData, { teamList, teamRankings } from "@store"
+    export let team_num: number;
+    export let alliance: 'red' | 'blue'
+
+    const { type } = matchData
+
+    let selectionMap:{[key:number]:string} = {
+        0: "",
+        1: "Captain",
+        2: "First Pick",
+        3: "Second Pick",
+        4: "Third Pick"   
+    }
+</script>
+{#if team_num != 0}
+    <div class="{alliance} team-card">
+        <strong>
+            <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
+            <div class="team-info">
+                <div class="team-info-item">Team Name: {$teamList[team_num]?.name?.get()}</div>
+                <div class="team-info-item">Robot Name: {$teamList[team_num]?.robotname?.get()}</div>
+                {#if $type == "qualification"}
+                    <div>Team Rank: {$teamRankings[team_num] + 1}</div>
+                {:else}
+                    <div>Alliance Pick: {selectionMap[$teamList[team_num]?.alliancePosition?.get()]}</div>
+                {/if}
+            </div>
+        </strong>
+    </div>
+{/if}
+
+<style>
+    .team-info-item {
+        padding-bottom: 1%;
+    }
+    .team-info {
+        font-size: x-large;
+    }
+    .team-num {
+        font-size: xxx-large;
+        padding-bottom: 2%;
+    }
+
+    .team-card {
+        padding-bottom: 3%;
+        padding-top: 3%;
+    }
+
+    .red {
+        background-color: rgb(218, 56, 50);
+        border-radius: 25px;
+    }
+
+    .blue {
+        background-color: rgb(42, 100, 173);
+        border-radius: 25px;
+    }
+</style>

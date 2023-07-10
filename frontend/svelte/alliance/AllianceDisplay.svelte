@@ -16,7 +16,7 @@
 		fetch(backend_url + "/api/alliances").then(async (data) => {
 			$alliances = await data.json();
 		});
-	}	
+	}
 	updateAlliances()
 	teams.subscribe((value) => {
 		updateAlliances()

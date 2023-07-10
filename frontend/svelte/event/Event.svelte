@@ -18,6 +18,7 @@
             displaynum:nextTeam.displaynum,
             alliance: parseInt(nextTeam.alliance as any) as any,
             alliancePosition:parseInt(nextTeam.alliancePosition as any) as any,
+            robotname: nextTeam.robotname,
             id:nextTeam.id
         })
         nextTeam = {
@@ -25,6 +26,7 @@
             displaynum: "",
             alliance: 0,
             alliancePosition:0,
+            robotname: "",
             id: null
         }
     }
@@ -45,9 +47,9 @@
             <div class=tableitem></div>
         </div>
         {#key $teamList}
-        {#each $teams as team, i }
-        <Team team={team}/>
-        {/each}
+            {#each $teams as team, i }
+                <Team team={team}/>
+            {/each}
         {/key}
         <div id="addrow" class=tablerow>
             <input class="tableitem" type=number bind:value={nextTeam.id}>

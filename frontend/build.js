@@ -6,17 +6,16 @@ import path from "node:path"
 import proxy from "http-proxy-middleware"
 import express from "express"
 
-
-
 let pages = {
-    'test':     ["Stores Test",      false],
-    'bracket':  ["Bracket",          false],
-    'match':    ["Match Control",    false],
-    'audience': ["Audience Display", false],
-    "event":    ["Team Management",  false],
-    "monitor":  ["Field Monitor",    true],
-    "estop":    ["Estop Panel",      true],
-    "rankings": ["Rankings",         false]
+    'test':      ["Stores Test",       false],
+    'announcer': ["Announcer Display", false],
+    'bracket':   ["Bracket",           false],
+    'match':     ["Match Control",     false],
+    'audience':  ["Audience Display",  false],
+    "event":     ["Team Management",   false],
+    "monitor":   ["Field Monitor",     true],
+    "estop":     ["Estop Panel",       true],
+    "rankings":  ["Rankings",          false]
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 //// Loads all subdirectories of /svelte
@@ -26,7 +25,6 @@ let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "in
 //     entryPoints.push("svelte/"+path.basename(filepath)+"/index.ts")
 //     }
 // })
-
 
 const mode = process.argv[2] ?? "build"
 
@@ -67,7 +65,7 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
     } else {
         server.use("/assets", express.static("dist"))
     }
-    server.get("/", (req, res) => {
+    server.get("/", (_req, res) => {
         res.redirect("/test")
     })
     server.get("/:page", (req, res) => {
@@ -84,7 +82,6 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
             <script type="module" src="/assets/${page}/index.js"></script>
             <link rel="stylesheet" href="/assets/${page}/index.css"></link>
-            
             <link rel="stylesheet" href="/assets/app.css"></link>
             ${showManifest ? `
             <meta name="apple-mobile-web-app-capable" content="yes">

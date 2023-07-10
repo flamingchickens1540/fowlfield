@@ -24,7 +24,7 @@
     
         "strict": false,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
 	
     },
 	"include": ["**/*.ts", "**/*.js", "**/*.svelte"]

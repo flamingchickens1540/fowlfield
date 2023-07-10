@@ -7,7 +7,7 @@ import type { AllianceStationStatus } from "@fowltypes";
 
 
 
-let currentMatchID: string = ""
+let currentMatchID:string = ""
 let serverTimeOffset:number = 0;
 
 let listenForPreload:boolean = false;
@@ -58,7 +58,19 @@ export function isMatchLoaded(match:string) {return match == loadedMatch.get()}
 export function isMatchPreloaded(match:string) {return match == preloadedMatch.get()}
 
 export const matchList:Writable<{[key:string]:MatchData}> = writable({})
-export const teamList:Writable<{[key:string]:WritableTeamData}> = writable({})
+export const teamList:Writable<{[key:number]:WritableTeamData}> = writable({})
+export const teamsSorted:Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
+    (Object.values($teams) ?? []).sort(
+            (a, b) => b.matchStats.get().rp - a.matchStats.get().rp
+        )
+    );
+export const teamRankings:Readable<{[key:number]:number}> = derived(teamsSorted, ($teams) => {
+    let map:{[key:number]:number} = {};
+    ($teams ?? []).forEach((team, index, _array) => {
+        map[team.id] = index
+    });
+    return map;
+})
 
 export const dsStatuses:Writable<DSStatuses> = writable()
 
@@ -103,11 +115,11 @@ export const loadedMatches = {
 export function updateTeamList(data:{[key:number]:ExtendedTeam}) {
     teamList.update((list) => {
         list = {}
-    Object.values(data).forEach(element => {
-        list[element.id] = getFowlTeamStore(element)
-    });
-    console.log("TEMAUD", list)
-    return list
+        Object.values(data).forEach(element => {
+            list[element.id] = getFowlTeamStore(element)
+        });
+        console.log("TEMAUD", list)
+        return list
     })
 }
 export function updateTeamStores(data:ExtendedTeam) {
