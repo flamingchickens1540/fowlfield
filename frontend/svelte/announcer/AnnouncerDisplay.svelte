@@ -12,7 +12,7 @@
         <h1>Red Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                <h2>Alliance Position: {$redAlliance}</h2> <!--This isn't working and I can't tell why-->
+                <h2>Alliance Position: {$redAlliance}</h2>
             </div>
         {/if}
         <TeamCard alliance={'red'} team_num={$red1}/>
@@ -23,7 +23,7 @@
         <h1>Blue Alliance</h1>
         {#if $type == 'elimination'}
             <div>
-                <h2>Alliance Position: {$blueAlliance}</h2> <!--This isn't working and I can't tell why-->
+                <h2>Alliance Position: {$blueAlliance}</h2>
             </div>
         {/if}
         <TeamCard alliance={'blue'} team_num={$blue1}/>
