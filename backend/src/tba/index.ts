@@ -140,26 +140,30 @@ export async function updateMatches() {
         .filter((match) => match.state == MatchState.POSTED)
         .map((match) => {
             const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
+            const redWon =match.redScore > match.blueScore
             return {
                 comp_level: match.type == "qualification" ? "qm":decodedMatchId[1] as any,
                 set_number: match.type == "qualification" ? 1 : parseInt(decodedMatchId[2]),
                 match_number: match.type == "qualification" ? match.matchNumber : parseInt(decodedMatchId[3]),
                 score_breakdown: {
                     red: {
-                        rp: 10,
+                        rp: match.redScore > match.blueScore ? match.redScore + match.blueScore : match.redScore,
                         teleopPoints: 0,
                         totalPoints: match.redScore,
                         techFoulCount:0,
-                        "foulCount": 0,
-                        "foulPoints": 0,
+                        foulCount: 0,
+                        foulPoints: 0,
+                        adjustPoints:0
+                        
                     },
                     blue: {
-                        rp: 10,
+                        rp: match.blueScore > match.redScore ? match.redScore + match.blueScore : match.blueScore,
                         teleopPoints: 0,
                         totalPoints: match.blueScore,
                         techFoulCount:0,
-                        "foulCount": 0,
-                        "foulPoints": 0,
+                        foulCount: 0,
+                        foulPoints: 0,
+                        adjustPoints:0
                     }
                 },
                 alliances: {

@@ -10,11 +10,56 @@ export interface TbaMatch {
     set_number: number;
     match_number: number;
     alliances: { [key in "red" | "blue"]: TbaAlliance};
-    score_breakdown?: { [key in "red"|"blue"]: { [key: string]: any}};
+    score_breakdown?: { [key in "red"|"blue"]: Partial<ScoreBreakdown>};
     time_string?: string;
     time_utc?: string;
     display_name?: string;
 }
+
+type ScoreBreakdown =  {
+    "activationBonusAchieved":boolean
+    "adjustPoints":number
+    "autoBridgeState":"Level"|"NotLevel"
+    "autoChargeStationPoints":number
+    "autoChargeStationRobot1":"Docked"|"None"
+    "autoChargeStationRobot2":"Docked"|"None"
+    "autoChargeStationRobot3":"Docked"|"None"
+    "autoCommunity":{[key in "B"|"M"|"T"]:"Cone"|"None"|"Cube"}
+    "autoDocked":boolean
+    "autoGamePieceCount":number
+    "autoGamePiecePoints":number
+    "autoMobilityPoints":number
+    "autoPoints":number
+    "coopertitionCriteriaMet":boolean
+    "coopGamePieceCount":number
+    "endGameBridgeState":"Level"|"NotLevel"
+    "endGameChargeStationPoints":number
+    "endGameChargeStationRobot1":"Docked"|"Park"|"None"
+    "endGameChargeStationRobot2":"Docked"|"Park"|"None"
+    "endGameChargeStationRobot3":"Docked"|"Park"|"None"
+    "endGameParkPoints":number
+    "extraGamePieceCount":number
+    "foulCount":number
+    "foulPoints":number
+    "g405Penalty":never
+    "h111Penalty":never
+    "linkPoints":number
+    "links":{nodes:[number, number, number], row:"Mid"|"Top"|"Bottom"}[]
+    "mobilityRobot1":"Yes"|"No"
+    "mobilityRobot2":"Yes"|"No"
+    "mobilityRobot3":"Yes"|"No"
+    "rp":number
+    "sustainabilityBonusAchieved":boolean
+    "techFoulCount":number
+    "teleopCommunity":{[key in "B"|"M"|"T"]:"Cone"|"None"|"Cube"}
+    "teleopGamePieceCount":number
+    "teleopGamePiecePoints":number
+    "teleopPoints":number
+    "totalChargeStationPoints":number
+    "totalPoints":number
+}
+
+
 export class TbaAlliance {
     teams: TbaTeamNumber[] = [];
     surrogates: TbaTeamNumber[] = [];
