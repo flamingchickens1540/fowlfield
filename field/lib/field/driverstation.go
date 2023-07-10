@@ -357,6 +357,7 @@ func (arena *Arena) listenForDriverStations() {
 		if wrongAssignedStation != "" {
 			dsConn.WrongStation = wrongAssignedStation
 		}
+		dsConn.sendEventCode("2023orbb")
 
 		// Spin up a goroutine to handle further TCP communication with this driver station.
 		go dsConn.handleTcpConnection(arena)
@@ -391,13 +392,22 @@ func (dsConn *DriverStationConnection) handleTcpConnection(arena *Arena) {
 
 // Sends a TCP packet containing the given game data to the driver station.
 func (dsConn *DriverStationConnection) sendGameDataPacket(gameData string) error {
-	byteData := []byte(gameData)
+	return dsConn.sendStringPacket(gameData, 0x1c)
+}
+
+// Sends a TCP packet containing the given event name to the driver station.
+func (dsConn *DriverStationConnection) sendEventCode(code string) error {
+	return dsConn.sendStringPacket(code, 0x14)
+}
+
+func (dsConn *DriverStationConnection) sendStringPacket(data string, tagid byte) error {
+	byteData := []byte(data)
 	size := len(byteData)
 	packet := make([]byte, size+4)
 
 	packet[0] = 0              // Packet size
 	packet[1] = byte(size + 2) // Packet size
-	packet[2] = 28             // Packet type
+	packet[2] = tagid           // Packet type
 	packet[3] = byte(size)     // Data size
 
 	// Fill the rest of the packet with the data.
