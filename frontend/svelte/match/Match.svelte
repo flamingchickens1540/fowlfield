@@ -2,7 +2,7 @@
 	// import Teams from "./components/teams/Teams.svelte";
 	
 	import { MatchState, type MatchData } from "@fowltypes";
-	import matchData, { abortMatch, commitMatch, loadedMatches, matchList, remainingTimeInPeriod, setPreloadingTrack, startMatch, teamList } from "@store";
+	import matchData, { abortMatch, commitMatch, dsStatuses, loadedMatches, matchList, remainingTimeInPeriod, setPreloadingTrack, startMatch, teamList } from "@store";
 	import { onMount } from "svelte";
 	import { derived, get, writable, type Readable, type Unsubscriber, type Writable } from "svelte/store";
 	
@@ -43,7 +43,6 @@
 		} else {
 			socket.emit("preloadMatch", $matchid)
 			socket.emit("loadMatch", $matchid)
-			setSortingEnabled(false)
 		}
 	}
 	
@@ -86,18 +85,28 @@
 	let blueTeamParent:HTMLElement;
 	
 	let setSortingEnabled:(enabled:boolean)=>void
+	
+
+	
+		$: hasAdjustedSort = (
+				$red1  != $dsStatuses?.R1?.assignedTeam ||
+				$red2  != $dsStatuses?.R2?.assignedTeam ||
+				$red3  != $dsStatuses?.R3?.assignedTeam ||
+				$blue1 != $dsStatuses?.B1?.assignedTeam ||
+				$blue2 != $dsStatuses?.B2?.assignedTeam ||
+				$blue3 != $dsStatuses?.B3?.assignedTeam
+			) && $loadedMatch == $matchid
+	
 	onMount(() => {
 		function onEnd(event:Sortable.SortableEvent) {
-				const teamA = event.from.children[event.oldIndex].id.replace(/^team-/, "")
-				const teamB = event.item.id.replace(/^team-/, "")
-				const storeA:Writable<number> = matchData[teamA]
-				const storeB:Writable<number> = matchData[teamB]
-				const teamAId = get(storeA)
-				storeA.set(get(storeB))
-				storeB.set(teamAId)
-				console.log(event.item.id, event.oldIndex, redTeamParent.children[event.oldIndex].id)
-			}
-		let lastTarget:HTMLElement;
+			const teamA = event.from.children[event.oldIndex].id.replace(/^team-/, "")
+			const teamB = event.item.id.replace(/^team-/, "")
+			const storeA:Writable<number> = matchData[teamA]
+			const storeB:Writable<number> = matchData[teamB]
+			const teamAId = get(storeA)
+			storeA.set(get(storeB))
+			storeB.set(teamAId)
+		}
 		const redSortable = new Sortable(redTeamParent, {
 			draggable:".item",
 			group:"teams",
@@ -205,7 +214,11 @@
 					<div id=team-blue3 class="item item-2-4"><TeamEntry store={blue3} station=B3></TeamEntry></div>
 					{/if}
 				</div>
+				{#if !hasAdjustedSort}
 				<button class=item id=sorting-toggle on:click={() => setSortingEnabled(!$isSortingEnabled)}><span id=lock-icon class="material-symbols-outlined">{$isSortingEnabled?"lock_open_right":"lock"}</span></button>
+				{:else} 
+				<button on:click={transitionLoadState} class=item id=sorting-toggle style="background-color:#c3b40bbc;">Update FMS</button>
+				{/if}
 			</div>
 		</div>
 	</main>
@@ -261,9 +274,6 @@
 
 				&:last-child {
 					&> * {padding-bottom:5px;}
-					input {
-						border-radius: 0px !important;
-					}
 					.item {
 						border:none;
 						
@@ -337,16 +347,6 @@
 			display:grid;
 			grid-auto-flow: row;
 			
-		}
-		#header {
-			left: 0px;
-			right: 0px;
-			text-align: center;
-			padding: 10px;
-		}
-		#new-match {
-			margin-top:20px;
-			width:100%
 		}
 		
 		#sidebar-l {
