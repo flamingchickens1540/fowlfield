@@ -29,6 +29,10 @@ func main() {
 	}
 	client = ipc.NewClient(arena)
 
+	field.SetUsageReportListener(func(team int, report string) {
+		client.SendUsageReport(team, report)
+		log.Println("usage report from", team, ":", report)
+	})
 	ticker := time.NewTicker(loopInterval)
 
 	loopChan := make(chan struct{})

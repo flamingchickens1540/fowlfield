@@ -5,9 +5,12 @@
 			"@fowlutils/*": ["../../common/utils/*"],
 			"@fowltypes": ["../../common/types/index"]
 		},
-		"resolveJsonModule":true,
 		"esModuleInterop": true,
-	
+		"resolveJsonModule": true,
+		"downlevelIteration": true
+		// "target":"ESNext",
+		// "moduleResolution": "classic"
     },
+	
 	"include": ["**/*.ts"],
 }

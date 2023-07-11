@@ -204,7 +204,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
     async function pollEstopHosts():Promise<void> {
         let complete:() => void
         io.to("estop").timeout(300).emit("queryEstop", (err, [data]) => {
-            if (data == null) {console.log("noresponse");return;}
+            if (data == null) {logger.warn("No Estop Response");return;}
             if (data.B1 != null) {handleEstop("B1", data.B1, true)}
             if (data.B2 != null) {handleEstop("B2", data.B2, true)}
             if (data.B3 != null) {handleEstop("B3", data.B3, true)}

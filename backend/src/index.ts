@@ -4,7 +4,7 @@ import * as http from 'http';
 import rootLogger from 'logger';
 import { DBSettings } from 'models/settings';
 import * as statusmanager from "statusmanager";
-import * as tba from "tba";
+import * as tba from "./tba/index";
 import { IPCClient } from "./ipc/ipc";
 import * as matchmanager from "./matchmanager";
 import * as db from "./models/db";

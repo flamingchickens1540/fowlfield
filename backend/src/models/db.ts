@@ -5,6 +5,7 @@ import { ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from "@f
 import { DBSettings, Settings } from "models/settings";
 import { DBTeam, buildStats } from "models/teams";
 import rootLogger from "logger";
+import { UsageReportingOutput } from "usageReport";
 
 const logger = rootLogger.getLogger("DB")
 const mongoURL = `mongodb://${mongo.username}:${mongo.password}@127.0.0.1:27017/${mongo.database}`
@@ -13,6 +14,7 @@ const mongoClient = new mongoDB.MongoClient(mongoURL);
 let teams: mongoDB.Collection<TeamData>;
 let matches: mongoDB.Collection<MatchData>;
 let settings: mongoDB.Collection<{ key: string, value: string }>;
+let reporting: mongoDB.Collection<{ team: number}&UsageReportingOutput>;
 
 export async function connect() {
     await mongoClient.connect()
@@ -23,6 +25,8 @@ export async function connect() {
     matches.createIndex({ id: 1 }, { unique: true })
     settings = mongoClient.db().collection("settings");
     settings.createIndex({ key: 1 }, { unique: true })
+    reporting = mongoClient.db().collection("reporting");
+    reporting.createIndex({ team: 1 }, { unique: true })
 }
 
 export async function getMatches(): Promise<{ [key: string]: DBMatch }> {
@@ -39,7 +43,8 @@ export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "
         win: 0,
         loss: 0,
         tie: 0,
-        rp: 0
+        rp: 0,
+        avg_score:0
     }
     
     for await (const match of matches.find({ $or: [{ red1: team }, { red2: team }, { red3: team }, { blue1: team }, { blue2: team }, { blue3: team }] })) {
@@ -108,5 +113,12 @@ export async function deleteTeam(id:number) {
     const resp = await teams.deleteOne({ id: id })
     if (!resp.acknowledged) {
         logger.warn("Could not delete team", id)
+    }
+}
+
+export async function recordUsageReport(team:number, report:UsageReportingOutput) {
+    const resp = await reporting.replaceOne({ team }, { team, ...report }, {upsert:true})
+    if (!resp.acknowledged) {
+        logger.warn("Could not record usage report", team)
     }
 }

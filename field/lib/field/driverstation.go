@@ -31,6 +31,12 @@ const (
 	maxTcpPacketBytes              = 4096
 )
 
+type usageReportListenerFunc func(int, string)
+var usageReportListener usageReportListenerFunc = func (team int, report string) {log.Println("No usage report listener set")}
+func SetUsageReportListener(listener usageReportListenerFunc) {
+	usageReportListener = listener
+}
+
 type DriverStationConnection struct {
 	TeamId                    int
 	AllianceStation           string
@@ -385,6 +391,10 @@ func (dsConn *DriverStationConnection) handleTcpConnection(arena *Arena) {
 			var statusPacket [36]byte
 			copy(statusPacket[:], buffer[2:38])
 			dsConn.decodeStatusPacket(statusPacket)
+		case 0x15:
+			// Usage report.
+			size := buffer[0]*0xff + buffer[1]
+			usageReportListener(dsConn.TeamId, string(buffer[2:size+1]))
 		}
 
 	}
@@ -407,7 +417,7 @@ func (dsConn *DriverStationConnection) sendStringPacket(data string, tagid byte)
 
 	packet[0] = 0              // Packet size
 	packet[1] = byte(size + 2) // Packet size
-	packet[2] = tagid           // Packet type
+	packet[2] = tagid          // Packet type
 	packet[3] = byte(size)     // Data size
 
 	// Fill the rest of the packet with the data.

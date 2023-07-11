@@ -61,6 +61,16 @@ func (client *NodeIPC) SendDsStatus(statuses map[string]model.AllianceStationSta
 	})
 }
 
+func (client *NodeIPC) SendUsageReport(team int, report string) {
+	client.send(model.IPCMessage{
+		Command: "usageReport",
+		Data: model.IPCData{
+			TeamId:      &team,
+			UsageReport: &report,
+		},
+	})
+}
+
 func (client *NodeIPC) SendMatchHold(statuses map[string]model.AllianceStationStatus) {
 	client.send(model.IPCMessage{
 		Command: "matchhold",

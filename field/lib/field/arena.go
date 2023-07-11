@@ -282,11 +282,15 @@ func (arena *Arena) GetAllianceStationStatuses() map[string]model.AllianceStatio
 
 func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]model.AllianceStationStatus {
 	statuses := make(map[string]model.AllianceStationStatus, len(stations))
+
+	// convert (?'extended'>)?(?'type'[A-Za-z])(?'instance'\d+)(?::(?'context'\d+))?(?:\((?'feature'.*?)\)) to js regex
+	
 	for _, station := range stations {
 		allianceStation := arena.AllianceStations[station]
 		if allianceStation.DsConn == nil {
 			statuses[station] = model.AllianceStationStatus{
 				Bypassed: allianceStation.TeamNumber == 0,
+				TeamNumber: allianceStation.TeamNumber,
 			}
 		} else {
 			statuses[station] =

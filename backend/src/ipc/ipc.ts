@@ -1,6 +1,7 @@
 import child_process from 'child_process';
 import {dirname, join} from 'path'
 import { IPCData, IPCMessage, IPCMatch, DriverStation } from '@fowltypes';
+import { handleUsageReport } from 'usageReport';
 
 
 interface IPCHandlers {
@@ -52,6 +53,7 @@ export class IPCClient {
         
         switch (message.cmd) {
             case "dsStatus": this.handlers.dsStatus(message.data.ds_status!); break;
+            case "usageReport": handleUsageReport(message.data.teamId!,message.data.usageReport!); break;
             default: console.warn("unhandled message",message)
         }
     }
