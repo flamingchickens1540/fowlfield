@@ -57,11 +57,13 @@ console.log(estops)
 const handlePressed = (station) => {
     console.log(station, "pressed")
     socket.emit("estop", station)
+    if (!socket.connected) {socket.connect()}
 }
 
 const handleReleased = (station) => {
     console.log(station, "released")
     socket.emit("unestop", station)
+    if (!socket.connected) {socket.connect()}
 }
 
 const socket = io(consts.socket.host, {
