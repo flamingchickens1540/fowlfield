@@ -98,6 +98,7 @@ export async function probeEstops(): Promise<boolean> {
     await estopProber()
     states.estopOnline = DSKeys.every((key) => hardwareEstops[key].online)
     updateLights()
+    logger.log("probed estops")
     return states.estopOnline
 }
 
@@ -112,9 +113,9 @@ export function handleEstop(station: DriverStation, state: boolean, isHardware: 
     } else {
         if (getCurrentMatch().state != MatchState.IN_PROGRESS) {
             ipcClient.unestop(station)
-            logger.log("lifting estop", station)
+            logger.debug("lifting estop", station)
         } else {
-            logger.log('not lifting estop', station)
+            logger.debug('not lifting estop', station)
         }
     }
     updateLights()

@@ -35,15 +35,15 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         }
         if ((socket.handshake.auth.role ?? "") == "estop") {
             socket.join("estop")
+            probeEstops()
         } else if ((socket.handshake.auth.role ?? "") == "light") {
             socket.join("light")
         }
         
         
-        logger.debug("New connection from", socket.id, socket.handshake.address, socket.handshake.url)
-        probeEstops()
-        socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
-        socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
+        logger.log("New connection from", socket.id, socket.handshake.address, socket.handshake.url, socket.handshake.auth.role??"default")
+        
+        
         
         const teams: { [key: number]: ExtendedTeam } = {}
         const matches: { [key: string]: MatchData } = {}
@@ -61,6 +61,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 buildStats(match, index<3, teams[team].matchStats)
             })
         });
+
+        // Send initial data
+        socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
+        socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
         socket.emit("matches", matches)
         socket.emit("teams", teams)
         socket.emit("dsStatus", getDsStatus())
@@ -136,6 +140,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("startMatch", async (id) => {
             const match = matchmanager.getCurrentMatch()
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
+            ipc.load(match.getData())
             await probeEstops()
             if (!isMatchReady()) {
                 alert("Match not ready")
