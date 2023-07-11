@@ -13,6 +13,11 @@ import * as teammanager from "./teammanager";
 let driverStatuses:ExtendedDsStatuses
 
 const server = http.createServer()
+export const isProduction = process.env.NODE_ENV === "production"
+
+
+
+
 
 const ipc = new IPCClient({
     dsStatus: handleDSStatus,

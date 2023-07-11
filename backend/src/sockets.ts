@@ -6,17 +6,15 @@ import * as matchmanager from "./matchmanager";
 import { getMatchPeriod } from '@fowlutils/match_timer';
 import * as teammanager from './teammanager';
 import { buildStats } from 'models/teams';
-import { getDsStatus } from 'index';
+import { getDsStatus, isProduction } from 'index';
 import { IPCClient } from 'ipc/ipc';
 import logger from "./logger"
 import { isMatchReady, probeEstops } from 'statusmanager';
 import { handleEstop } from './statusmanager';
-
+import {instrument} from "@socket.io/admin-ui"
 const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
-
-const skipEstopVerification = false;
 
 
 export default function startServer(server: http.Server, ipc:IPCClient) {
@@ -25,6 +23,18 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             origin: "*"
         }
     })
+
+    if (!isProduction) {
+        console.log("starting admin server")
+        instrument(io, {
+            auth: {
+                type: "basic",
+                username: "admin",
+                password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS" // "changeit" encrypted with bcrypt
+              },
+            mode:"development"
+        })
+    }
     
     
     io.on("connection", (socket) => {
@@ -196,7 +206,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("unestop", (s) => handleEstop(s, false, socket.rooms.has("estop")))
         
         socket.on("disconnect", () => {
-            if (socket.rooms.has("estop")) {
+            logger.log("disconnected", socket.id, socket.handshake.auth.role)
+            if (socket.handshake.auth.role == "estop") {
                 probeEstops()
             }
         })
