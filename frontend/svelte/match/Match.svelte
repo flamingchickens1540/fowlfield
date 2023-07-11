@@ -15,6 +15,8 @@
 	import TeamEntry from "./components/TeamEntry.svelte";
 	
 	import Sortable, { Swap } from 'sortablejs';
+	import AllianceStationMonitor from "./components/AllianceStationMonitor.svelte";
+	import AllianceStationMonitorParent from "./components/AllianceStationMonitorParent.svelte";
 	
 	Sortable.mount(new Swap())
 	
@@ -140,10 +142,19 @@
 </datalist>
 
 <main>
-	<div id="header">
-		<p>Bunnybots Scoreboard</p>
+	<div id="scoring">
+		<h2>Scoring</h2>
 	</div>
-	<h2>Scoring</h2>
+	<div id="monitor">
+		<AllianceStationMonitorParent />
+		<AllianceStationMonitor station="R1"></AllianceStationMonitor>
+		<AllianceStationMonitor station="R2"></AllianceStationMonitor>
+		<AllianceStationMonitor station="R3"></AllianceStationMonitor>
+		<AllianceStationMonitor station="B1"></AllianceStationMonitor>
+		<AllianceStationMonitor station="B2"></AllianceStationMonitor>
+		<AllianceStationMonitor station="B3"></AllianceStationMonitor>
+	</div>
+	
 	<div id="sidebar-l">
 		<h2>Matches</h2>
 		<div id=matchGrid>
@@ -166,12 +177,6 @@
 			<button on:click={transitionMatchState} class=match-control style="background-color:{buttonData[$matchstate].color};">{buttonData[$matchstate].text}</button>
 		</div>
 		<h3 id=match-time>{$matchstate != MatchState.IN_PROGRESS ? statusMessages[$matchstate]: formatDuration($remainingTimeInPeriod)}</h3>
-		<div id="control-buttons">
-			<!-- <AudienceControl screen={{layout:AudienceScreenLayout.BLANK, match:$matchID}} text="Show Blank"></AudienceControl><br>
-				<AudienceControl screen={{layout:AudienceScreenLayout.MATCH, match:$matchID}} text="Show Match Screen"></AudienceControl><br>
-				<AudienceControl screen={{layout:AudienceScreenLayout.SCORES, match:$matchID}} text="Show Scores"></AudienceControl><br>
-				<AudienceControl screen={{layout:AudienceScreenLayout.WIN, match:$matchID}} text="Show Win Screen"></AudienceControl> -->
-			</div>
 			<p id="teams-header">Teams</p>
 			<div id=teamsgrid>
 				{#if $redAlliance == 0}
@@ -202,10 +207,6 @@
 				</div>
 				<button class=item id=sorting-toggle on:click={() => setSortingEnabled(!$isSortingEnabled)}><span id=lock-icon class="material-symbols-outlined">{$isSortingEnabled?"lock_open_right":"lock"}</span></button>
 			</div>
-			<br>
-			<br>
-			
-			<!-- <Teams/> -->
 		</div>
 	</main>
 	
@@ -217,6 +218,12 @@
 			overflow:hidden;
 		}
 		@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0");
+		#monitor {
+			display:grid;
+			grid-template-rows: repeat(7, calc(100%/7));
+			grid-template-columns: repeat(7, calc(100%/7));
+			column-gap:1px;
+		}
 		main {
 			position:absolute;
 			left:0;
