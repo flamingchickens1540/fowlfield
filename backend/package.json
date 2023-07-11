@@ -8,7 +8,7 @@
     "build": "npm run updateTypes && node build.js",
     "updateTypes": "cd ../field && tygo generate",
     "start": "npm run build && node index.cjs",
-    "dev": "node build.js watch & nodemon --inspect index.cjs"
+    "dev": "node build.js watch"
   },
   "author": "",
   "license": "ISC",
@@ -19,6 +19,7 @@
     "nodemon": "latest"
   },
   "dependencies": {
+    "@socket.io/admin-ui": "^0.5.1",
     "axios": "^1.4.0",
     "lodash.isequal": "^4.5.0",
     "mongo": "^0.1.0",
