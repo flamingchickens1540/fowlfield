@@ -28,7 +28,7 @@ export function getCompLevel(match:MatchData):"qm"|"qf"|"sf"|"f" {
     if (match.elimRound == 2) {return "sf"}
     if (match.elimRound == 1) {return "f"}
     console.warn("Unknown match type!")
-    return null
+    return "qm"
 }
 
 export function getMatchTitle(match:MatchData):string {

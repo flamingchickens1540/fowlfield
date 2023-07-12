@@ -1,9 +1,10 @@
 <script lang="ts">
-    import {teamList} from "@store"
+    import {teamList, eventData} from "@store"
     import Team from "./components/Team.svelte"
     import type { TeamData } from "@fowltypes";
     import socket from "@socket";
 	import { derived, get } from "svelte/store";
+	import writableDerived from "svelte-writable-derived";
     
     let nextTeam:TeamData = {
         name: "",
@@ -31,6 +32,26 @@
         }
     }
 
+    $: {
+        console.log("EVENTDATA", $eventData)
+    }
+
+    const lunchReturnTime = writableDerived(
+        eventData,
+        ($eventData) => {
+            const date = new Date($eventData.lunchReturnTime)
+            return date.getHours()+":"+date.getMinutes()
+        },
+        (time, $eventData) => {
+            const date = new Date()
+            const [hours, minutes] = time.split(":")
+            date.setHours(parseInt(hours))
+            date.setMinutes(parseInt(minutes))
+            date.setSeconds(0)
+
+            $eventData.lunchReturnTime = date.getTime()
+            return $eventData
+        })
     const teams = derived(teamList, ($teams) => Object.values($teams).sort((a, b) => get(a.displaynum).localeCompare(get(b.displaynum), undefined, {numeric:true, sensitivity:"base"})) )
 </script>
 
@@ -74,10 +95,41 @@
         </div>
         
     </div>
+    <h1>Other</h1>
+    <div id=lunchinput>
+        <span>Lunch</span>
+        <input type="time" min="10:00" max="18:00" step=300 bind:value={$lunchReturnTime}>
+        <button on:click={() => $eventData.atLunch = !$eventData.atLunch}>{$eventData.atLunch ? "Stop Lunch" : "Start Lunch"}</button>
+        
+    </div>
     <br>
 </main>
 
 <style lang="scss">
+    #lunchinput {
+        width:40%;
+        margin-left:auto;
+        margin-right:auto;
+        // border: 1px solid white;
+        padding:10px;
+        border-radius: 10px;
+        display:flex;
+        justify-content: space-around;
+        flex-direction: row;
+        align-items: center;
+        // height:50px;
+        background-color:hsl(0, 0%, 20%);
+        span {
+            font-size:20px;
+        }
+        button {
+            height:30px;
+            margin:0;
+            padding:5px;
+            width:150px;
+            background-color:hsl(0, 0%, 30%);
+        }
+    }
     #teamlist {
         display:grid;
         grid-template-columns:100px 100px auto auto 150px 150px 50px; 

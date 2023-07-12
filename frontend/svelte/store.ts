@@ -1,9 +1,9 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
 import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses } from '@fowltypes';
-import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, type WritableTeamData } from "./socketStore";
+import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, SocketDataStore, type WritableTeamData } from "./socketStore";
 import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
 import socket from "@socket";
-import type { AllianceStationStatus, ExtendedDsStatuses } from "@fowltypes";
+import type { AllianceStationStatus, EventInfo, ExtendedDsStatuses } from "@fowltypes";
 
 
 
@@ -75,6 +75,12 @@ export const teamRankings:Readable<{[key:number]:number}> = derived(teamsSorted,
 export const dsStatuses:Writable<ExtendedDsStatuses> = writable()
 
 
+export const eventData = new SocketDataStore<EventInfo>({
+    lunchReturnTime: 0,
+    atLunch:false
+}, (data) => {
+    socket.emit("partialEvent", data)
+})
 
 export function updateTimeOffset(time:number) {
     serverTimeOffset = Date.now() - time
@@ -94,6 +100,10 @@ export function commitMatch() {
 }
 export function updateDSStatuses(data:ExtendedDsStatuses) {
     dsStatuses.set(data)
+}
+
+export function updateEventInfo(data:EventInfo) {
+    eventData.setQuiet(data)
 }
 matchDataPrivate.id.subscribeLocal((value) => currentMatchID = value)
 

@@ -141,4 +141,52 @@ export class FowlMatchStore<K extends keyof MatchData, T extends MatchData[K]> i
 }
 
 
+export class SocketDataStore<T> implements Writable<T> {
+    private value: Writable<T>
+    private blockUpdates: boolean = false;
 
+    constructor(initialValue: T, silentCallback:(value:T) => void) {
+        this.value = writable(initialValue)
+        this.blockUpdates = true;
+        this.value.subscribe((value) => {
+            if (!this.blockUpdates) {
+                silentCallback(value)
+            }
+        })
+        this.blockUpdates = false;
+    }
+
+    setQuiet(value: T) {
+        this.blockUpdates = true
+        this.value.set(value)
+        this.blockUpdates = false
+    }
+    
+    set(value: T) {
+        this.value.set(value)
+    }
+    
+    update(updater: Updater<T>) {
+        this.value.update(updater)
+    }
+    
+    subscribe(run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber {
+        return this.value.subscribe(run, invalidate)
+    }
+    
+    subscribeLocal(run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber {
+        return this.value.subscribe((value) => {
+            if (!this.blockUpdates) {
+                run(value)
+            }
+        }, invalidate)
+    }
+    
+    getReadonly(): Readable<T> {
+        return { 
+            subscribe: (run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber => {
+                return this.value.subscribe(run, invalidate)
+            }
+        }
+    }
+}

@@ -15,6 +15,12 @@ export interface MatchData extends Match {
 }
 
 
+export interface EventInfo {
+    atLunch:boolean
+    lunchReturnTime:number
+}
+
+
 
 export interface TeamData extends Team {
     name:string

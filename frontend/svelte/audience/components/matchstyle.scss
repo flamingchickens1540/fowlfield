@@ -32,7 +32,7 @@
   height: 215px;
   position: absolute;
   left: 0px;
-  bottom: 0px;
+  top:1945px;
 }
 .rectangle-blue {
   background: #3c84ba;
@@ -40,7 +40,7 @@
   height: 215px;
   position: absolute;
   left: 1920px;
-  bottom: 0px;
+  top:1945px;
 }
 @mixin team($left-value) {
   @include regularText();

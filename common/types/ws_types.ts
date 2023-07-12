@@ -2,6 +2,7 @@ import type { IPCData } from "./ipctypes";
 import type {
     DSStatuses,
     DriverStation,
+    EventInfo,
     ExtendedDsStatuses,
     ExtendedTeam,
     MatchData,
@@ -17,6 +18,7 @@ export interface ServerToClientEvents {
     matches(data: { [key: string]: MatchData }): void;
     team(data: ExtendedTeam): void;
     teams(data: { [key: string]: ExtendedTeam }): void;
+    event(data: EventInfo): void;
     /**
      *
      * @param time the current server-side time (ms)
@@ -36,11 +38,13 @@ export interface ServerToClientEvents {
     alert(message:string):void
     queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
     setLight(color:StackLightColor, state:StackLightState)
+    
 }
 
 export interface ClientToServerEvents {
     partialMatch(data: PartialMatch): void;
     partialTeam(data: PartialTeam): void;
+    partialEvent(data: Partial<EventInfo>): void;
 
     newTeam(data: TeamData): void;
     deleteTeam(id:number): void;

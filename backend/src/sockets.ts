@@ -12,6 +12,7 @@ import logger from "./logger"
 import { isMatchReady, probeEstops } from 'statusmanager';
 import { handleEstop } from './statusmanager';
 import {instrument} from "@socket.io/admin-ui"
+import { DBSettings } from 'models/settings';
 const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -79,6 +80,12 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.emit("teams", teams)
         socket.emit("dsStatus", getDsStatus())
         socket.emit("syncTime", Date.now()) // Account for time zone differences
+        DBSettings.getInstance().then((settings) => {
+            socket.emit("event", {
+                atLunch: settings.atLunch,
+                lunchReturnTime: settings.lunchReturnTime
+            })
+        })
         
         socket.on("preloadMatch", (id: string) => {
             matchLogger.log("preloading", id)
@@ -204,6 +211,17 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         
         socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))
         socket.on("unestop", (s) => handleEstop(s, false, socket.rooms.has("estop")))
+
+        socket.on("partialEvent", async (data) => {
+            console.log("recieved partial event", data)
+            const settings = await DBSettings.getInstance()
+            if (data.atLunch != null) { settings.atLunch = data.atLunch }
+            if (data.lunchReturnTime != null) { settings.lunchReturnTime = data.lunchReturnTime }
+            io.emit("event", {
+                atLunch: settings.atLunch,
+                lunchReturnTime: settings.lunchReturnTime
+            })
+        })
         
         socket.on("disconnect", () => {
             logger.log("disconnected", socket.id, socket.handshake.auth.role)
@@ -211,11 +229,13 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 probeEstops()
             }
         })
+        
         function alert(...message:string[]) {
             matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
     })
+
     
     async function pollEstopHosts():Promise<void> {
         let complete:() => void

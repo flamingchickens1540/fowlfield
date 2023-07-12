@@ -3,7 +3,7 @@ import { io, type Socket } from "socket.io-client";
 import { getCookie, setCookie} from 'typescript-cookie';
 import { backend_url } from "../consts.json";
 
-import { updateDSStatuses, updateLoadedMatch, updateMatchList, updateMatchStores, updateTeamList, updateTeamStores, updateTimeOffset } from '@store';
+import { updateDSStatuses, updateEventInfo, updateLoadedMatch, updateMatchList, updateMatchStores, updateTeamList, updateTeamStores, updateTimeOffset } from '@store';
 import type { ClientToServerEvents, ServerToClientEvents } from '@fowltypes';
 
 
@@ -24,6 +24,7 @@ socket.on("preloadMatch", (match) => updateLoadedMatch(true, match))
 socket.on("loadMatch", (match) => updateLoadedMatch(false, match))
 socket.on("syncTime", updateTimeOffset)
 socket.on("dsStatus", updateDSStatuses)
+socket.on("event", updateEventInfo)
 // socket.on("matchData", (data) => {
 //     updateMatchData(data)
 // })

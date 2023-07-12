@@ -2,10 +2,13 @@
 	import { MatchPeriod } from "@fowltypes";
 	import { formatDuration } from "@fowlutils/format";
 	import matchData, {remainingTimeInDisplayPeriod, matchPeriod, teamList} from "@store";
+	import { fade } from "svelte/transition";
 	import { derived } from "svelte/store";
 
-	const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, matchNumber, type} = matchData
 
+  
+  const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, matchNumber, type} = matchData
+  
 
 	const scoreHeight = derived(type, ($type) => $type == "qualification" ? "1946px": "1978px");
 	const allianceDisplay = derived(type, ($type) => $type == "qualification" ? "none": "block");
@@ -36,7 +39,7 @@
 	
 </style>
 
-<div class=match>
+<div class=match out:fade={{}} in:fade={{}}>
 	<div class="rectangle-info"></div>
 	
 	<div class="rectangle-red"></div>
