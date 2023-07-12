@@ -1,4 +1,4 @@
-import App from './AnnouncerTeamsDisplay.svelte'
+import App from './AnnouncerDisplay.svelte'
 
 const app = new App({
   target: document.body,
