@@ -40,7 +40,7 @@
         eventData,
         ($eventData) => {
             const date = new Date($eventData.lunchReturnTime)
-            return date.getHours()+":"+date.getMinutes()
+            return date.getHours()+":"+date.getMinutes().toFixed(0).padStart(0)
         },
         (time, $eventData) => {
             const date = new Date()
@@ -98,7 +98,7 @@
     <h1>Other</h1>
     <div id=lunchinput>
         <span>Lunch</span>
-        <input type="time" min="10:00" max="18:00" step=300 bind:value={$lunchReturnTime}>
+        <input type="time" step=300 bind:value={$lunchReturnTime}>
         <button on:click={() => $eventData.atLunch = !$eventData.atLunch}>{$eventData.atLunch ? "Stop Lunch" : "Start Lunch"}</button>
         
     </div>
