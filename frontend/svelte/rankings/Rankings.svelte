@@ -20,8 +20,10 @@
 	onMount(() => {
 		let isGoingDown = true;
 		setInterval(() => {
+			if (isHovering) {return}
 			const distanceToBottom = document.body.scrollHeight-(window.scrollY + window.innerHeight)
 			const distanceToTop = window.scrollY
+			
 			if (isGoingDown) {
 				window.scrollBy(0, 1)
 				if (distanceToBottom == 0) {
@@ -37,6 +39,7 @@
 			}
 		}, 20)
 	});
+	let isHovering:boolean = false
 </script>
 
 <div class="container">
@@ -50,7 +53,7 @@
 					<th>W-L-T</th>
 				</tr>
 			</thead>
-			<tbody id="tablebody">
+			<tbody id="tablebody" on:mouseenter={() => isHovering = true} on:mouseleave={() => isHovering = false}>
 				{#each $teamsSorted as team, i}
 					<TeamRanking rank={i + 1} teamData={team} />
 				{/each}
