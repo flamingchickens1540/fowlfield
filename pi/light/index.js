@@ -1,4 +1,5 @@
-
+// Add to /boot/config.txt
+// gpio=2,3,4,14=op,dh
 
 
 const { Gpio } = require("onoff");

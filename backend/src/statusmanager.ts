@@ -66,9 +66,8 @@ export function isMatchReady() {
 
 function updateLights() {
     const matchActive = getCurrentMatch().state == MatchState.IN_PROGRESS
-    const matchDone = getCurrentMatch().state == MatchState.COMPLETE || getCurrentMatch().state == MatchState.POSTED
-    lightSetter(StackLightColor.RED, matchDone ? StackLightState.OFF : states.redConnected ? (states.redEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
-    lightSetter(StackLightColor.BLUE, matchDone ? StackLightState.OFF : states.blueConnected ? (states.blueEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
+    lightSetter(StackLightColor.RED, states.redConnected ? (states.redEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
+    lightSetter(StackLightColor.BLUE, states.blueConnected ? (states.blueEnabled ? StackLightState.SOLID : StackLightState.OFF) : StackLightState.FLASH)
     lightSetter(StackLightColor.ORANGE, !states.estopOnline ? StackLightState.FLASH : (states.estopPressed ? StackLightState.SOLID : StackLightState.OFF))
     lightSetter(StackLightColor.GREEN, matchActive ? StackLightState.SOLID : isMatchReady() ? StackLightState.FLASH : StackLightState.OFF)
 }
