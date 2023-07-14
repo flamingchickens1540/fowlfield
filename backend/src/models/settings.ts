@@ -4,7 +4,6 @@ import * as db from "./db"
 export interface Settings extends EventInfo {
     loadedMatch:string,
     preloadedMatch:string,
-    
 }
 
 export class DBSettings implements Settings {

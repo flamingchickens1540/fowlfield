@@ -13,8 +13,8 @@ const mongoClient = new mongoDB.MongoClient(mongoURL);
 
 let teams: mongoDB.Collection<TeamData>;
 let matches: mongoDB.Collection<MatchData>;
-let settings: mongoDB.Collection<{ key: string, value: string }>;
-let reporting: mongoDB.Collection<{ team: number}&UsageReportingOutput>;
+let settings: mongoDB.Collection<{ key: string, value: Settings[keyof Settings] }>;
+let reporting: mongoDB.Collection<{ team: number, raw:string, report:UsageReportingOutput}>;
 
 export async function connect() {
     await mongoClient.connect()
@@ -74,6 +74,8 @@ export async function readSettings() {
     const result: Settings = {
         loadedMatch: "",
         preloadedMatch: "",
+        atLunch:false,
+        lunchReturnTime:0
     }
     for await (const setting of settings.find()) {
         result[setting.key] = setting.value
@@ -116,8 +118,8 @@ export async function deleteTeam(id:number) {
     }
 }
 
-export async function recordUsageReport(team:number, report:UsageReportingOutput) {
-    const resp = await reporting.replaceOne({ team }, { team, ...report }, {upsert:true})
+export async function recordUsageReport(team:number, raw:string,report:UsageReportingOutput) {
+    const resp = await reporting.replaceOne({ team }, { team, raw, report }, {upsert:true})
     if (!resp.acknowledged) {
         logger.warn("Could not record usage report", team)
     }

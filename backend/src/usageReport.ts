@@ -260,5 +260,5 @@ function formatReport(report: DecodedReport) {
 export function handleUsageReport(team: number, data: string) {
     const formatted = formatReport(decode(data))
     logger.log("recieved usage report for", team)
-    recordUsageReport(team, formatted)
+    recordUsageReport(team, data, formatted)
 }
