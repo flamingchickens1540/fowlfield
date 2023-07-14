@@ -23,9 +23,9 @@
         }
     }
     tr:nth-child(odd) {
-        background-color: hsl(34, 57%, 70%);
+        background-color: hsl(34, 0%, 70%);
     }
     tr:nth-child(even) {
-        background-color: hsl(34, 57%, 60%);
+        background-color: hsl(34, 0%, 60%);
 }
 </style>

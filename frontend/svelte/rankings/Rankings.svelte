@@ -75,11 +75,11 @@
 	}
 	.footer {
 		height: 100%;
-		box-shadow: 0px 15px 20px 20px hsl(34, 57%, 15%);
+		box-shadow: 0px 15px 20px 20px hsl(0, 0%, 15%);
 		position: sticky;
 		z-index: 10;
 		bottom: 0;
-		background-color: hsl(34, 57%, 40%);
+		background-color: hsl(50, 0%, 40%);
 	}
 	:global(:root) {
 		overscroll-behavior: none;

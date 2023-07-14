@@ -9,9 +9,9 @@ td, th {
 
 
 thead tr {
-    background-color: hsl(34, 57%, 50%) !important;
+    background-color: hsl(34, 0%, 50%) !important;
     position: sticky;
-    box-shadow: -2px -9px 14px 20px #8c6026;
+    box-shadow: -2px -9px 14px 20px hsl(34, 0%, 35%);
     top: 0;
 }
 
