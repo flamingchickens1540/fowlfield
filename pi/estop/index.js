@@ -1,7 +1,8 @@
 
 // Put the following in /boot/config.txt
-// gpio=7,20,19=op,dh
-// gpio=1,21,13=ip,np
+// gpio=19,16,7=op,dh
+// gpio=21=op,dl
+// gpio=26,20,1=ip,np
 
 const { Gpio } = require("onoff");
 const { io } = require("socket.io-client");
