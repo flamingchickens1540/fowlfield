@@ -99,10 +99,11 @@ export async function updateAlliances() {
     await post("alliance_selections/update", body)
 }
 
-export async function reset(...fields:('alliance'|'team'|'match')[]) {
+export async function reset(...fields:('alliance'|'team'|'match'|'ranking')[]) {
     if (fields.includes("alliance")) await post("alliance_selections/update", [])
     if (fields.includes("team")) await post("team_list/update", [])
     if (fields.includes("match")) await post("matches/delete", Object.values(getMatches()).map((match) => match.id as any))
+    if (fields.includes("ranking")) await post("rankings/update", {breakdowns: [], rankings:[]})
 
 }
 export async function updateRankings() {
@@ -186,4 +187,3 @@ export async function resetRankings() {
     }
     await post("rankings/update", body)
 }
-

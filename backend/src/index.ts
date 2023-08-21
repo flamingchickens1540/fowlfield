@@ -38,10 +38,10 @@ async function configure() {
     socketCallbacks = await startSockets(server, ipc)
     registerDSStatus = statusmanager.configure(socketCallbacks.setLight, ipc, socketCallbacks.pollEstopHosts).registerDSStatus
     ipc.load(matchmanager.getCurrentMatch().getData())
-    await tba.reset("team")
-    await tba.updateAlliances()
-    await tba.updateMatches()
-    await tba.updateRankings()
+    await tba.reset("team", "alliance", "match", "ranking") // TODO: Remove this when teams are finalized
+    // await tba.updateAlliances()
+    // await tba.updateMatches()
+    // await tba.updateRankings()
 
 }
 
@@ -75,6 +75,7 @@ export function getDsStatus() {
 
 
 configure()
+
 
 
 rootLogger.log("starting node")
