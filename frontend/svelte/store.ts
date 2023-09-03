@@ -74,7 +74,6 @@ export const teamRankings:Readable<{[key:number]:number}> = derived(teamsSorted,
 
 export const dsStatuses:Writable<ExtendedDsStatuses> = writable()
 
-
 export const eventData = new SocketDataStore<EventInfo>({
     lunchReturnTime: 0,
     atLunch:false

@@ -15,7 +15,7 @@
 </script>
 
 <script context=module lang=ts>
-    function getOrdinal(n) {
+    function getOrdinal(n: number):string {
         let ord = 'th';
         
         if (n % 10 == 1 && n % 100 != 11) {ord = 'st';}
@@ -27,18 +27,18 @@
 </script>
 
 {#if team_num != 0}
-<div class="team-card" style="--colorA:{alliance == "red" ? "rgb(218, 56, 50)" :"rgb(42, 100, 173)"}; --colorB:{alliance == "red" ? "hsl(2, 63%, 45%)" :"hsl(213, 64%, 35%)"}">
-    <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
-    <div class=conts>
-        <div class="team-info-label">Team Name</div><div class=team-info-item>{$teamList[team_num]?.name?.get()}</div>
-        <div class="team-info-label">Robot Name</div><div class=team-info-item>{$teamList[team_num]?.robotname?.get()}</div>
-        {#if $type == "qualification"}
-        <div class=team-info-label>Team Rank</div><div class=team-info-item>{getOrdinal($teamRankings[team_num] + 1)}</div>
-        {:else}
-        <div class=team-info-label>Alliance Pick</div><div class=team-info-item>{selectionMap[$teamList[team_num]?.alliancePosition?.get()]}</div>
-        {/if}
+    <div class="team-card" style="--colorA:{alliance == "red" ? "rgb(218, 56, 50)" :"rgb(42, 100, 173)"}; --colorB:{alliance == "red" ? "hsl(2, 63%, 45%)" :"hsl(213, 64%, 35%)"}">
+        <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
+        <div class=conts>
+            <div class="team-info-label">Team Name</div><div class=team-info-item>{$teamList[team_num]?.name?.get()}</div>
+            <div class="team-info-label">Robot Name</div><div class=team-info-item>{$teamList[team_num]?.robotname?.get()}</div>
+            {#if $type == "qualification"}
+                <div class=team-info-label>Team Rank</div><div class=team-info-item>{getOrdinal($teamRankings[team_num] + 1)}</div>
+            {:else}
+                <div class=team-info-label>Alliance Pick</div><div class=team-info-item>{selectionMap[$teamList[team_num]?.alliancePosition?.get()]}</div>
+            {/if}
+        </div>
     </div>
-</div>
 {/if}
 
 <style lang=scss>

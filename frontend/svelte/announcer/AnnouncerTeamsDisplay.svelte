@@ -10,9 +10,9 @@
 <div class="grid-cols-2">
     <div class="grid-rows-flux">
         {#if $type == 'elimination'}
-        <h1>Alliance {$redAlliance}</h1>    
+            <h1>Alliance {$redAlliance}</h1>    
         {:else} 
-        <h1>Red Alliance</h1>
+            <h1>Red Alliance</h1>
         {/if}
         <TeamCard alliance={'red'} team_num={$red1}/>
         <TeamCard alliance={'red'} team_num={$red2}/>
@@ -20,9 +20,9 @@
     </div>
     <div class="grid-rows-flux">
         {#if $type == 'elimination'}
-        <h1>Alliance {$blueAlliance}</h1>    
+            <h1>Alliance {$blueAlliance}</h1>    
         {:else} 
-        <h1>Blue Alliance</h1>
+            <h1>Blue Alliance</h1>
         {/if}
         <TeamCard alliance={'blue'} team_num={$blue1}/>
         <TeamCard alliance={'blue'} team_num={$blue2}/>

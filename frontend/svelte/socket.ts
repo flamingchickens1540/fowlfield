@@ -11,7 +11,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '@fowltypes';
 const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(backend_url || window.location.origin, {
     auth: {
         key: getCookie("auth")
-    },
+    }, 
     autoConnect:false
 })
 
