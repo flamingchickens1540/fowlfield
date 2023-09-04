@@ -6,8 +6,6 @@ import { backend_url } from "../consts.json";
 import { updateDSStatuses, updateEventInfo, updateLoadedMatch, updateMatchList, updateMatchStores, updateTeamList, updateTeamStores, updateTimeOffset } from '@store';
 import type { ClientToServerEvents, ServerToClientEvents } from '@fowltypes';
 
-
-
 const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(backend_url || window.location.origin, {
     auth: {
         key: getCookie("auth")

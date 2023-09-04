@@ -5,8 +5,6 @@ import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRe
 import socket from "@socket";
 import type { AllianceStationStatus, EventInfo, ExtendedDsStatuses } from "@fowltypes";
 
-
-
 let currentMatchID:string = ""
 let serverTimeOffset:number = 0;
 
