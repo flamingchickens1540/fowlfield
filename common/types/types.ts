@@ -1,6 +1,5 @@
 import type { IPCData, Match, Team } from "./ipctypes"
 
-
 export type DriverStation = "R1"| "R2" | "R3" | "B1" | "B2" | "B3"
 
 export type PartialMatch = Pick<MatchData, "id"> & Partial<MatchData>
@@ -11,16 +10,13 @@ export interface MatchData extends Match {
     redAlliance:number,
     blueAlliance:number,
     startTime:number,
-    state:MatchState
+    state:MatchState,    
 }
-
 
 export interface EventInfo {
     atLunch:boolean
     lunchReturnTime:number
 }
-
-
 
 export interface TeamData extends Team {
     name:string
@@ -42,7 +38,6 @@ export interface ExtendedTeam extends TeamData {
     matchStats: TeamMatchStats
 }
 
-
 export enum MatchState {
     PENDING = "pending",
     IN_PROGRESS = "progress",
@@ -57,8 +52,6 @@ export enum MatchPeriod {
     POSTMATCH="post"
 }
 
-
-
 export type DSStatuses = IPCData["ds_status"]
 
 export type ExtendedDsStatus = DSStatuses[DriverStation]& {
@@ -67,5 +60,5 @@ export type ExtendedDsStatus = DSStatuses[DriverStation]& {
 }
 export type ExtendedDsStatuses = {[key in DriverStation]:DSStatuses[key]& ExtendedDsStatus}
 
-
 export type MatchID = `${"qm"|"qf"|"sf"|"f"}${number}m${number}`
+
