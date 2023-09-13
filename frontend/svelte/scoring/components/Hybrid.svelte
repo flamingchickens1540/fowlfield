@@ -6,16 +6,16 @@
     let hybridRobots = 0;
 
     $: if (alliance == "red") {
-            matchData.redScore.set(hybridRobots * 3);
-        } else {
-            matchData.blueScore.set(hybridRobots * 3);
-        }
+        matchData.redScore.set(hybridRobots * 3);
+    } else {
+        matchData.blueScore.set(hybridRobots * 3);
+    }
 
-    $:  if (alliance == "red") {
-            matchData.redScore.set(hybridBunnies * 5);
-        } else {
-            matchData.blueScore.set(hybridBunnies * 5);
-        }
+    $: if (alliance == "red") {
+        matchData.redScore.set(hybridBunnies * 5);
+    } else {
+        matchData.blueScore.set(hybridBunnies * 5);
+    }
     
 </script>
 

@@ -11,4 +11,4 @@ Bunnybots FMS other necessary software
 Finishing this shoud be pretty easy, remember to track red cards.
 
 ## "Connecting the dots" and testing
-Making sure everything works together correctly
+Making sure **everything** works together correctly
