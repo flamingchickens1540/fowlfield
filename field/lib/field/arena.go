@@ -45,6 +45,7 @@ type Arena struct {
 	AllianceStations map[string]*AllianceStation
 	MatchState
 	lastDsPacketTime time.Time
+	sendDsPacketNow     bool
 	CurrentMatch     *model.Match
 }
 
@@ -195,6 +196,9 @@ func (arena *Arena) Update() {
 	case PausePeriod:
 		auto = false
 		enabled = false
+		for _, allianceStation := range arena.AllianceStations {
+			allianceStation.Astop = false
+		}
 		if matchTimeSec >= game.GetDurationToTeleopStart().Seconds() {
 			arena.MatchState = TeleopPeriod
 			auto = false
@@ -225,8 +229,9 @@ func (arena *Arena) Update() {
 	}
 
 	// Send a packet if at a period transition point or if it's been long enough since the last one.
-	if sendDsPacket || time.Since(arena.lastDsPacketTime).Seconds()*1000 >= dsPacketPeriodMs {
+	if sendDsPacket || arena.sendDsPacketNow || time.Since(arena.lastDsPacketTime).Seconds()*1000 >= dsPacketPeriodMs {
 		arena.sendDsPacket(auto, enabled)
+		arena.sendDsPacketNow = false
 	}
 
 }
@@ -250,9 +255,11 @@ func (arena *Arena) assignTeam(teamId int, station string) error {
 		return fmt.Errorf("invalid alliance station '%s'", station)
 	}
 
-	// Do nothing if the station is already assigned to the requested team.
-	arena.AllianceStations[station].Estop = false
 
+	arena.AllianceStations[station].Estop = false
+	arena.AllianceStations[station].Astop = false
+
+	// Do nothing if the station is already assigned to the requested team.
 	dsConn := arena.AllianceStations[station].DsConn
 	if dsConn != nil && dsConn.TeamId == teamId {
 		return nil
@@ -284,12 +291,12 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 	statuses := make(map[string]model.AllianceStationStatus, len(stations))
 
 	// convert (?'extended'>)?(?'type'[A-Za-z])(?'instance'\d+)(?::(?'context'\d+))?(?:\((?'feature'.*?)\)) to js regex
-	
+
 	for _, station := range stations {
 		allianceStation := arena.AllianceStations[station]
 		if allianceStation.DsConn == nil {
 			statuses[station] = model.AllianceStationStatus{
-				Bypassed: allianceStation.TeamNumber == 0,
+				Bypassed:   allianceStation.TeamNumber == 0,
 				TeamNumber: allianceStation.TeamNumber,
 			}
 		} else {
@@ -299,6 +306,7 @@ func (arena *Arena) getAllianceStationStatuses(stations ...string) map[string]mo
 					TeamNumber:      allianceStation.TeamNumber,
 					DsConnected:     allianceStation.DsConn != nil,
 					Enabled:         allianceStation.DsConn.Enabled,
+					IsTempStopped:   allianceStation.Astop,
 					IsEstopped:      allianceStation.DsConn.EstopReported,
 					IsEstopAssigned: allianceStation.DsConn.Estop,
 					IsAuto:          allianceStation.DsConn.Auto,
@@ -330,7 +338,7 @@ func (arena *Arena) sendDsPacket(auto bool, enabled bool) {
 	for _, allianceStation := range arena.AllianceStations {
 		dsConn := allianceStation.DsConn
 		if dsConn != nil {
-			dsConn.Auto = auto
+			dsConn.Auto = auto || !enabled || allianceStation.Astop
 			dsConn.Enabled = enabled && !allianceStation.Estop && !allianceStation.Astop
 			dsConn.Estop = allianceStation.Estop
 			err := dsConn.update(arena)
@@ -366,4 +374,17 @@ func (arena *Arena) HandleEstop(station string, state bool) {
 			allianceStation.Estop = false
 		}
 	}
+	arena.sendDsPacketNow = true
+}
+
+func (arena *Arena) HandleTemporaryStop(station string, state bool) {
+	allianceStation := arena.AllianceStations[station]
+	if state {
+		if arena.MatchState != PreMatch && arena.MatchState != PostMatch {
+			allianceStation.Astop = true
+		}
+	} else {
+		allianceStation.Astop = false
+	}
+	arena.sendDsPacketNow = true
 }

@@ -9,8 +9,6 @@ import (
 	"fmt"
 	"log"
 	"net"
-	"regexp"
-	"strconv"
 	"time"
 
 	"team1540.org/fowlfield/lib/game"
@@ -32,7 +30,9 @@ const (
 )
 
 type usageReportListenerFunc func(int, string)
-var usageReportListener usageReportListenerFunc = func (team int, report string) {log.Println("No usage report listener set")}
+
+var usageReportListener usageReportListenerFunc = func(team int, report string) { log.Println("No usage report listener set") }
+
 func SetUsageReportListener(listener usageReportListenerFunc) {
 	usageReportListener = listener
 }
@@ -322,21 +322,21 @@ func (arena *Arena) listenForDriverStations() {
 
 		// Read the team number from the IP address to check for a station mismatch.
 		stationStatus := byte(0)
-		teamRe := regexp.MustCompile(`\d+\.(\d+)\.(\d+)\.`)
-		ipAddress, _, _ := net.SplitHostPort(tcpConn.RemoteAddr().String())
-		teamDigits := teamRe.FindStringSubmatch(ipAddress)
-		teamDigit1, _ := strconv.Atoi(teamDigits[1])
-		teamDigit2, _ := strconv.Atoi(teamDigits[2])
-		stationTeamId := teamDigit1*100 + teamDigit2
+		// teamRe := regexp.MustCompile(`\d+\.(\d+)\.(\d+)\.`)
+		// ipAddress, _, _ := net.SplitHostPort(tcpConn.RemoteAddr().String())
+		// teamDigits := teamRe.FindStringSubmatch(ipAddress)
+		// teamDigit1, _ := strconv.Atoi(teamDigits[1])
+		// teamDigit2, _ := strconv.Atoi(teamDigits[2])
+		// stationTeamId := teamDigit1*100 + teamDigit2
 		wrongAssignedStation := ""
-		if stationTeamId != teamId {
-			wrongAssignedStation = arena.getAssignedAllianceStation(stationTeamId)
-			if wrongAssignedStation != "" {
-				// The team is supposed to be in this match, but is plugged into the wrong station.
-				log.Printf("Team %d is in incorrect station %s.", teamId, wrongAssignedStation)
-				stationStatus = 1
-			}
-		}
+		// if stationTeamId != teamId {
+		// 	wrongAssignedStation = arena.getAssignedAllianceStation(stationTeamId)
+		// 	if wrongAssignedStation != "" {
+		// 		// The team is supposed to be in this match, but is plugged into the wrong station.
+		// 		log.Printf("Team %d is in incorrect station %s.", teamId, wrongAssignedStation)
+		// 		stationStatus = 1
+		// 	}
+		// }
 
 		var assignmentPacket [5]byte
 		assignmentPacket[0] = 0  // Packet size

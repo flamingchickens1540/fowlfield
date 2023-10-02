@@ -1,14 +1,13 @@
 import { ExtendedTeam, PartialTeam, TeamData } from "@fowltypes";
-import { DBSettings } from "models/settings";
-import { DBTeam, buildStats } from "models/teams";
-import * as db from "./models/db";
-import * as matchmanager from "./matchmanager"
 import { average } from '@fowlutils/index';
+import { calculateAlliancePoints } from "@fowlutils/scores";
+import { DBTeam, buildStats } from "models/teams";
+import { matchmanager } from ".";
+import * as db from "../models/db";
 
 
 let teams:{[key:number]:DBTeam}
 let isReady:boolean = false;
-let settings:DBSettings
 
 export async function loadTeams() {
     teams = await db.getTeams()
@@ -74,7 +73,7 @@ export function buildExtendedTeams():{ [key: number]: ExtendedTeam } {
         matchteams.forEach((team: number, index: number) => {
             if (teams[team] == null) {return}
             const isRed = index<3
-            teams[team]._matchscores.push(isRed ? match.redScore : match.blueScore)
+            teams[team]._matchscores.push(isRed ? calculateAlliancePoints(match.redScoreBreakdown) : calculateAlliancePoints(match.blueScoreBreakdown))
             buildStats(match, isRed, teams[team].matchStats)
         })
     });

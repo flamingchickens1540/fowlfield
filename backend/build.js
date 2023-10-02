@@ -9,6 +9,7 @@ const ctx = await context({
     entryPoints: ["src/index.ts"],
     outfile: "index.cjs",
     bundle: true,
+    sourcemap:"both",
     platform:"node",
     logLevel: "info",
     absWorkingDir: __dirname,

@@ -2,9 +2,9 @@ import { MatchData, MatchState } from "@fowltypes";
 import { DoubleEliminationBracket } from "./doubleEliminationBracket";
 import { getMatches } from "./models/db";
 import { DBMatch } from "./models/matches";
-import * as matchmanager from "./matchmanager"
-import * as teammanager from './teammanager';
 import rootLogger from "logger";
+import { matchmanager, teammanager } from "managers";
+import { calculateAlliancePoints } from "@fowlutils/scores";
 
 const logger = rootLogger.getLogger("MatchMaker")
 
@@ -31,7 +31,7 @@ export class MatchMaker {
             if (match.state == MatchState.COMPLETE || match.state == MatchState.POSTED) {
             this.bracket.update(
                 match.matchNumber,
-                match.redScore > match.blueScore ? "red" : "blue"
+                calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
                 );
             }
             });
@@ -52,8 +52,8 @@ export class MatchMaker {
             blue1: 0,
             blue2: 0,
             blue3: 0,
-            redScore: 0,
-            blueScore: 0,
+            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
             startTime: 0,
             redAlliance:0,
             blueAlliance:0,
@@ -81,8 +81,8 @@ export class MatchMaker {
             blue1: alliances[match.blue][0] ?? 0,
             blue2: alliances[match.blue][1] ?? 0,
             blue3: alliances[match.blue][2] ?? 0,
-            redScore: 0,
-            blueScore: 0,
+            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
             startTime: 0,
             redAlliance:match.red,
             blueAlliance:match.blue,
@@ -104,7 +104,7 @@ export class MatchMaker {
         if (match.type == "elimination") {
             this.bracket?.update(
                 match.matchNumber,
-                match.redScore > match.blueScore ? "red" : "blue"
+                calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
                 );
             }
         }

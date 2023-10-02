@@ -8,7 +8,7 @@
     "short_name": "E-Stops",
     "icons": [
         {
-            "src": "/estop.png",
+            "src": "/manifest/estop.png",
             "sizes": "512x512",
             "type": "image/png"
         }

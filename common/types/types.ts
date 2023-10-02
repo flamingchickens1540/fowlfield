@@ -1,4 +1,4 @@
-import type { IPCData, Match, Team } from "./ipctypes"
+import type { AllianceStationStatus, IPCData, Match, Team } from "./ipctypes"
 
 
 export type DriverStation = "R1"| "R2" | "R3" | "B1" | "B2" | "B3"
@@ -6,12 +6,27 @@ export type DriverStation = "R1"| "R2" | "R3" | "B1" | "B2" | "B3"
 export type PartialMatch = Pick<MatchData, "id"> & Partial<MatchData>
 export type PartialTeam = Pick<TeamData, "id"> & Partial<TeamData>
 export interface MatchData extends Match {
-    redScore:number
-    blueScore:number,
     redAlliance:number,
     blueAlliance:number,
+    blueScoreBreakdown:ScoreBreakdown
+    redScoreBreakdown:ScoreBreakdown
     startTime:number,
     state:MatchState
+}
+
+export interface ScoreBreakdown {
+    autoBunnyCount:number,
+    finalBunnyCount:number,
+    autoTaxiBonus: [boolean, boolean, boolean]
+    targetHits: [number, number, number], // These are times this alliance hit an opponent robot
+    fouls: Foul[] // These are fouls committed by the other alliance, they represent points to be added to this alliance
+    endgameParkBonus: [boolean, boolean, boolean]
+}
+
+export interface Foul {
+    timestamp:number
+    robot:number
+    value:number
 }
 
 
@@ -20,7 +35,10 @@ export interface EventInfo {
     lunchReturnTime:number
 }
 
-
+export type RobotHitState = {
+    count: 0|1|2|3
+    lastDisable: number
+}
 
 export interface TeamData extends Team {
     name:string
@@ -59,7 +77,7 @@ export enum MatchPeriod {
 
 
 
-export type DSStatuses = IPCData["ds_status"]
+export type DSStatuses = { [key in DriverStation]: AllianceStationStatus}
 
 export type ExtendedDsStatus = DSStatuses[DriverStation]& {
     hardwareEstopPressed:boolean

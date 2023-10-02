@@ -1,15 +1,15 @@
 
 
-import axios from "axios"
-import {tba} from "../../secrets.json"
-import crypto from "crypto"
-import { TbaTeamNumber, TbaEventInfo, TbaPlayoffAlliances, TbaMatch, TbaRankings, TbaRanking, TbaAlliance, TbaPlayoffType } from "./types"
-import { MatchState, MatchData, MatchID, TeamData } from '@fowltypes';
-import { categorizeAlliances, getCompLevel, getMatchTitle } from '@fowlutils/index';
-import { buildStats } from "models/teams";
-import { buildExtendedTeams, getTeams } from "teammanager";
+import { MatchID, MatchState, TeamData } from '@fowltypes';
+import { categorizeAlliances, getMatchTitle } from '@fowlutils/index';
+import { calculateScoringInfo } from '@fowlutils/scores';
+import axios from "axios";
+import crypto from "crypto";
 import rootLogger from "logger";
-import { getMatches } from "matchmanager";
+import { getMatches } from "managers/matchmanager";
+import { buildExtendedTeams, getTeams } from "managers/teammanager";
+import { tba } from "../../secrets.json";
+import { TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaTeamNumber } from "./types";
 
 const logger = rootLogger.getLogger("tba")
 
@@ -141,35 +141,48 @@ export async function updateMatches() {
         .filter((match) => match.state == MatchState.POSTED)
         .map((match) => {
             const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
-            const redWon =match.redScore > match.blueScore
+            const {redBreakdown, redScore, blueBreakdown, blueScore} = calculateScoringInfo(match)
+            
             return {
                 comp_level: match.type == "qualification" ? "qm":decodedMatchId[1] as any,
                 set_number: match.type == "qualification" ? 1 : parseInt(decodedMatchId[2]),
                 match_number: match.type == "qualification" ? match.matchNumber : parseInt(decodedMatchId[3]),
                 score_breakdown: {
                     red: {
-                        rp: match.redScore > match.blueScore ? match.redScore + match.blueScore : match.redScore,
-                        teleopPoints: 0,
-                        totalPoints: match.redScore,
-                        techFoulCount:0,
+                        rp: redScore > blueScore ? redScore + blueScore : redScore,
+                        teleopPoints: redBreakdown.targetHits + redBreakdown.finalBunny,
+                        totalPoints: redScore,
+                        techFoulCount:0, // TODO: Implement once penalties are done
                         foulCount: 0,
                         foulPoints: 0,
-                        adjustPoints:0
+                        adjustPoints:0,
+                        mobilityRobot1: match.redScoreBreakdown.autoTaxiBonus[0] ? "Yes": "No",
+                        mobilityRobot2: match.redScoreBreakdown.autoTaxiBonus[1] ? "Yes": "No",
+                        mobilityRobot3: match.redScoreBreakdown.autoTaxiBonus[2] ? "Yes": "No",
+                        autoMobilityPoints: redBreakdown.autoTaxi,
+                        endGameParkPoints: redBreakdown.endgamePark,
+                        autoPoints: redBreakdown.autoTaxi + redBreakdown.autoBunny
                         
                     },
                     blue: {
-                        rp: match.blueScore > match.redScore ? match.redScore + match.blueScore : match.blueScore,
-                        teleopPoints: 0,
-                        totalPoints: match.blueScore,
-                        techFoulCount:0,
+                        rp: blueScore > redScore ? redScore + blueScore : blueScore,
+                        teleopPoints: blueBreakdown.targetHits + blueBreakdown.finalBunny,
+                        totalPoints: blueScore,
+                        techFoulCount:0, // TODO: Implement once penalties are done
                         foulCount: 0,
                         foulPoints: 0,
-                        adjustPoints:0
+                        adjustPoints:0,
+                        mobilityRobot1: match.blueScoreBreakdown.autoTaxiBonus[0] ? "Yes": "No",
+                        mobilityRobot2: match.blueScoreBreakdown.autoTaxiBonus[1] ? "Yes": "No",
+                        mobilityRobot3: match.blueScoreBreakdown.autoTaxiBonus[2] ? "Yes": "No",
+                        autoMobilityPoints: blueBreakdown.autoTaxi,
+                        endGameParkPoints: blueBreakdown.endgamePark,
+                        autoPoints: blueBreakdown.autoTaxi + blueBreakdown.autoBunny
                     }
                 },
                 alliances: {
-                    red: new TbaAlliance(match.red1, match.red2, match.red3, match.redScore),
-                    blue: new TbaAlliance(match.blue1, match.blue2, match.blue3, match.blueScore)
+                    red: new TbaAlliance(match.red1, match.red2, match.red3, redScore),
+                    blue: new TbaAlliance(match.blue1, match.blue2, match.blue3, blueScore)
                 },
                 time_string: new Date(match.startTime).toLocaleTimeString("en-us", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }),
                 // time_utc: new Date(match.matchStartTime).toISOString(),

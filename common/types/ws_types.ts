@@ -8,6 +8,7 @@ import type {
     MatchData,
     PartialMatch,
     PartialTeam,
+    RobotHitState,
     StackLightColor,
     StackLightState,
     TeamData,
@@ -35,7 +36,11 @@ export interface ServerToClientEvents {
     loadMatch(matdatach: MatchData): void;
     abortMatch(data: MatchData): void;
     dsStatus(data:ExtendedDsStatuses):void
+    
     alert(message:string):void
+
+    robotHitState(ds:DriverStation, hitState:RobotHitState):void
+
     queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
     setLight(color:StackLightColor, state:StackLightState)
     
@@ -63,4 +68,6 @@ export interface ClientToServerEvents {
     nextMatch(type:"qualification"|"elimination"):void
     estop(station:DriverStation):void
     unestop(station:DriverStation):void
+
+    registerHit(station:DriverStation):void
 }

@@ -9,6 +9,7 @@ export interface AllianceStationStatus {
   robotConnected: boolean;
   enabled: boolean;
   isAuto: boolean;
+  isTempStopped: boolean;
   tripTime: number /* int */;
   missedPackets: number /* int */;
   bypassed: boolean;

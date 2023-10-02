@@ -1,7 +1,7 @@
 import App from './AllianceDisplay.svelte'
 
 const app = new App({
-  target: document.getElementById('app'),
+  target: document.body,
   intro:true
 })
 

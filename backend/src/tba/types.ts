@@ -10,13 +10,13 @@ export interface TbaMatch {
     set_number: number;
     match_number: number;
     alliances: { [key in "red" | "blue"]: TbaAlliance};
-    score_breakdown?: { [key in "red"|"blue"]: Partial<ScoreBreakdown>};
+    score_breakdown?: { [key in "red"|"blue"]: Partial<TbaScoreBreakdown>};
     time_string?: string;
     time_utc?: string;
     display_name?: string;
 }
 
-type ScoreBreakdown =  {
+type TbaScoreBreakdown =  {
     "activationBonusAchieved":boolean
     "adjustPoints":number
     "autoBridgeState":"Level"|"NotLevel"

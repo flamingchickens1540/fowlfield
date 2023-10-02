@@ -1,18 +1,19 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
-import * as matchmanager from "./matchmanager";
+import * as matchmanager from "./managers/matchmanager";
 import { getMatchPeriod } from '@fowlutils/match_timer';
-import * as teammanager from './teammanager';
+import * as teammanager from './managers/teammanager';
 import { buildStats } from 'models/teams';
 import { getDsStatus, isProduction } from 'index';
 import { IPCClient } from 'ipc/ipc';
 import logger from "./logger"
-import { isMatchReady, probeEstops } from 'statusmanager';
-import { handleEstop } from './statusmanager';
+import { isMatchReady, probeEstops } from 'managers/statusmanager';
+import { handleEstop } from './managers/statusmanager';
 import {instrument} from "@socket.io/admin-ui"
 import { DBSettings } from 'models/settings';
+import { hitmanager } from 'managers';
 const matchLogger = logger.getLogger("match")
 
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -49,6 +50,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             probeEstops()
         } else if ((socket.handshake.auth.role ?? "") == "light") {
             socket.join("light")
+        } else if ((socket.handshake.auth.role ?? "") == "robot") {
+            socket.join("robot")
+        } else {
+            socket.join("dashboard")
         }
         
         
@@ -90,16 +95,16 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("preloadMatch", (id: string) => {
             matchLogger.log("preloading", id)
             const match = matchmanager.setPreloadMatch(id)
-            io.emit("preloadMatch", match.getData())
+            io.to("dashboard").emit("preloadMatch", match.getData())
         })
         
         socket.on("loadMatch", (id: string) => {
             matchLogger.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
-            
+            hitmanager.reset()
             ipc.load(match.getData())
             probeEstops().then((didSucceed) => {if (!didSucceed) alert("Estop responses not received, check online")})
-            io.emit("loadMatch", match.getData())
+            io.to("dashboard").emit("loadMatch", match.getData())
         })
         
         
@@ -107,9 +112,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("partialMatch", async (data: PartialMatch) => {
             logger.debug("reciving match", data)
             if (!data.id) { logger.warn("recieved bad match data", data); return }
-            let match = matchmanager.updateMatch(data)
+            const match = matchmanager.updateMatch(data)
             if (match != null) {
-                io.emit("match", match.getData())
+                io.to("dashboard").emit("match", match.getData())
             }
             if (data.red1 != null && data.red1 != 0) { io.emit("team", await teammanager.getTeam(data.red1).getExtendedData()) }
             if (data.red2 != null && data.red2 != 0) { io.emit("team", await teammanager.getTeam(data.red2).getExtendedData()) }
@@ -122,9 +127,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("partialTeam", async (data: PartialTeam) => {
             logger.debug("receiving team", data)
             if (!data.id) { logger.warn("received bad team", data); return }
-            let team = teammanager.updateTeam(data)
+            const team = teammanager.updateTeam(data)
             if (team != null) {
-                io.emit("team", await team.getExtendedData())
+                io.to("dashboard").emit("team", await team.getExtendedData())
             }
         })
         
@@ -132,7 +137,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             logger.log("deleting team", id)
             teammanager.deleteTeam(id)
             
-            io.emit("teams", teammanager.buildExtendedTeams())
+            io.to("dashboard").emit("teams", teammanager.buildExtendedTeams())
         })
         
         socket.on("newTeam", async (data: TeamData) => {
@@ -140,7 +145,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             if (!data.id) { logger.warn("received bad team", data); return }
             if (data.displaynum == "") {delete data.displaynum}
             if (data.name == "") {delete data.name}
-            let team = teammanager.newTeam({
+            const team = teammanager.newTeam({
                 id:data.id,
                 displaynum:data.displaynum ?? data.id.toString(),
                 alliance:data.alliance ?? 0,
@@ -150,7 +155,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             })
             if (team != null) {
                 const extended = await team.getExtendedData()
-                io.emit("team", extended)
+                io.to("dashboard").emit("team", extended)
             }
         })
         
@@ -159,10 +164,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
             ipc.load(match.getData())
             await probeEstops()
-            if (!isMatchReady()) {
-                alert("Match not ready")
-                return;
-            }
+            // if (!isMatchReady()) {
+            //     alert("Match not ready")
+            //     return;
+            // }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
             
@@ -180,7 +185,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 match.startTime = 0;
                 match.state = MatchState.PENDING;
             }).finally(() => {
-                io.emit("match", match.getData())
+                io.to("dashboard").emit("match", match.getData())
             })
         })
         socket.on("abortMatch", (id) => {
@@ -191,21 +196,20 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             match.state = MatchState.PENDING
             ipc.abort()
             probeEstops()
-            // TODO: NOTIFY IPC
-            io.emit("abortMatch", match.getData())
+            io.to("dashboard").emit("abortMatch", match.getData())
         })
         
         socket.on("commitMatch", (id) => {
             const match = matchmanager.getMatch(id)
             match.state = MatchState.POSTED
-            // TODO: Actually commit
-            io.emit("match", match.getData())
+            // TODO: Actually commit w/ TBA
+            io.to("dashboard").emit("match", match.getData())
         })
         
         socket.on("nextMatch", (type) => {
             const newmatch = matchmanager.advanceMatches(type)
             if (newmatch != null) {
-                io.emit("match", newmatch.getData())
+                io.to("dashboard").emit("match", newmatch.getData())
             }
         })
         
@@ -217,7 +221,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             const settings = await DBSettings.getInstance()
             if (data.atLunch != null) { settings.atLunch = data.atLunch }
             if (data.lunchReturnTime != null) { settings.lunchReturnTime = data.lunchReturnTime }
-            io.emit("event", {
+            io.to("dashboard").emit("event", {
                 atLunch: settings.atLunch,
                 lunchReturnTime: settings.lunchReturnTime
             })
@@ -228,6 +232,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             if (socket.handshake.auth.role == "estop") {
                 probeEstops()
             }
+        })
+
+        socket.on("registerHit", (station) => {
+            hitmanager.registerHit(station)
         })
         
         function alert(...message:string[]) {
@@ -281,7 +289,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             // console.log("Setting lights", light, on)
             io.to("light").emit("setLight", light, state)
         },
-        pollEstopHosts
+        pollEstopHosts,
+        emitHitStatus(station: DriverStation, state: RobotHitState) {
+            io.to(["robot", "dashboard"]).emit("robotHitState",station, state)
+        }
     }
     
 }

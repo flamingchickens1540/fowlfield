@@ -2,13 +2,13 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/monitor",
-    "name": "FowlField Monitor",
+    "start_url": "/scoring",
+    "name": "FowlField Scoring",
     "orientation":"landscape",
-    "short_name": "Monitor",
+    "short_name": "Scoring",
     "icons": [
         {
-            "src": "/monitor.png",
+            "src": "/manifest/monitor.png",
             "sizes": "512x512",
             "type": "image/png"
         }

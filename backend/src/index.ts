@@ -1,15 +1,13 @@
 
-import { DSStatuses, ExtendedDsStatus, ExtendedDsStatuses, StackLightColor, StackLightState } from '@fowltypes';
+import { DSStatuses, DriverStation, ExtendedDsStatus, ExtendedDsStatuses, RobotHitState, StackLightColor, StackLightState } from '@fowltypes';
 import * as http from 'http';
 import rootLogger from 'logger';
 import { DBSettings } from 'models/settings';
-import * as statusmanager from "statusmanager";
+import {statusmanager, teammanager, matchmanager, hitmanager} from "managers";
 import * as tba from "./tba/index";
 import { IPCClient } from "./ipc/ipc";
-import * as matchmanager from "./matchmanager";
 import * as db from "./models/db";
 import startSockets from "./sockets";
-import * as teammanager from "./teammanager";
 let driverStatuses:ExtendedDsStatuses
 
 const server = http.createServer()
@@ -26,6 +24,7 @@ let socketCallbacks:{
     emitDsStatus:(data:DSStatuses) => void,
     setLight:(color:StackLightColor, state:StackLightState) => void,
     pollEstopHosts:() => Promise<void>
+    emitHitStatus:(station: DriverStation, state: RobotHitState) => void
 };
 
 let registerDSStatus: (data:DSStatuses) => ExtendedDsStatuses
@@ -35,10 +34,13 @@ async function configure() {
     await matchmanager.loadMatches()
     await teammanager.loadTeams()
     
+    
     socketCallbacks = await startSockets(server, ipc)
     registerDSStatus = statusmanager.configure(socketCallbacks.setLight, ipc, socketCallbacks.pollEstopHosts).registerDSStatus
+    hitmanager.configureHitManager(ipc, socketCallbacks.emitHitStatus)
     ipc.load(matchmanager.getCurrentMatch().getData())
-    await tba.reset("team", "alliance", "match", "ranking") // TODO: Remove this when teams are finalized
+    // await tba.reset("alliance", "match", "ranking") // TODO: Remove this when teams are finalized
+    await tba.updateEventTeams()
     // await tba.updateAlliances()
     // await tba.updateMatches()
     // await tba.updateRankings()
