@@ -237,6 +237,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         socket.on("registerHit", (station) => {
             hitmanager.registerHit(station)
         })
+
+        socket.on("undoHit", (station) => {
+            hitmanager.undoHit(station)
+        })
         
         function alert(...message:string[]) {
             matchLogger.warn("ALERT", ...message)

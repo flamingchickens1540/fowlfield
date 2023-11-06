@@ -338,7 +338,7 @@ func (arena *Arena) sendDsPacket(auto bool, enabled bool) {
 	for _, allianceStation := range arena.AllianceStations {
 		dsConn := allianceStation.DsConn
 		if dsConn != nil {
-			dsConn.Auto = auto || !enabled || allianceStation.Astop
+			dsConn.Auto = auto || allianceStation.Astop
 			dsConn.Enabled = enabled && !allianceStation.Estop && !allianceStation.Astop
 			dsConn.Estop = allianceStation.Estop
 			err := dsConn.update(arena)

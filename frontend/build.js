@@ -15,7 +15,8 @@ let pages = {
     "monitor":   ["Field Monitor",     true],
     "estop":     ["Estop Panel",       true],
     "rankings":  ["Rankings",          false],
-    "scoring":   ["Scoring",           true]
+    "scoring":   ["Scoring",           true],
+    "review":     ["Review", false]
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 //// Loads all subdirectories of /svelte

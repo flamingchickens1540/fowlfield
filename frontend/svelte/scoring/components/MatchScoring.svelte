@@ -37,6 +37,7 @@
             return breakdown
         })
         lastHitTime = 0
+        socket.emit("undoHit", (alliance == "red" ? "R":"B")+station as DriverStation)
     }
     function registerFoul(value:number) {
         scoreBreakdownOpponent.update((breakdown) => {breakdown.fouls.push({"robot": get(matchData[pos]), timestamp: Date.now(), value}); return breakdown})

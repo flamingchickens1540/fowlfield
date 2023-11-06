@@ -70,4 +70,5 @@ export interface ClientToServerEvents {
     unestop(station:DriverStation):void
 
     registerHit(station:DriverStation):void
+    undoHit(station:DriverStation):void
 }

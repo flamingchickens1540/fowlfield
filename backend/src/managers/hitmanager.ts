@@ -1,5 +1,8 @@
 import { IPCClient } from "ipc/ipc";
 import { DriverStation, RobotHitState } from "../../../common/types/types";
+import rootLogger from "logger";
+
+const logger = rootLogger.getLogger("hitmanager")
 let hitStates: { [key in DriverStation]: RobotHitState & { timeout: NodeJS.Timeout } } = {
     R1: {
         count: 0,
@@ -40,29 +43,24 @@ export function configureHitManager(client: IPCClient, subscriber: (station: Dri
 
 }
 export function registerHit(station: DriverStation): boolean {
-    console.log("registering hit")
+    logger.log("registering hit for", station)
     const state = hitStates[station]
     if (state.count >= 3 || Date.now() - state.lastDisable < 6000) {
         return false
     }
     state.count++
     if (state.count >= 3) {
-        console.log("disabling")
+        logger.log("disabling", station)
         ipc.tempDisable(station)
-        console.log("disabled")
         state.lastDisable = Date.now()
-        console.log("hitA")
         if (state.timeout != null) {
             clearTimeout(state.timeout)
         }
-        console.log("hitB")
         const t = setTimeout(() => {
             state.count = 0
             ipc.tempEnable(station)
         }, 5000)
-        console.log("hitC")
         state.timeout = t
-        console.log("hitD")
     }
     hitChangeSubscriber(station, {
         count:state.count as 0|1|2|3,
@@ -73,6 +71,7 @@ export function registerHit(station: DriverStation): boolean {
 
 export function undoHit(station: DriverStation) {
     const state = hitStates[station]
+    logger.log("Undoing hit", station)
     if (state.count >= 3) {
         if (state.timeout != null) {
             clearTimeout(state.timeout)

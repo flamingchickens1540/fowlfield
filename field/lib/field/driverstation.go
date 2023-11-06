@@ -314,7 +314,7 @@ func (arena *Arena) listenForDriverStations() {
 			log.Printf("Rejecting connection from Team %d, who is not in the current match, soon.", teamId)
 			go func() {
 				// Wait a second and then close it so it doesn't chew up bandwidth constantly trying to reconnect.
-				time.Sleep(time.Second)
+				time.Sleep(time.Second *5)
 				tcpConn.Close()
 			}()
 			continue
