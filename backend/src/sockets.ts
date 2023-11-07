@@ -235,11 +235,36 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         })
 
         socket.on("registerHit", (station) => {
-            hitmanager.registerHit(station)
+            const success = hitmanager.registerHit(station)
+            const match = matchmanager.getCurrentMatch()
+            if (success) {
+                const stationnum = parseInt(station[1]) - 1
+                if (station[0] == "B") {
+                    match.redScoreBreakdown.targetHits[stationnum]++
+                } else {
+                    match.blueScoreBreakdown.targetHits[stationnum]++
+                }
+                io.to("dashboard").emit("match", match.getData())
+            }
+            
         })
 
         socket.on("undoHit", (station) => {
             hitmanager.undoHit(station)
+            const match = matchmanager.getCurrentMatch()
+            const stationnum = parseInt(station[1]) - 1
+            if (station[0] == "B") {
+                match.redScoreBreakdown.targetHits[stationnum]--
+                if (match.redScoreBreakdown.targetHits[stationnum] < 0) {
+                    match.redScoreBreakdown.targetHits[stationnum] = 0
+                }
+            } else {
+                match.blueScoreBreakdown.targetHits[stationnum]--
+                if (match.blueScoreBreakdown.targetHits[stationnum] < 0) {
+                    match.blueScoreBreakdown.targetHits[stationnum] = 0
+                }
+            }
+            io.to("dashboard").emit("match", match.getData())
         })
         
         function alert(...message:string[]) {

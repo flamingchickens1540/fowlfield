@@ -1,5 +1,5 @@
 <script lang="ts">
-    import type { DriverStation } from "@fowltypes";
+    import type { DriverStation, RobotHitState } from "@fowltypes";
     import { driverstations } from "../Scoring.svelte";
     import matchData, { teamList } from "@store";
     import { derived, get } from "svelte/store";
@@ -10,7 +10,7 @@
     export let station:1|2|3
     export let alliance:'red'|'blue'
     export const pos = `${alliance}${station}`
-    
+    export const dsposstring = (alliance == "red" ? "R":"B")+station as DriverStation
     const robot = derived([matchData[pos], teamList], ([$teamid, $teams]) => $teams[$teamid]?.displaynum?.get() ?? "0")
     const scoreBreakdown         = alliance== "red" ? matchData.redScoreBreakdown : matchData.blueScoreBreakdown
     const scoreBreakdownOpponent = alliance== "red" ? matchData.blueScoreBreakdown : matchData.redScoreBreakdown
@@ -20,24 +20,13 @@
     let lastHitTime:number = 0
     let undoStopwatchValue = "-"
     function registerHit() {
-        scoreBreakdownOpponent.update((breakdown) => {
-            breakdown.targetHits[station-1]++;
-            lastHitTime = Date.now()
-            return breakdown
-        })
-        socket.emit("registerHit", (alliance == "red" ? "R":"B")+station as DriverStation)
+        lastHitTime = Date.now()
+        socket.emit("registerHit", dsposstring)
     }
     
     function undoHit() {
-        scoreBreakdownOpponent.update((breakdown) => {
-            breakdown.targetHits[station-1]--;
-            if (breakdown.targetHits[station-1] < 0) {
-                breakdown.targetHits[station-1]=0
-            }
-            return breakdown
-        })
         lastHitTime = 0
-        socket.emit("undoHit", (alliance == "red" ? "R":"B")+station as DriverStation)
+        socket.emit("undoHit", dsposstring)
     }
     function registerFoul(value:number) {
         scoreBreakdownOpponent.update((breakdown) => {breakdown.fouls.push({"robot": get(matchData[pos]), timestamp: Date.now(), value}); return breakdown})
@@ -53,6 +42,18 @@
         const time = Math.round((Date.now() - lastHitTime)/1000)
         undoStopwatchValue = time > 15 ? "—" : time+"s"
     }, 500)
+
+
+    let disableHitButton = false
+    socket.on("robotHitState", (ds:DriverStation, state: RobotHitState) => {
+        if (ds == dsposstring) {
+            if (state.count == 3) {
+                disableHitButton = true
+            } else {
+                disableHitButton = false
+            }
+        }
+    })
 </script>
 
 <div class="scoring-container" style="--buttoncolor:{alliance == "red" ? 'rgb(122, 0, 0)' : 'rgb(0, 45, 122)'}">
@@ -82,7 +83,7 @@
         <button class="btn" style="width:100%;height:100%;;box-sizing:border-box;margin:0;font-size:60px;background-color:black;border:1px solid #a0a0a0" on:click={estop}>Estop</button>
     </div>
     <div class="hit-tracker">
-        <button class="red-button btn" style="width:100%;height:70%;;box-sizing:border-box;margin:0;font-size:60px;" on:click={registerHit}>Hit ({$scoreBreakdownOpponent.targetHits[station-1] ?? 0})</button>
+        <button class="red-button btn" style="width:100%;height:70%;;box-sizing:border-box;margin:0;font-size:60px;" on:click={registerHit} disabled={disableHitButton}>Hit ({$scoreBreakdownOpponent.targetHits[station-1] ?? 0})</button>
         <div style="width:100%;height:calc(30% - 10px);padding-top:10px;margin:0;">
             <button class="btn" style="width:100%;height:100%;margin:0;font-size:40px;background-color:orange" on:click={undoHit}>Undo ({undoStopwatchValue})</button>
         </div>
