@@ -71,4 +71,6 @@ export interface ClientToServerEvents {
 
     registerHit(station:DriverStation):void
     undoHit(station:DriverStation):void
+
+    getHitStates(cb:(states:{[key in DriverStation]:RobotHitState}) => void):void
 }

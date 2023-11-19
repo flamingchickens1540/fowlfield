@@ -1,4 +1,4 @@
-import { MatchData, MatchState } from "@fowltypes";
+import { MatchData, MatchState, Card } from "@fowltypes";
 import { DoubleEliminationBracket } from "./doubleEliminationBracket";
 import { getMatches } from "./models/db";
 import { DBMatch } from "./models/matches";
@@ -57,6 +57,8 @@ export class MatchMaker {
             startTime: 0,
             redAlliance:0,
             blueAlliance:0,
+            redCards:[Card.NONE, Card.NONE, Card.NONE],
+            blueCards:[Card.NONE, Card.NONE, Card.NONE],
             state:MatchState.PENDING
         });
     }
@@ -86,6 +88,8 @@ export class MatchMaker {
             startTime: 0,
             redAlliance:match.red,
             blueAlliance:match.blue,
+            redCards:[Card.NONE, Card.NONE, Card.NONE],
+            blueCards:[Card.NONE, Card.NONE, Card.NONE],
             state:MatchState.PENDING
         });
     }

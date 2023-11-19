@@ -1,5 +1,5 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses } from '@fowltypes';
+import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses, Card } from '@fowltypes';
 import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, SocketDataStore, type WritableTeamData } from "./socketStore";
 import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
 import socket from "@socket";
@@ -40,6 +40,8 @@ const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchDat
     blue1: new FowlMatchStore("blue1", 0),
     blue2: new FowlMatchStore("blue2", 0),
     blue3: new FowlMatchStore("blue3", 0),
+    redCards: new FowlMatchStore("redCards", [Card.NONE,Card.NONE,Card.NONE]),
+    blueCards: new FowlMatchStore("blueCards", [Card.NONE,Card.NONE,Card.NONE]),
 };
 
 

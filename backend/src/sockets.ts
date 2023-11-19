@@ -1,4 +1,4 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState, Card } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
@@ -56,7 +56,6 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             socket.join("dashboard")
         }
         
-        
         logger.log("New connection from", socket.id, socket.handshake.address, socket.handshake.url, socket.handshake.auth.role??"default")
         
         
@@ -74,7 +73,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
             matchteams.forEach((team: number, index: number) => {
                 if (teams[team] == null) {return}
-                buildStats(match, index<3, teams[team].matchStats)
+                const isRed = index < 3
+                const dq = (isRed ? match.redCards : match.blueCards)[index%3] == Card.RED
+                buildStats(match, isRed,dq, teams[team].matchStats)
             })
         });
 
@@ -102,11 +103,17 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             matchLogger.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
             hitmanager.reset()
+            Object.entries(hitmanager.getStates()).forEach(([station, state]) => { // TODO: make this a little nicer with a single event
+                io.to(["robot", "dashboard"]).emit("robotHitState", station as DriverStation, state)
+            })
             ipc.load(match.getData())
             probeEstops().then((didSucceed) => {if (!didSucceed) alert("Estop responses not received, check online")})
             io.to("dashboard").emit("loadMatch", match.getData())
         })
         
+        socket.on("getHitStates", (cb) => {
+            cb(hitmanager.getStates())
+        })
         
 
         socket.on("partialMatch", async (data: PartialMatch) => {
@@ -151,7 +158,8 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 alliance:data.alliance ?? 0,
                 alliancePosition: data.alliancePosition ?? 0,
                 name: data.name ?? "Team "+data.displaynum ?? data.id.toString(),
-                robotname:data.robotname
+                robotname:data.robotname,
+                card: Card.NONE
             })
             if (team != null) {
                 const extended = await team.getExtendedData()
@@ -241,8 +249,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 const stationnum = parseInt(station[1]) - 1
                 if (station[0] == "B") {
                     match.redScoreBreakdown.targetHits[stationnum]++
+                    match.redScoreBreakdown = match.redScoreBreakdown // Force DB save
                 } else {
                     match.blueScoreBreakdown.targetHits[stationnum]++
+                    match.blueScoreBreakdown = match.blueScoreBreakdown // Force DB save
                 }
                 io.to("dashboard").emit("match", match.getData())
             }
@@ -258,11 +268,13 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 if (match.redScoreBreakdown.targetHits[stationnum] < 0) {
                     match.redScoreBreakdown.targetHits[stationnum] = 0
                 }
+                match.redScoreBreakdown = match.redScoreBreakdown // Force DB save
             } else {
                 match.blueScoreBreakdown.targetHits[stationnum]--
                 if (match.blueScoreBreakdown.targetHits[stationnum] < 0) {
                     match.blueScoreBreakdown.targetHits[stationnum] = 0
                 }
+                match.blueScoreBreakdown = match.blueScoreBreakdown // Force DB save
             }
             io.to("dashboard").emit("match", match.getData())
         })
@@ -276,15 +288,19 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
     
     async function pollEstopHosts():Promise<void> {
         let complete:() => void
-        io.to("estop").timeout(300).emit("queryEstop", (err, [data]) => {
-            if (data == null) {logger.warn("No Estop Response");return;}
-            if (data.B1 != null) {handleEstop("B1", data.B1, true)}
-            if (data.B2 != null) {handleEstop("B2", data.B2, true)}
-            if (data.B3 != null) {handleEstop("B3", data.B3, true)}
-            if (data.R1 != null) {handleEstop("R1", data.R1, true)}
-            if (data.R2 != null) {handleEstop("R2", data.R2, true)}
-            if (data.R3 != null) {handleEstop("R3", data.R3, true)}
+        io.to("estop").timeout(300).emit("queryEstop", (err, responses) => {
+            if (responses == null || responses.length == 0) {logger.warn("No Estop Response");return;}
+            responses.forEach((data) => {
+                if (data == null) {logger.warn("No Estop Response");return;}
+                if (data.B1 != null) {handleEstop("B1", data.B1, true)}
+                if (data.B2 != null) {handleEstop("B2", data.B2, true)}
+                if (data.B3 != null) {handleEstop("B3", data.B3, true)}
+                if (data.R1 != null) {handleEstop("R1", data.R1, true)}
+                if (data.R2 != null) {handleEstop("R2", data.R2, true)}
+                if (data.R3 != null) {handleEstop("R3", data.R3, true)}
+            })
             complete()
+            
         })
         const success:Promise<void> = new Promise((resolve, reject) => {
             complete = resolve;

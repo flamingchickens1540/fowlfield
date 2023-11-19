@@ -1,14 +1,13 @@
 <script lang="ts">
-	import type { TeamData } from "@fowltypes";
+	import { Card, type TeamData } from "@fowltypes";
 	import socket from "@socket";
 	import type { WritableTeamData } from "socketStore";
 	import writableDerived from "svelte-writable-derived";
 	import { writable, type Writable } from "svelte/store";
 	export let team: WritableTeamData;
-	const {id, displaynum, name, alliance, robotname, alliancePosition} = team
+	const {id, displaynum, name, alliance, robotname, alliancePosition, card} = team
 	const alliancestring:Writable<string> = writableDerived(alliance, (currentalliance) => currentalliance?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
 	const allianceposstring:Writable<string> = writableDerived(alliancePosition, (current) => current?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
-		
 
 	let nobodymove:boolean = false
 	alliance.subscribe((value) => {
@@ -31,6 +30,11 @@
 	<input class="tableitem centertext" type="string" bind:value={$displaynum} />
 	<input class="tableitem" type="string" bind:value={$name} />
 	<input class="tableitem" type="string" bind:value={$robotname} />
+	<select class="tableitem" bind:value={$card}>
+		<option value={Card.RED}>Red Card</option>
+		<option value={Card.YELLOW}>Yellow Card</option>
+		<option value={Card.NONE}>None</option>
+	</select>
 	<select class="tableitem" bind:value={$alliancestring}>
 		<option value=0>None</option>
 		<option value=1>Alliance 1</option>

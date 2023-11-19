@@ -65,6 +65,7 @@
 		// TODO: Implement
 		<div>
 			<h2>Cards against red</h2>
+			
 		</div>
 		<div>
 			<h2>Cards against blue</h2>

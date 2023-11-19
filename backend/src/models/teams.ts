@@ -1,11 +1,17 @@
-import { ExtendedTeam, MatchData, PartialTeam, TeamData, TeamMatchStats } from "@fowltypes";
+import { Card, ExtendedTeam, MatchData, PartialTeam, TeamData, TeamMatchStats } from "@fowltypes";
 import * as db from "./db"
+import { DBMatch } from "./matches";
+import { calculateAlliancePoints } from "@fowlutils/scores";
 
 export class DBTeam implements TeamData {
     get id() {return this.data.id}
     
     
-    constructor(private data:TeamData){}
+    constructor(private data:TeamData){
+        if (data.card == null) {
+            data.card = Card.NONE
+        }
+    }
     get name() {return this.data.name}
     set name(value) {this.data.name = value; db.updateTeam({id:this.data.id, name:value})}
     get displaynum() {return this.data.displaynum}
@@ -16,7 +22,8 @@ export class DBTeam implements TeamData {
     set alliance(value) {this.data.alliance = value; db.updateTeam({id:this.data.id, alliance:value})}
     get alliancePosition() {return this.data.alliancePosition}
     set alliancePosition(value) {this.data.alliancePosition = value; db.updateTeam({id:this.data.id, alliancePosition:value})}
-    
+    get card() {return this.data.card}
+    set card(value) {this.data.card = value; db.updateTeam({id:this.data.id, card:value})}
 
 
     getData() {
@@ -56,13 +63,15 @@ const registerDraw = (stats:TeamMatchStats, teamScore: number) => {
     stats.rp += teamScore
 }
 
-export function buildStats(match: MatchData, isRed:boolean, stats:TeamMatchStats) {
+export function buildStats(match: MatchData, isRed:boolean, isDQ:boolean, stats:TeamMatchStats) {
+    const redScore = isDQ ? 0 : calculateAlliancePoints(match.redScoreBreakdown)
+    const blueScore = isDQ ? 0 : calculateAlliancePoints(match.blueScoreBreakdown)
     if (match.type == "elimination") {return;}
-    if (match.redScore > match.blueScore) {
-        registerWin(stats, isRed, match.redScore, match.blueScore)
-    } else if (match.redScore < match.blueScore) {
-        registerWin(stats, !isRed, match.blueScore, match.redScore)
+    if (redScore > blueScore) {
+        registerWin(stats, isRed, redScore, blueScore)
+    } else if (redScore < blueScore) {
+        registerWin(stats, !isRed, blueScore, redScore)
     } else {
-        registerDraw(stats, isRed ? match.redScore : match.blueScore)
+        registerDraw(stats, isRed ? redScore : blueScore)
     }
 }

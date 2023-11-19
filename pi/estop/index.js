@@ -81,7 +81,7 @@ socket.on("connect_error", (err) => console.log("connect failed", err.message))
 socket.on("disconnect", (reason) => console.log("disconnect", reason))
 socket.on("queryEstop", (cb) => {
     console.log("querying")
-    const output = {B1:false, B2:false, B3:false}
+    const output = {}
     consts.pins.forEach(([ds, pin]) => {
         output[ds] = estops[ds].currentButtonState == 1
     })

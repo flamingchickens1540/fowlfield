@@ -49,6 +49,11 @@ export class DBMatch {
     get state() {return this.data.state}
     set state(value) {this.update({id:this.data.id, state:value})}
 
+    get redCards() {return this.data.redCards}
+    set redCards(value) {this.update({id:this.data.id, redCards:value})}
+    get blueCards() {return this.data.blueCards}
+    set blueCards(value) {this.update({id:this.data.id, blueCards:value})}
+
     constructor(private data:MatchData){}
     
 

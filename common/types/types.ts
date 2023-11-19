@@ -5,6 +5,12 @@ export type DriverStation = "R1"| "R2" | "R3" | "B1" | "B2" | "B3"
 
 export type PartialMatch = Pick<MatchData, "id"> & Partial<MatchData>
 export type PartialTeam = Pick<TeamData, "id"> & Partial<TeamData>
+
+export enum Card {
+    NONE = "none",
+    YELLOW = "yellow",
+    RED = "red"
+}
 export interface MatchData extends Match {
     redAlliance:number,
     blueAlliance:number,
@@ -12,6 +18,8 @@ export interface MatchData extends Match {
     redScoreBreakdown:ScoreBreakdown
     startTime:number,
     state:MatchState
+    redCards:[Card,Card,Card]
+    blueCards:[Card,Card,Card]
 }
 
 export interface ScoreBreakdown {
@@ -46,6 +54,7 @@ export interface TeamData extends Team {
     robotname?:string
     alliance:0|1|2|3|4
     alliancePosition:0|1|2|3|4
+    card:Card
 }
 export interface TeamMatchStats {
     win:number

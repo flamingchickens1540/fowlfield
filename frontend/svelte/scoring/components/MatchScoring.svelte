@@ -1,7 +1,7 @@
 <script lang="ts">
     import type { DriverStation, RobotHitState } from "@fowltypes";
     import { driverstations } from "../Scoring.svelte";
-    import matchData, { teamList } from "@store";
+    import matchData, { dsStatuses, teamList } from "@store";
     import { derived, get } from "svelte/store";
     import socket from "@socket";
     import { onMount } from "svelte/internal";
@@ -44,15 +44,12 @@
     }, 500)
 
 
-    let disableHitButton = false
-    socket.on("robotHitState", (ds:DriverStation, state: RobotHitState) => {
-        if (ds == dsposstring) {
-            if (state.count == 3) {
-                disableHitButton = true
-            } else {
-                disableHitButton = false
-            }
-        }
+    
+    let disableHitButtonHit = false
+
+    dsStatuses.subscribe((statuses) => {
+        const station  = statuses[dsposstring]
+        disableHitButtonHit = (station.bypassed || !station.robotConnected || station.isEstopped || !station.enabled || station.bypassed || !station)
     })
 </script>
 
@@ -83,7 +80,7 @@
         <button class="btn" style="width:100%;height:100%;;box-sizing:border-box;margin:0;font-size:60px;background-color:black;border:1px solid #a0a0a0" on:click={estop}>Estop</button>
     </div>
     <div class="hit-tracker">
-        <button class="red-button btn" style="width:100%;height:70%;;box-sizing:border-box;margin:0;font-size:60px;" on:click={registerHit} disabled={disableHitButton}>Hit ({$scoreBreakdownOpponent.targetHits[station-1] ?? 0})</button>
+        <button class="red-button btn" style="width:100%;height:70%;;box-sizing:border-box;margin:0;font-size:60px;" on:click={registerHit} disabled={disableHitButtonHit}>Hit ({$scoreBreakdownOpponent.targetHits[station-1] ?? 0})</button>
         <div style="width:100%;height:calc(30% - 10px);padding-top:10px;margin:0;">
             <button class="btn" style="width:100%;height:100%;margin:0;font-size:40px;background-color:orange" on:click={undoHit}>Undo ({undoStopwatchValue})</button>
         </div>

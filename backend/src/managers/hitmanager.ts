@@ -42,6 +42,10 @@ export function configureHitManager(client: IPCClient, subscriber: (station: Dri
     hitChangeSubscriber = subscriber
 
 }
+
+export function getStates(): { [key in DriverStation]: RobotHitState } {
+    return hitStates
+}
 export function registerHit(station: DriverStation): boolean {
     const state = hitStates[station]
     if (state.count >= 3 || Date.now() - state.lastDisable < 6000) {

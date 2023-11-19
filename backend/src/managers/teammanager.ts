@@ -1,4 +1,4 @@
-import { ExtendedTeam, PartialTeam, TeamData } from "@fowltypes";
+import { Card, ExtendedTeam, PartialTeam, TeamData } from "@fowltypes";
 import { average } from '@fowlutils/index';
 import { calculateAlliancePoints } from "@fowlutils/scores";
 import { DBTeam, buildStats } from "models/teams";
@@ -74,7 +74,8 @@ export function buildExtendedTeams():{ [key: number]: ExtendedTeam } {
             if (teams[team] == null) {return}
             const isRed = index<3
             teams[team]._matchscores.push(isRed ? calculateAlliancePoints(match.redScoreBreakdown) : calculateAlliancePoints(match.blueScoreBreakdown))
-            buildStats(match, isRed, teams[team].matchStats)
+            const dq = (isRed ? match.redCards : match.blueCards)[index%3] == Card.RED
+            buildStats(match, isRed, dq, teams[team].matchStats)
         })
     });
 
