@@ -11,7 +11,7 @@ import { IPCClient } from 'ipc/ipc';
 import logger from "./logger"
 import { isMatchReady, probeEstops } from 'managers/statusmanager';
 import { handleEstop } from './managers/statusmanager';
-import {instrument} from "@socket.io/admin-ui"
+import { instrument } from "@socket.io/admin-ui"
 import { DBSettings } from 'models/settings';
 import { hitmanager } from 'managers';
 const matchLogger = logger.getLogger("match")
@@ -19,7 +19,7 @@ const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 
-export default function startServer(server: http.Server, ipc:IPCClient) {
+export default function startServer(server: http.Server, ipc: IPCClient) {
     io = new Server(server, {
         cors: {
             origin: "*"
@@ -33,14 +33,14 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 type: "basic",
                 username: "admin",
                 password: "$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS" // "changeit" encrypted with bcrypt
-              },
-            mode:"development"
+            },
+            mode: "development"
         })
     }
-    
-    
+
+
     io.on("connection", (socket) => {
-        
+
         if (socket.handshake.auth?.key?.trim() !== consts.socket.key) {
             socket.disconnect(true)
             return;
@@ -55,27 +55,29 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         } else {
             socket.join("dashboard")
         }
-        
-        logger.log("New connection from", socket.id, socket.handshake.address, socket.handshake.url, socket.handshake.auth.role??"default")
-        
-        
-        
+
+        logger.log("New connection from", socket.id, socket.handshake.address, socket.handshake.url, socket.handshake.auth.role ?? "default")
+
+
+
         const teams: { [key: number]: ExtendedTeam } = {}
         const matches: { [key: string]: MatchData } = {}
-        
-        Object.entries(teammanager.getTeams()).forEach(([key, team]) => {teams[key] = { 
-            ...team.getData(), 
-            matches: [], 
-            matchStats: { win: 0, loss: 0, tie: 0, rp: 0 }
-        }})
+
+        Object.entries(teammanager.getTeams()).forEach(([key, team]) => {
+            teams[key] = {
+                ...team.getData(),
+                matches: [],
+                matchStats: { win: 0, loss: 0, tie: 0, rp: 0 }
+            }
+        })
         Object.entries(matchmanager.getMatches()).forEach(([key, match]) => {
             matches[key] = match.getData()
             const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
             matchteams.forEach((team: number, index: number) => {
-                if (teams[team] == null) {return}
+                if (teams[team] == null) { return }
                 const isRed = index < 3
-                const dq = (isRed ? match.redCards : match.blueCards)[index%3] == Card.RED
-                buildStats(match, isRed,dq, teams[team].matchStats)
+                const dq = (isRed ? match.redCards : match.blueCards)[index % 3] == Card.RED
+                buildStats(match, isRed, dq, teams[team].matchStats)
             })
         });
 
@@ -92,13 +94,13 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 lunchReturnTime: settings.lunchReturnTime
             })
         })
-        
+
         socket.on("preloadMatch", (id: string) => {
             matchLogger.log("preloading", id)
             const match = matchmanager.setPreloadMatch(id)
             io.to("dashboard").emit("preloadMatch", match.getData())
         })
-        
+
         socket.on("loadMatch", (id: string) => {
             matchLogger.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
@@ -107,14 +109,14 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 io.to(["robot", "dashboard"]).emit("robotHitState", station as DriverStation, state)
             })
             ipc.load(match.getData())
-            probeEstops().then((didSucceed) => {if (!didSucceed) alert("Estop responses not received, check online")})
+            probeEstops().then((didSucceed) => { if (!didSucceed) alert("Estop responses not received, check online") })
             io.to("dashboard").emit("loadMatch", match.getData())
         })
-        
+
         socket.on("getHitStates", (cb) => {
             cb(hitmanager.getStates())
         })
-        
+
 
         socket.on("partialMatch", async (data: PartialMatch) => {
             logger.debug("reciving match", data)
@@ -130,7 +132,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             if (data.blue2 != null && data.blue2 != 0) { io.emit("team", await teammanager.getTeam(data.blue2).getExtendedData()) }
             if (data.blue3 != null && data.blue3 != 0) { io.emit("team", await teammanager.getTeam(data.blue3).getExtendedData()) }
         })
-        
+
         socket.on("partialTeam", async (data: PartialTeam) => {
             logger.debug("receiving team", data)
             if (!data.id) { logger.warn("received bad team", data); return }
@@ -139,26 +141,26 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 io.to("dashboard").emit("team", await team.getExtendedData())
             }
         })
-        
-        socket.on("deleteTeam", async (id:number) => {
+
+        socket.on("deleteTeam", async (id: number) => {
             logger.log("deleting team", id)
             teammanager.deleteTeam(id)
-            
+
             io.to("dashboard").emit("teams", teammanager.buildExtendedTeams())
         })
-        
+
         socket.on("newTeam", async (data: TeamData) => {
             logger.debug("receiving full team", data)
             if (!data.id) { logger.warn("received bad team", data); return }
-            if (data.displaynum == "") {delete data.displaynum}
-            if (data.name == "") {delete data.name}
+            if (data.displaynum == "") { delete data.displaynum }
+            if (data.name == "") { delete data.name }
             const team = teammanager.newTeam({
-                id:data.id,
-                displaynum:data.displaynum ?? data.id.toString(),
-                alliance:data.alliance ?? 0,
+                id: data.id,
+                displaynum: data.displaynum ?? data.id.toString(),
+                alliance: data.alliance ?? 0,
                 alliancePosition: data.alliancePosition ?? 0,
-                name: data.name ?? "Team "+data.displaynum ?? data.id.toString(),
-                robotname:data.robotname,
+                name: data.name ?? "Team " + data.displaynum ?? data.id.toString(),
+                robotname: data.robotname,
                 card: Card.NONE
             })
             if (team != null) {
@@ -166,7 +168,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 io.to("dashboard").emit("team", extended)
             }
         })
-        
+
         socket.on("startMatch", async (id) => {
             const match = matchmanager.getCurrentMatch()
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
@@ -178,7 +180,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             // }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
-            
+
             ipc.start(match.getData())
             ipc.awaitResponse(["matchhold", "matchconfirm"]).then((message) => {
                 if (message.cmd == "matchhold") {
@@ -206,21 +208,38 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             probeEstops()
             io.to("dashboard").emit("abortMatch", match.getData())
         })
-        
+
         socket.on("commitMatch", (id) => {
             const match = matchmanager.getMatch(id)
             match.state = MatchState.POSTED
+
+            const handleCard = async (card: Card, teamnum: number) => {
+                if (card == Card.NONE) { return }
+                const team = teammanager.getTeam(teamnum)
+                if (team == null) { return }
+                team.card = Card.YELLOW
+                logger.log("Committing", card, "card for", teamnum)
+                io.to("dashboard").emit("team", await team.getExtendedData())
+            }
+            handleCard(match.redCards[0], match.red1)
+            handleCard(match.redCards[1], match.red2)
+            handleCard(match.redCards[2], match.red3)
+            handleCard(match.blueCards[0], match.blue1)
+            handleCard(match.blueCards[1], match.blue2)
+            handleCard(match.blueCards[2], match.blue3)
+            logger.log("Committing", id)
             // TODO: Actually commit w/ TBA
+
             io.to("dashboard").emit("match", match.getData())
         })
-        
+
         socket.on("nextMatch", (type) => {
             const newmatch = matchmanager.advanceMatches(type)
             if (newmatch != null) {
                 io.to("dashboard").emit("match", newmatch.getData())
             }
         })
-        
+
         socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))
         socket.on("unestop", (s) => handleEstop(s, false, socket.rooms.has("estop")))
 
@@ -234,7 +253,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 lunchReturnTime: settings.lunchReturnTime
             })
         })
-        
+
         socket.on("disconnect", () => {
             logger.log("disconnected", socket.id, socket.handshake.auth.role)
             if (socket.handshake.auth.role == "estop") {
@@ -256,7 +275,7 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
                 }
                 io.to("dashboard").emit("match", match.getData())
             }
-            
+
         })
 
         socket.on("undoHit", (station) => {
@@ -278,40 +297,40 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
             }
             io.to("dashboard").emit("match", match.getData())
         })
-        
-        function alert(...message:string[]) {
+
+        function alert(...message: string[]) {
             matchLogger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
     })
 
-    
-    async function pollEstopHosts():Promise<void> {
-        let complete:() => void
+
+    async function pollEstopHosts(): Promise<void> {
+        let complete: () => void
         io.to("estop").timeout(300).emit("queryEstop", (err, responses) => {
-            if (responses == null || responses.length == 0) {logger.warn("No Estop Response");return;}
+            if (responses == null || responses.length == 0) { logger.warn("No Estop Response"); return; }
             responses.forEach((data) => {
-                if (data == null) {logger.warn("No Estop Response");return;}
-                if (data.B1 != null) {handleEstop("B1", data.B1, true)}
-                if (data.B2 != null) {handleEstop("B2", data.B2, true)}
-                if (data.B3 != null) {handleEstop("B3", data.B3, true)}
-                if (data.R1 != null) {handleEstop("R1", data.R1, true)}
-                if (data.R2 != null) {handleEstop("R2", data.R2, true)}
-                if (data.R3 != null) {handleEstop("R3", data.R3, true)}
+                if (data == null) { logger.warn("No Estop Response"); return; }
+                if (data.B1 != null) { handleEstop("B1", data.B1, true) }
+                if (data.B2 != null) { handleEstop("B2", data.B2, true) }
+                if (data.B3 != null) { handleEstop("B3", data.B3, true) }
+                if (data.R1 != null) { handleEstop("R1", data.R1, true) }
+                if (data.R2 != null) { handleEstop("R2", data.R2, true) }
+                if (data.R3 != null) { handleEstop("R3", data.R3, true) }
             })
             complete()
-            
+
         })
-        const success:Promise<void> = new Promise((resolve, reject) => {
+        const success: Promise<void> = new Promise((resolve, reject) => {
             complete = resolve;
         })
-        const timeout:Promise<void> = new Promise((resolve, reject) => {
+        const timeout: Promise<void> = new Promise((resolve, reject) => {
             setTimeout(() => resolve(), 300);
         });
 
-        return Promise.race([success,timeout])
+        return Promise.race([success, timeout])
 
-        
+
     }
 
     setInterval(() => {
@@ -325,9 +344,9 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         }
     }, 50)
 
-    
+
     return {
-        emitDsStatus(statuses:ExtendedDsStatuses) {
+        emitDsStatus(statuses: ExtendedDsStatuses) {
             io.emit("dsStatus", statuses)
         },
         setLight(light: StackLightColor, state: StackLightState) {
@@ -336,10 +355,10 @@ export default function startServer(server: http.Server, ipc:IPCClient) {
         },
         pollEstopHosts,
         emitHitStatus(station: DriverStation, state: RobotHitState) {
-            io.to(["robot", "dashboard"]).emit("robotHitState",station, state)
+            io.to(["robot", "dashboard"]).emit("robotHitState", station, state)
         }
     }
-    
+
 }
 
 

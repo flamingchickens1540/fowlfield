@@ -3,22 +3,30 @@
 	const { redScoreBreakdown, blueScoreBreakdown } = matchData;
 	import Foul from "./components/Foul.svelte";
 	import CustomFoul from "./components/CustomFoul.svelte";
-	import { calculatePointBreakdown } from "@fowlutils/scores";
+	import { calculateAlliancePoints, calculatePointBreakdown } from "@fowlutils/scores";
+	import Card from "./components/Card.svelte";
 </script>
 
 <main>
-	<h1>Teams</h1>
-	
+	<h1>Match Review</h1>
+	<div class="reviewcontainer">
+		<div>
+			<h2>Red Points - {calculateAlliancePoints($redScoreBreakdown)}</h2>
+		</div>
+		<div>
+			<h2>Blue Points - {calculateAlliancePoints($blueScoreBreakdown)}</h2>
+		</div>
+	</div>
 	<div class="reviewcontainer">
 		<div>
 			<h2>Red Bunnies</h2>
-			<h4>Auto</h4>
+			<h3>Auto</h3>
 			<div class=bunnycounter>
 				<button class="red-button" on:click={() => $redScoreBreakdown.autoBunnyCount--}>-</button>
 				<input type="number" bind:value={$redScoreBreakdown.autoBunnyCount} />
 				<button class="green-button" on:click={() => $redScoreBreakdown.autoBunnyCount++}>+</button>
 			</div>
-			<h4>Endgame</h4>
+			<h3>Endgame</h3>
 			<div class=bunnycounter>
 				<button class="red-button" on:click={() => $redScoreBreakdown.finalBunnyCount--}>-</button>
 				<input type="number" bind:value={$redScoreBreakdown.finalBunnyCount} />
@@ -27,13 +35,13 @@
 		</div>
 		<div>
 			<h2>Blue Bunnies</h2>
-			<h4>Auto</h4>
+			<h3>Auto</h3>
 			<div class=bunnycounter>
 				<button class="red-button" on:click={() => $blueScoreBreakdown.autoBunnyCount--}>-</button>
 				<input type="number" bind:value={$blueScoreBreakdown.autoBunnyCount} />
 				<button class="green-button" on:click={() => $blueScoreBreakdown.autoBunnyCount++}>+</button>
 			</div>
-			<h4>Endgame</h4>
+			<h3>Endgame</h3>
 			<div class=bunnycounter>
 				<button class="red-button" on:click={() => $blueScoreBreakdown.finalBunnyCount--}>-</button>
 				<input type="number" bind:value={$blueScoreBreakdown.finalBunnyCount} />
@@ -62,24 +70,44 @@
 	</div>
 
 	<div class="reviewcontainer">
-		// TODO: Implement
 		<div>
-			<h2>Cards against red</h2>
-			
+			<h2>Cards - Red Alliance</h2>
+			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:80px>
+				<Card isRedAlliance={true} stationid={1}></Card>
+				<Card isRedAlliance={true} stationid={2}></Card>
+				<Card isRedAlliance={true} stationid={3}></Card>
+			</div>
 		</div>
 		<div>
-			<h2>Cards against blue</h2>
+			<h2>Cards - Blue Alliance</h2>
+			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:80px>
+			<Card isRedAlliance={false} stationid={1}></Card>
+			<Card isRedAlliance={false} stationid={2}></Card>
+			<Card isRedAlliance={false} stationid={3}></Card>
+			</div>
 		</div>
 	</div>
-	
-	
+
 </main>
 
 <style lang="scss">
+	main {
+		padding-bottom:50px;
+	}
 	.reviewcontainer {
 		display:grid;
-		grid-template-columns: auto auto;
+		grid-template-columns: 1fr 1fr;
 		margin-bottom: 30px;
+		> * {
+			&:nth-child(1) {
+				background-color: #380000;
+			}
+
+			&:nth-child(2) {
+				background-color: #001638;
+			}
+			border: 1px white dashed;
+		}
 	}
 	.bunnycounter {
 		.red-button {

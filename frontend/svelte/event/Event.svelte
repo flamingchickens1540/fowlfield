@@ -5,13 +5,15 @@
     import socket from "@socket";
 	import { derived, get } from "svelte/store";
 	import writableDerived from "svelte-writable-derived";
+	import {Card} from "@fowltypes";
     
     let nextTeam:TeamData = {
         name: "",
         displaynum: "",
         alliance: 0,
         alliancePosition:0,
-        id: null
+        id: null,
+        card:Card.NONE
     }
     function addTeam() {
         socket.emit("newTeam", {
@@ -20,7 +22,8 @@
             alliance: parseInt(nextTeam.alliance as any) as any,
             alliancePosition:parseInt(nextTeam.alliancePosition as any) as any,
             robotname: nextTeam.robotname,
-            id:nextTeam.id
+            id:nextTeam.id,
+            card:Card.NONE
         })
         nextTeam = {
             name: "",
@@ -28,7 +31,8 @@
             alliance: 0,
             alliancePosition:0,
             robotname: "",
-            id: null
+            id: null,
+            card:Card.NONE
         }
     }
 
@@ -64,7 +68,8 @@
             <div class=tableitem>Name</div>
             <div class=tableitem>Robot Name</div>
             <div class=tableitem>Alliance</div>
-            <div class=tableitem></div>
+            <div class=tableitem>Playoff Pos</div>
+            <div class=tableitem>Card</div>
             <div class=tableitem></div>
         </div>
         {#key $teamList}
@@ -132,7 +137,7 @@
     }
     #teamlist {
         display:grid;
-        grid-template-columns:100px 100px auto auto 150px 150px 50px; 
+        grid-template-columns:100px 100px auto auto 150px 150px 150px 50px; 
         grid-auto-flow: row;
     }
     
