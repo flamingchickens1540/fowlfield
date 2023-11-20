@@ -1,15 +1,15 @@
 
 
-import axios from "axios"
-import {tba} from "../../secrets.json"
-import crypto from "crypto"
-import { TbaTeamNumber, TbaEventInfo, TbaPlayoffAlliances, TbaMatch, TbaRankings, TbaRanking, TbaAlliance, TbaPlayoffType } from "./types"
-import { MatchState, MatchData, MatchID, TeamData } from '@fowltypes';
-import { categorizeAlliances, getCompLevel, getMatchTitle } from '@fowlutils/index';
-import { buildStats } from "models/teams";
-import { buildExtendedTeams, getTeams } from "teammanager";
+import { MatchData, MatchID, MatchState, TeamData } from '@fowltypes';
+import { categorizeAlliances, getMatchTitle } from '@fowlutils/index';
+import { calculateScoringInfo } from '@fowlutils/scores';
+import axios from "axios";
+import crypto from "crypto";
 import rootLogger from "logger";
-import { getMatches } from "matchmanager";
+import { getMatches } from "managers/matchmanager";
+import { buildExtendedTeams, getTeams } from "managers/teammanager";
+import { tba } from "../../secrets.json";
+import { TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaTeamNumber } from "./types";
 
 const logger = rootLogger.getLogger("tba")
 
@@ -44,7 +44,7 @@ interface Endpoints {
     "media/add": never;
 }
 
-async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]) {
+async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]):Promise<boolean> {
     const path = `/api/trusted/v1/event/${eventCode}/${endpoint}`
     const signature = crypto.createHash('md5').update(tba.secret + path + JSON.stringify(body)).digest('hex')
     let response;
@@ -54,14 +54,18 @@ async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]) 
                 'X-TBA-Auth-Sig': signature
             }
         })
-        logger.log(response.status, response.statusText, path)
+        logger.log(response.status, response.statusText, path, body)
+        if (response.status == 200) {
+            return true
+        }
     } catch (e) {
         logger.error("Request to", path, "failed.", e.response?.status, e.response?.statusText, e.response?.data)
     }
+    return false
 }
 
 
-export async function updateEventInfo(teams: TeamData[]=Object.values(getTeams())) {
+export async function updateEventInfo(teams: TeamData[] = Object.values(getTeams())) {
     const remap_teams = {}
     teams.forEach(({ id, displaynum }) => {
         if (id.toString() != displaynum && !displaynum.endsWith("A")) {
@@ -74,7 +78,7 @@ export async function updateEventInfo(teams: TeamData[]=Object.values(getTeams()
         webcasts: [
             // { url: "https://team1540.org/bunnybots" }
         ],
-        playoff_type:TbaPlayoffType.DOUBLE_ELIM_4_TEAM,
+        playoff_type: TbaPlayoffType.DOUBLE_ELIM_4_TEAM,
         remap_teams
     }
 
@@ -88,22 +92,21 @@ export async function updateEventTeams() {
     await updateEventInfo(teams)
 }
 
-export async function updateAlliances() {
+export async function updateAlliances():Promise<boolean> {
     const teams = Object.values(getTeams())
     const alliances = categorizeAlliances(teams)
     const body = alliances.map((alliance) => {
         const teams = alliance.map((team) => getTBATeamNumber(team))
-        
-        return teams.filter((element) => element != "frc0").reverse()
+        return teams.filter((element) => element != "frc0")
     })
-    await post("alliance_selections/update", body)
+    return await post("alliance_selections/update", body)
 }
 
-export async function reset(...fields:('alliance'|'team'|'match'|'ranking')[]) {
+export async function reset(...fields: ('alliance' | 'team' | 'match' | 'ranking')[]) {
     if (fields.includes("alliance")) await post("alliance_selections/update", [])
     if (fields.includes("team")) await post("team_list/update", [])
-    if (fields.includes("match")) await post("matches/delete", Object.values(getMatches()).map((match) => match.id as any))
-    if (fields.includes("ranking")) await post("rankings/update", {breakdowns: [], rankings:[]})
+    if (fields.includes("match")) await post("matches/delete", Object.values(getMatches()).map((match) => match.id.toLowerCase() as any))
+    if (fields.includes("ranking")) await post("rankings/update", { breakdowns: [], rankings: [] })
 
 }
 export async function updateRankings() {
@@ -115,7 +118,7 @@ export async function updateRankings() {
         wins: team.matchStats.win,
         losses: team.matchStats.loss,
         ties: team.matchStats.tie,
-        played: team.matchStats.loss+team.matchStats.win+team.matchStats.tie,
+        played: team.matchStats.loss + team.matchStats.win + team.matchStats.tie,
         qual_average: 0,
         dqs: 0,
         "Ranking Score": team.matchStats.rp,
@@ -135,48 +138,61 @@ export async function updateRankings() {
     }
     await post("rankings/update", body)
 }
+function matchToTBAMatch(match: MatchData): TbaMatch {
+    const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
+    const { redBreakdown, redScore, blueBreakdown, blueScore } = calculateScoringInfo(match)
 
+    return {
+        comp_level: match.type == "qualification" ? "qm" : decodedMatchId[1] as any,
+        set_number: match.type == "qualification" ? 1 : parseInt(decodedMatchId[2]),
+        match_number: match.type == "qualification" ? match.matchNumber : parseInt(decodedMatchId[3]),
+        score_breakdown: {
+            red: {
+                rp: redScore > blueScore ? redScore + blueScore : redScore,
+                teleopPoints: redBreakdown.targetHits + redBreakdown.finalBunny,
+                totalPoints: redScore,
+                techFoulCount: 0, // TODO: Implement once penalties are done
+                foulCount: 0,
+                foulPoints: 0,
+                adjustPoints: 0,
+                mobilityRobot1: match.redScoreBreakdown.autoTaxiBonus[0] ? "Yes" : "No",
+                mobilityRobot2: match.redScoreBreakdown.autoTaxiBonus[1] ? "Yes" : "No",
+                mobilityRobot3: match.redScoreBreakdown.autoTaxiBonus[2] ? "Yes" : "No",
+                autoMobilityPoints: redBreakdown.autoTaxi,
+                endGameParkPoints: redBreakdown.endgamePark,
+                autoPoints: redBreakdown.autoTaxi + redBreakdown.autoBunny
+
+            },
+            blue: {
+                rp: blueScore > redScore ? redScore + blueScore : blueScore,
+                teleopPoints: blueBreakdown.targetHits + blueBreakdown.finalBunny,
+                totalPoints: blueScore,
+                techFoulCount: 0, // TODO: Implement once penalties are done
+                foulCount: 0,
+                foulPoints: 0,
+                adjustPoints: 0,
+                mobilityRobot1: match.blueScoreBreakdown.autoTaxiBonus[0] ? "Yes" : "No",
+                mobilityRobot2: match.blueScoreBreakdown.autoTaxiBonus[1] ? "Yes" : "No",
+                mobilityRobot3: match.blueScoreBreakdown.autoTaxiBonus[2] ? "Yes" : "No",
+                autoMobilityPoints: blueBreakdown.autoTaxi,
+                endGameParkPoints: blueBreakdown.endgamePark,
+                autoPoints: blueBreakdown.autoTaxi + blueBreakdown.autoBunny
+            }
+        },
+        alliances: {
+            red: new TbaAlliance(match.red1, match.red2, match.red3, redScore),
+            blue: new TbaAlliance(match.blue1, match.blue2, match.blue3, blueScore)
+        },
+        time_string: new Date(match.startTime).toLocaleTimeString("en-us", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }),
+        // time_utc: new Date(match.matchStartTime).toISOString(),
+        // time_utc:"2008-01-02T10:30:00.000Z",
+        display_name: getMatchTitle(match)
+    }
+}
 export async function updateMatches() {
     const data: TbaMatch[] = Object.values(getMatches())
         .filter((match) => match.state == MatchState.POSTED)
-        .map((match) => {
-            const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
-            const redWon =match.redScore > match.blueScore
-            return {
-                comp_level: match.type == "qualification" ? "qm":decodedMatchId[1] as any,
-                set_number: match.type == "qualification" ? 1 : parseInt(decodedMatchId[2]),
-                match_number: match.type == "qualification" ? match.matchNumber : parseInt(decodedMatchId[3]),
-                score_breakdown: {
-                    red: {
-                        rp: match.redScore > match.blueScore ? match.redScore + match.blueScore : match.redScore,
-                        teleopPoints: 0,
-                        totalPoints: match.redScore,
-                        techFoulCount:0,
-                        foulCount: 0,
-                        foulPoints: 0,
-                        adjustPoints:0
-                        
-                    },
-                    blue: {
-                        rp: match.blueScore > match.redScore ? match.redScore + match.blueScore : match.blueScore,
-                        teleopPoints: 0,
-                        totalPoints: match.blueScore,
-                        techFoulCount:0,
-                        foulCount: 0,
-                        foulPoints: 0,
-                        adjustPoints:0
-                    }
-                },
-                alliances: {
-                    red: new TbaAlliance(match.red1, match.red2, match.red3, match.redScore),
-                    blue: new TbaAlliance(match.blue1, match.blue2, match.blue3, match.blueScore)
-                },
-                time_string: new Date(match.startTime).toLocaleTimeString("en-us", { hour: "numeric", minute: "2-digit", timeZone: "America/Los_Angeles" }),
-                // time_utc: new Date(match.matchStartTime).toISOString(),
-                // time_utc:"2008-01-02T10:30:00.000Z",
-                display_name: getMatchTitle(match)
-            }
-        })
+        .map(matchToTBAMatch)
     // resetMatches(matches)
     await post("matches/update", data)
 }

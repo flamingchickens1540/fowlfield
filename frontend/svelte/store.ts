@@ -1,9 +1,10 @@
 import { derived, writable, type Readable, type Writable } from "svelte/store";
-import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses } from '@fowltypes';
+import { MatchState, type MatchData, MatchPeriod, type ExtendedTeam, type DSStatuses, Card } from '@fowltypes';
 import { FowlMatchStore, getFowlTeamStore, getReadonlyStore, gettableStore, SocketDataStore, type WritableTeamData } from "./socketStore";
 import { getMatchPeriod, getRemainingTimeInPeriod, getElapsedTimeInPeriod, getRemainingTimeInDisplayPeriod } from "@fowlutils/match_timer";
 import socket from "@socket";
 import type { AllianceStationStatus, EventInfo, ExtendedDsStatuses } from "@fowltypes";
+import { calculateAlliancePoints, calculateScoringInfo } from '../../common/utils/scores';
 
 
 
@@ -23,8 +24,8 @@ const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchDat
     startTime: new FowlMatchStore("startTime", 0),
     state: new FowlMatchStore("state", MatchState.PENDING),
 
-    redScore: new FowlMatchStore("redScore", 0),
-    blueScore: new FowlMatchStore("blueScore", 0),
+    redScoreBreakdown: new FowlMatchStore("redScoreBreakdown", {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]}),
+    blueScoreBreakdown: new FowlMatchStore("blueScoreBreakdown", {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]}),
     redAlliance: new FowlMatchStore("redAlliance", 0),
     blueAlliance: new FowlMatchStore("blueAlliance", 0),
 
@@ -39,6 +40,8 @@ const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchDat
     blue1: new FowlMatchStore("blue1", 0),
     blue2: new FowlMatchStore("blue2", 0),
     blue3: new FowlMatchStore("blue3", 0),
+    redCards: new FowlMatchStore("redCards", [Card.NONE,Card.NONE,Card.NONE]),
+    blueCards: new FowlMatchStore("blueCards", [Card.NONE,Card.NONE,Card.NONE]),
 };
 
 
@@ -84,7 +87,6 @@ export const eventData = new SocketDataStore<EventInfo>({
 
 export function updateTimeOffset(time:number) {
     serverTimeOffset = Date.now() - time
-    console.log(serverTimeOffset)
 }
 
 export function startMatch() {
@@ -128,7 +130,6 @@ export function updateTeamList(data:{[key:number]:ExtendedTeam}) {
         Object.values(data).forEach(element => {
             list[element.id] = getFowlTeamStore(element)
         });
-        console.log("TEMAUD", list)
         return list
     })
 }
@@ -146,7 +147,6 @@ export function updateTeamStores(data:ExtendedTeam) {
 }
 
 export function updateMatchList(data:{[key:string]:MatchData}) {
-    console.log(data)
     matchList.set(data)
 }
 export function updateMatchStores(data: MatchData) {
@@ -158,8 +158,9 @@ export function updateMatchStores(data: MatchData) {
 }
 
 
-const matchData: { [key in keyof MatchData]: Writable<MatchData[key]> } = {
+const matchData: { [key in keyof MatchData]: Writable<MatchData[key]> } & {redScore:Readable<number>, blueScore:Readable<number>} = {
     ...matchDataPrivate,
-    // state:matchDataPrivate.state
+    redScore:derived(matchDataPrivate.redScoreBreakdown, (b, set) => {set(calculateAlliancePoints(b))}),
+    blueScore:derived(matchDataPrivate.blueScoreBreakdown, (b, set) => {set(calculateAlliancePoints(b))})
 }
 export default matchData

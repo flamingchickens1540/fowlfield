@@ -1,5 +1,5 @@
 node_modules
-backend/index.cjs
+backend/index.cjs*
 frontend/dist
 data
 backend/secrets.json

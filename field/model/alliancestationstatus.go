@@ -6,6 +6,7 @@ type AllianceStationStatus struct {
 	RobotConnected  bool    `json:"robotConnected"`
 	Enabled         bool    `json:"enabled"`
 	IsAuto          bool    `json:"isAuto"`
+	IsTempStopped   bool    `json:"isTempStopped"`
 	TripTime        int     `json:"tripTime"`
 	MissedPackets   int     `json:"missedPackets"`
 	Bypassed        bool    `json:"bypassed"`

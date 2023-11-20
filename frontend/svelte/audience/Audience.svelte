@@ -2,22 +2,23 @@
 	import { eventData } from "@store";
 	import Match from "./components/Match.svelte";
 	import Message from "./components/Message.svelte";
-	import { crossfade, fade } from "svelte/transition";
-	import { quintOut } from 'svelte/easing';
 
-	let element = Message
+	let shown = "match";
 
-
-	eventData.subscribe(({atLunch}) => {
+	eventData.subscribe(({ atLunch }) => {
 		if (atLunch) {
-			element = Message
+			shown = "msg"
 		} else {
-			element = Match
+			shown = "match"
 		}
-	})
-
+	});
 </script>
 
-<div >
-	<svelte:component  this={element}/>
+
+<div style="display:{shown == "msg" ? "contents": "none"}">
+	<Message></Message>
+</div>
+
+<div style="display:{shown == "match" ? "contents": "none"}">
+	<Match></Match>
 </div>

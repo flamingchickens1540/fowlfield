@@ -1,16 +1,17 @@
 
 import { MatchData, PartialMatch } from "@fowltypes";
 import * as db from "./db";
-import * as matchmanager from "../matchmanager"
+import * as matchmanager from "../managers/matchmanager"
 
 
 export class DBMatch {
     get id() {return this.data.id}
     
-    get redScore() {return this.data.redScore}
-    set redScore(value) {this.update({id:this.data.id, redScore:value})}
-    get blueScore() {return this.data.blueScore}
-    set blueScore(value) {this.update({id:this.data.id, blueScore:value})}
+    get redScoreBreakdown() {return this.data.redScoreBreakdown}
+    set redScoreBreakdown(value) {this.update({id:this.data.id, redScoreBreakdown:value})}
+
+    get blueScoreBreakdown() {return this.data.blueScoreBreakdown}
+    set blueScoreBreakdown(value) {this.update({id:this.data.id, blueScoreBreakdown:value})}
     
     get type() {return this.data.type}
     set type(value) {this.update({id:this.data.id, type:value})}
@@ -47,6 +48,11 @@ export class DBMatch {
 
     get state() {return this.data.state}
     set state(value) {this.update({id:this.data.id, state:value})}
+
+    get redCards() {return this.data.redCards}
+    set redCards(value) {this.update({id:this.data.id, redCards:value})}
+    get blueCards() {return this.data.blueCards}
+    set blueCards(value) {this.update({id:this.data.id, blueCards:value})}
 
     constructor(private data:MatchData){}
     

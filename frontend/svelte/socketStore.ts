@@ -45,6 +45,7 @@ export function getFowlTeamStore(data:ExtendedTeam): WritableTeamData {
         robotname: gettableStore(data.robotname ?? ""),
         alliance: gettableStore(data.alliance),
         alliancePosition: gettableStore(data.alliancePosition),
+        card: gettableStore(data.card),
     }
 
     const readonlyprops = {

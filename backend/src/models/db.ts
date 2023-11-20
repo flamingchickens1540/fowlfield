@@ -1,7 +1,7 @@
 import { mongo } from "../../secrets.json"
 import mongoDB from "mongodb"
 import { DBMatch } from "./matches";
-import { ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from "@fowltypes";
+import { Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from "@fowltypes";
 import { DBSettings, Settings } from "models/settings";
 import { DBTeam, buildStats } from "models/teams";
 import rootLogger from "logger";
@@ -46,10 +46,36 @@ export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "
         rp: 0,
         avg_score:0
     }
-    
     for await (const match of matches.find({ $or: [{ red1: team }, { red2: team }, { red3: team }, { blue1: team }, { blue2: team }, { blue3: team }] })) {
-        const isRed = team == match.red1 || team == match.red2 || team == match.red3;
-        buildStats(match, isRed, stats)
+        let isRed = false;
+        let card = Card.NONE;
+        switch (team) {
+            case match.red1: 
+                isRed = true;
+                card = match.redCards[0];
+                break;
+            case match.red2: 
+                isRed = true;
+                card = match.redCards[1];
+                break;
+            case match.red3: 
+                isRed = true;
+                card = match.redCards[2];
+                break;
+            case match.blue1: 
+                isRed = false;
+                card = match.blueCards[0];
+                break;
+            case match.blue2: 
+                isRed = false;
+                card = match.blueCards[1];
+                break;
+            case match.blue3: 
+                isRed = false;
+                card = match.blueCards[2];
+                break;
+        }
+        buildStats(match, isRed, card == Card.RED, stats)
     }
     return {
         matchStats: stats

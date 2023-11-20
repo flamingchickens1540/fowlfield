@@ -1,156 +1,78 @@
-<script lang="ts">
-	import type { TeamData } from "../../common/types";
-	import {
-		derived,
-		writable,
-		type Readable,
-		type Writable,
-	} from "svelte/store";
-	import { teams } from "../store";
-	import { PlayoffAlliance } from "../../common/alliances";
-	import { backend_url } from "../../secrets";
-  import { fade, fly, slide } from "svelte/transition";
-
-	const alliances: Writable<TeamData[][]> = writable([]);
-	function updateAlliances() {
-		fetch(backend_url + "/api/alliances").then(async (data) => {
-			$alliances = await data.json();
-		});
-	}
-	updateAlliances()
-	teams.subscribe((value) => {
-		updateAlliances()
+<script lang=ts context=module>
+	import { teamList } from "@store";
+	import { derived } from "svelte/store";
+	export const alliances = derived(teamList, ($teamList) => {
+		const list = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
+		Object.values($teamList).forEach((team) => {
+			if (team.alliance.get() == 0 || team.alliancePosition.get() == 0) {return}
+			list[team.alliance.get()-1][team.alliancePosition.get()-1] = team.id
+		})
+		return list
 	})
-	let sortedTeams: Readable<TeamData[]> = derived(teams, ($teams) =>
-		$teams
-			.filter((team) => team.playoffAlliance == PlayoffAlliance.NONE)
-			.sort((a, b) => b.rankingPoints - a.rankingPoints)
-	);
 </script>
 
-<div id="alliances">
-	<h1>Alliances</h1>
-	<div id="allianceGrid">
-		{#each $alliances as alliance, i}
-			<div class="alliance-box">
-				<h2>Alliance {i + 1}</h2>
-				<div class=alliance-teams>
-				{#each alliance as team}
-					<div transition:fade class="alliance-member">
-						<p>{team.display_id}</p>
-					</div>
-				{/each}
-			</div>
-			</div>
-		{/each}
+<script lang=ts>
+	import AllianceItem from "./components/AllianceItem.svelte";
+	import socket from "@socket";
+	import { onMount } from "svelte";
+
+	let tbabutton:HTMLButtonElement;
+	
+	onMount(() => {
+		alliances.subscribe(() => tbabutton.disabled = false)
+		tbabutton.addEventListener("click", () => {
+			socket.emit("commitAlliances", (success) => {
+				tbabutton.disabled = success;
+			})
+		})
+	})
+</script>
+
+<datalist id="teams">
+	{#each Object.values($teamList) as team}
+		{#if team.alliance.get() == 0}
+			<option value={team.displaynum.get()}></option>
+		{/if}
+	{/each}
+</datalist>
+
+<h1>Alliance Selection</h1>
+<div id=alliance-display>
+	<div id=header>
+		<div>Alliance</div>
+		<div>Captain</div>
+		<div>1st Pick</div>
+		<div>2nd Pick</div>
+		<div>3rd Pick</div>
 	</div>
+	<AllianceItem index={0}></AllianceItem>
+	<AllianceItem index={1}></AllianceItem>
+	<AllianceItem index={2}></AllianceItem>
+	<AllianceItem index={3}></AllianceItem>
 </div>
 
-<div id="team-display">
-	<h1>Available Teams</h1>
-	<div id="teamGrid">
-		{#each $sortedTeams as team, i}
-			<div class="team-box" transition:slide|local>
-				<p><strong>{i + 1})</strong> {team.display_id}</p>
-			</div>
-		{/each}
-	</div>
-</div>
-<footer />
+<button bind:this={tbabutton}>Publish to TBA</button>
 
-<style lang="scss">
-	p {
-		color: black;
+<style lang=scss>
+	button {
+		margin-top:80px;
+		background-color:#4555a5;
+		margin-bottom:20px;
+		font-size:30px;
+		padding:20px;
 	}
-	#allianceGrid {
+	#alliance-display {
 		display:grid;
-
-		grid-template-columns: repeat(2, 50%);
-		grid-template-rows: repeat(2, 40vh);
-		.alliance-box {
-			background-color:#f7dc99;
-			padding:10px;
-			margin:20px;
-			border-radius: 10px;
-			display:flex;
-			flex-direction: column;
-		}
-		.alliance-member {
-			text-align: center;
-			position:relative;
-			p {
-				margin:0;
-				position:absolute;
-				top:50%;
-				left:50%;
-				transform: translate(-50%, -50%);
-				font-size:40px;
+		grid-auto-flow: row;
+		grid-template-columns: 200px auto auto auto auto;
+		grid-gap: 1em;
+		#header {
+			display:contents; 
+			font-size:30px;
+			> * {
+				margin-top:20px;
+				margin-bottom:20px;
 			}
 		}
-		P {
-			font-size:25px;
-		}
-		h2 {
-			font-size:50px;
-		}
-		
-	}
-	.alliance-teams {
-		flex: 1;
-		display:grid;
-		grid-template-rows:auto auto;
-		grid-template-columns: auto auto;
-	}
-	#teamGrid {
-		display: grid;
-		grid-template-columns: repeat(3, auto);
-		grid-template-rows: repeat(8, auto);
-		grid-auto-flow: column;
-	}
-	.team-box {
-		display: block;
-		border-radius: 25px;
-		text-align: left;
-		padding-left: 20px;
-		font-size: 50px;
-		p {
-			line-height: 100%;
-			margin: 2.6vh;
-		}
-		strong {
-			font-weight: 900;
-		}
-	}
-
-	
-	#team-display {
-		position: absolute;
-		left: 51vw;
-		right: 1vw;
-		top: 1vw;
-		bottom: 1vw;
-		text-justify: auto;
-		background-color: #f7dc99;
-		justify-content: center;
-		border-radius: 25px;
-		align-items: center;
-	}
-
-	#alliances {
-		position: absolute;
-		left: 1vw;
-		right: 51vw;
-		top: 1vw;
-		bottom: 1vw;
-		background-color: #eea19c;
-		border-radius: 20px;
-
-	}
-	h2 {
-		color: black;
-	}
-
-	h1 {
-		color: black;
 	}
 </style>

@@ -18,6 +18,10 @@ func processCommand(client *NodeIPC, cmd string, message model.IPCData) {
 		startMatch(client, *message.Match)
 	case "unestop":
 		setEstop(client, *message.AllianceStation, false)
+	case "disableTemp":
+		setTstop(client, *message.AllianceStation, true)
+	case "enableTemp":
+		setTstop(client, *message.AllianceStation, false)
 	}
 
 }
@@ -29,6 +33,10 @@ func loadMatch(match model.Match) {
 
 func setEstop(client *NodeIPC, station string, estopped bool) {
 	arena.HandleEstop(station, estopped)
+	client.SendDsStatus(arena.GetAllianceStationStatuses())
+}
+func setTstop(client *NodeIPC, station string, stopped bool) {
+	arena.HandleTemporaryStop(station, stopped)
 	client.SendDsStatus(arena.GetAllianceStationStatuses())
 }
 

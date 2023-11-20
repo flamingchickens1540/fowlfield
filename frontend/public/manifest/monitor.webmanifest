@@ -1,0 +1,16 @@
+{
+    "theme_color": "#242424",
+    "background_color": "#242424",
+    "display": "fullscreen",
+    "start_url": "/monitor",
+    "name": "FowlField Monitor",
+    "orientation":"landscape",
+    "short_name": "Monitor",
+    "icons": [
+        {
+            "src": "/manifest/monitor.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

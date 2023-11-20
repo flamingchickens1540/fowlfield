@@ -1,8 +1,7 @@
-import { ClientToServerEvents, DSStatuses, DriverStation, ExtendedDsStatuses, MatchState, ServerToClientEvents, StackLightColor, StackLightState } from "@fowltypes";
+import { DSStatuses, DriverStation, ExtendedDsStatuses, MatchState, StackLightColor, StackLightState } from "@fowltypes";
 import { IPCClient } from "ipc/ipc";
-import { Server } from "socket.io";
-import { getCurrentMatch } from './matchmanager';
 import rootLogger from "logger";
+import { getCurrentMatch } from './matchmanager';
 let lightSetter: (light: StackLightColor, state: StackLightState) => void
 let estopProber: () => Promise<void>;
 let ipcClient: IPCClient

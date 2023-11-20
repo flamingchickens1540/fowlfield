@@ -75,7 +75,14 @@ export class IPCClient {
     unestop(station:DriverStation) {
         this.send('unestop', {alliancestation:station});
     }
-    
+
+    tempDisable(station:DriverStation) {
+        this.send('disableTemp', {alliancestation:station});
+    }
+    tempEnable(station:DriverStation) {
+        this.send('enableTemp', {alliancestation:station});
+    }
+
     async awaitResponse(commands:string[], timeout:number=100):Promise<IPCMessage> {
         let promises:Promise<IPCMessage>[] = []
         for (let command of commands) {
