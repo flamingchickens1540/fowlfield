@@ -14,8 +14,10 @@ import { handleEstop } from './managers/statusmanager';
 import { instrument } from "@socket.io/admin-ui"
 import { DBSettings } from 'models/settings';
 import { hitmanager } from 'managers';
-const matchLogger = logger.getLogger("match")
 
+import * as tba from "./tba/index";
+
+const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 
@@ -93,6 +95,10 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
                 atLunch: settings.atLunch,
                 lunchReturnTime: settings.lunchReturnTime
             })
+        })
+
+        socket.on("commitAlliances", async (cb) => {
+            cb(await tba.updateAlliances())
         })
 
         socket.on("preloadMatch", (id: string) => {
@@ -229,6 +235,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             handleCard(match.blueCards[2], match.blue3)
             logger.log("Committing", id)
             // TODO: Actually commit w/ TBA
+            // tba.updateMatches()
 
             io.to("dashboard").emit("match", match.getData())
         })

@@ -73,4 +73,5 @@ export interface ClientToServerEvents {
     undoHit(station:DriverStation):void
 
     getHitStates(cb:(states:{[key in DriverStation]:RobotHitState}) => void):void
+    commitAlliances(cb:(ok:boolean) => void):void
 }

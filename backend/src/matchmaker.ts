@@ -40,7 +40,7 @@ export class MatchMaker {
     advanceQualsMatch(): DBMatch {
         this.matchNum++;
         return matchmanager.newMatch({
-            id: `QM${this.matchNum}`,
+            id: `qm${this.matchNum}`,
             matchNumber: this.matchNum,
             elimRound: 0,
             elimGroup: 0,

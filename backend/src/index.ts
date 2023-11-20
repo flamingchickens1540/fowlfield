@@ -39,7 +39,7 @@ async function configure() {
     registerDSStatus = statusmanager.configure(socketCallbacks.setLight, ipc, socketCallbacks.pollEstopHosts).registerDSStatus
     hitmanager.configureHitManager(ipc, socketCallbacks.emitHitStatus)
     ipc.load(matchmanager.getCurrentMatch().getData())
-    // await tba.reset("alliance", "match", "ranking") // TODO: Remove this when teams are finalized
+    // await tba.reset("match") // TODO: Remove this when teams are finalized
     await tba.updateEventTeams()
     // await tba.updateAlliances()
     // await tba.updateMatches()
