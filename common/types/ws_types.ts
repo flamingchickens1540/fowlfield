@@ -41,9 +41,9 @@ export interface ServerToClientEvents {
 
     robotHitState(ds:DriverStation, hitState:RobotHitState):void
 
-    queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void)
-    setLight(color:StackLightColor, state:StackLightState)
-    
+    queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void):void
+    setLight(color:StackLightColor, state:StackLightState):void
+    setBucketState(state:number):void
 }
 
 export interface ClientToServerEvents {

@@ -1,4 +1,4 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState, Card } from '@fowltypes';
+import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState, Card, BucketPattern } from '@fowltypes';
 import * as http from "http";
 import { Server } from "socket.io";
 import consts from "../secrets.json";
@@ -13,7 +13,7 @@ import { isMatchReady, probeEstops } from 'managers/statusmanager';
 import { handleEstop } from './managers/statusmanager';
 import { instrument } from "@socket.io/admin-ui"
 import { DBSettings } from 'models/settings';
-import { hitmanager } from 'managers';
+import { bucketmanager, hitmanager } from 'managers';
 
 import * as tba from "./tba/index";
 
@@ -42,11 +42,14 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
 
 
     io.on("connection", (socket) => {
-
+        
         if (socket.handshake.auth?.key?.trim() !== consts.socket.key) {
             socket.disconnect(true)
+            logger.log("unauthorized connection from", socket.handshake.address, socket.handshake.url, socket.handshake.auth)
             return;
         }
+        logger.log("new connection from", socket.id, socket.handshake.address, socket.handshake.auth.role ?? "default")
+
         if ((socket.handshake.auth.role ?? "") == "estop") {
             socket.join("estop")
             probeEstops()
@@ -54,48 +57,63 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             socket.join("light")
         } else if ((socket.handshake.auth.role ?? "") == "robot") {
             socket.join("robot")
+            const robot_id = socket.handshake.auth.robot_id
+            if (robot_id == null) {
+                logger.warn("Robot attempted to connect without robot_id", socket.handshake.auth)
+                socket.disconnect(true)
+                return;
+            }
+
+            if (!["R1", "R2", "R3", "B1", "B2", "B3"].includes(robot_id)) {
+                logger.warn("Robot attempted to connect without valid robot_id", socket.handshake.auth)
+                socket.disconnect(true)
+                return;
+            }
+            bucketmanager.registerBucket(robot_id, socket)
         } else {
             socket.join("dashboard")
+
+            const teams: { [key: number]: ExtendedTeam } = {}
+            const matches: { [key: string]: MatchData } = {}
+
+            Object.entries(teammanager.getTeams()).forEach(([key, team]) => {
+                teams[key] = {
+                    ...team.getData(),
+                    matches: [],
+                    matchStats: { win: 0, loss: 0, tie: 0, rp: 0 }
+                }
+            })
+            Object.entries(matchmanager.getMatches()).forEach(([key, match]) => {
+                matches[key] = match.getData()
+                const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
+                matchteams.forEach((team: number, index: number) => {
+                    if (teams[team] == null) { return }
+                    const isRed = index < 3
+                    const dq = (isRed ? match.redCards : match.blueCards)[index % 3] == Card.RED
+                    buildStats(match, isRed, dq, teams[team].matchStats)
+                })
+            });
+
+            // Send initial data
+            socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
+            socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
+            socket.emit("matches", matches)
+            socket.emit("teams", teams)
+            socket.emit("dsStatus", getDsStatus())
+            socket.emit("syncTime", Date.now()) // Account for time zone differences
+            DBSettings.getInstance().then((settings) => {
+                socket.emit("event", {
+                    atLunch: settings.atLunch,
+                    lunchReturnTime: settings.lunchReturnTime
+                })
+            })
         }
 
-        logger.log("New connection from", socket.id, socket.handshake.address, socket.handshake.url, socket.handshake.auth.role ?? "default")
+        
 
 
 
-        const teams: { [key: number]: ExtendedTeam } = {}
-        const matches: { [key: string]: MatchData } = {}
 
-        Object.entries(teammanager.getTeams()).forEach(([key, team]) => {
-            teams[key] = {
-                ...team.getData(),
-                matches: [],
-                matchStats: { win: 0, loss: 0, tie: 0, rp: 0 }
-            }
-        })
-        Object.entries(matchmanager.getMatches()).forEach(([key, match]) => {
-            matches[key] = match.getData()
-            const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
-            matchteams.forEach((team: number, index: number) => {
-                if (teams[team] == null) { return }
-                const isRed = index < 3
-                const dq = (isRed ? match.redCards : match.blueCards)[index % 3] == Card.RED
-                buildStats(match, isRed, dq, teams[team].matchStats)
-            })
-        });
-
-        // Send initial data
-        socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
-        socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
-        socket.emit("matches", matches)
-        socket.emit("teams", teams)
-        socket.emit("dsStatus", getDsStatus())
-        socket.emit("syncTime", Date.now()) // Account for time zone differences
-        DBSettings.getInstance().then((settings) => {
-            socket.emit("event", {
-                atLunch: settings.atLunch,
-                lunchReturnTime: settings.lunchReturnTime
-            })
-        })
 
         socket.on("commitAlliances", async (cb) => {
             cb(await tba.updateAlliances())
@@ -104,6 +122,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
         socket.on("preloadMatch", (id: string) => {
             matchLogger.log("preloading", id)
             const match = matchmanager.setPreloadMatch(id)
+            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
             io.to("dashboard").emit("preloadMatch", match.getData())
         })
 
@@ -111,8 +130,9 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             matchLogger.log("loading", id)
             const match = matchmanager.setLoadedMatch(id)
             hitmanager.reset()
+            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
             Object.entries(hitmanager.getStates()).forEach(([station, state]) => { // TODO: make this a little nicer with a single event
-                io.to(["robot", "dashboard"]).emit("robotHitState", station as DriverStation, state)
+                io.to("dashboard").emit("robotHitState", station as DriverStation, state)
             })
             ipc.load(match.getData())
             probeEstops().then((didSucceed) => { if (!didSucceed) alert("Estop responses not received, check online") })
@@ -131,12 +151,12 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             if (match != null) {
                 io.to("dashboard").emit("match", match.getData())
             }
-            if (data.red1 != null && data.red1 != 0) { io.emit("team", await teammanager.getTeam(data.red1).getExtendedData()) }
-            if (data.red2 != null && data.red2 != 0) { io.emit("team", await teammanager.getTeam(data.red2).getExtendedData()) }
-            if (data.red3 != null && data.red3 != 0) { io.emit("team", await teammanager.getTeam(data.red3).getExtendedData()) }
-            if (data.blue1 != null && data.blue1 != 0) { io.emit("team", await teammanager.getTeam(data.blue1).getExtendedData()) }
-            if (data.blue2 != null && data.blue2 != 0) { io.emit("team", await teammanager.getTeam(data.blue2).getExtendedData()) }
-            if (data.blue3 != null && data.blue3 != 0) { io.emit("team", await teammanager.getTeam(data.blue3).getExtendedData()) }
+            if (data.red1 != null && data.red1 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.red1).getExtendedData()) }
+            if (data.red2 != null && data.red2 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.red2).getExtendedData()) }
+            if (data.red3 != null && data.red3 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.red3).getExtendedData()) }
+            if (data.blue1 != null && data.blue1 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.blue1).getExtendedData()) }
+            if (data.blue2 != null && data.blue2 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.blue2).getExtendedData()) }
+            if (data.blue3 != null && data.blue3 != 0) { io.to("dashboard").emit("team", await teammanager.getTeam(data.blue3).getExtendedData()) }
         })
 
         socket.on("partialTeam", async (data: PartialTeam) => {
@@ -195,6 +215,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
                     alert("[IPC] Match not ready")
                 } else {
                     matchLogger.log(match.id, "start confirmed")
+                    bucketmanager.setPatternAll(BucketPattern.HITS_0)
                 }
             }).catch((reason) => {
                 alert("Did not recieve IPC response:", reason)
@@ -347,14 +368,14 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             match.state = MatchState.COMPLETE;
             probeEstops()
             matchLogger.log("Transitioning match", match.id, "to completed")
-            io.emit("match", match.getData())
+            io.to("dashboard").emit("match", match.getData())
         }
     }, 50)
 
 
     return {
         emitDsStatus(statuses: ExtendedDsStatuses) {
-            io.emit("dsStatus", statuses)
+            io.to("dashboard").emit("dsStatus", statuses)
         },
         setLight(light: StackLightColor, state: StackLightState) {
             // console.log("Setting lights", light, on)
@@ -362,7 +383,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
         },
         pollEstopHosts,
         emitHitStatus(station: DriverStation, state: RobotHitState) {
-            io.to(["robot", "dashboard"]).emit("robotHitState", station, state)
+            io.to("dashboard").emit("robotHitState", station, state)
         }
     }
 

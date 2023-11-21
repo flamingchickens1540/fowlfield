@@ -1,6 +1,7 @@
 import { IPCClient } from "ipc/ipc";
 import { DriverStation, RobotHitState } from "../../../common/types/types";
 import rootLogger from "logger";
+import { bucketmanager } from "managers";
 
 const logger = rootLogger.getLogger("hitmanager")
 let hitStates: { [key in DriverStation]: RobotHitState & { timeout: NodeJS.Timeout } } = {
@@ -40,7 +41,15 @@ let hitChangeSubscriber: (station: DriverStation, state: RobotHitState) => void
 export function configureHitManager(client: IPCClient, subscriber: (station: DriverStation, state: RobotHitState) => void) {
     ipc = client
     hitChangeSubscriber = subscriber
+}
 
+function notifySubscriber(station: DriverStation) {
+    const state = hitStates[station]
+    hitChangeSubscriber(station, {
+        count:state.count as 0|1|2|3,
+        lastDisable: state.lastDisable
+    })
+    bucketmanager.setPattern(station, state.count)
 }
 
 export function getStates(): { [key in DriverStation]: RobotHitState } {
@@ -63,18 +72,12 @@ export function registerHit(station: DriverStation): boolean {
         const t = setTimeout(() => {
             state.count = 0
             ipc.tempEnable(station)
-            hitChangeSubscriber(station, {
-                count:state.count as 0|1|2|3,
-                lastDisable: state.lastDisable
-            })
+            notifySubscriber(station)
         }, 5000)
         state.timeout = t
     }
     logger.log("registering hit for", station, state.count)
-    hitChangeSubscriber(station, {
-        count:state.count as 0|1|2|3,
-        lastDisable: state.lastDisable
-    })
+    notifySubscriber(station)
     return true
 }
 
@@ -90,7 +93,7 @@ export function undoHit(station: DriverStation) {
     }
     state.count = Math.max(Math.min(2, state.count - 1), 0) as 0 | 1 | 2 | 3
     logger.log("Undoing hit", station, state.count)
-    hitChangeSubscriber(station, state)
+    notifySubscriber(station)
 }
 
 export function reset() {
