@@ -13,9 +13,9 @@ export enum StackLightState {
 
 export enum BucketPattern {
     HITS_0, // OFF
-    HITS_1,
-    HITS_2,
     HITS_3,
+    HITS_2,
+    HITS_1,
     ALLIANCE_STATION,
     RED_ALLIANCE,
     BLUE_ALLIANCE,

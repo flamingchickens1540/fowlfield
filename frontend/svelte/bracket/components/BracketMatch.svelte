@@ -3,6 +3,7 @@
 	import { MatchState } from "../../../../common/types/types";
 	import type { Writable } from "svelte/store";
 	import LeaderLine from "leader-line-new";
+	import { calculateAlliancePoints } from "@fowlutils/scores";
 
     export let title:string
     export let id:string
@@ -13,7 +14,9 @@
     $: lossline = $lines[id]?.[1]
     $: match = $matchList[id]
 
-    $: winner = match?.state != MatchState.POSTED ? "none" : match?.redScore > match?.blueScore ? "red" : "blue" //TODO: check ties
+    $: redscore  = calculateAlliancePoints(match?.redScoreBreakdown) 
+    $: bluescore = calculateAlliancePoints(match?.blueScoreBreakdown)
+    $: winner = match?.state != MatchState.POSTED || redscore == bluescore? "none" : redscore>bluescore? "red" : "blue" //TODO: check ties
 
     $: {
         if (winner == "red") {
@@ -32,8 +35,8 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div id={id} class=fullsize style="--redweight:{winner == "red" ? 700 : "unset"};--blueweight:{winner == "blue" ? 700 : "unset"}">
     <span class=title>{title}</span>
-    <div class="red alliance">{match?.redAlliance}</div>
-    <div class="blue alliance">{match?.blueAlliance}</div>
+    <div class="red alliance">{match?.redAlliance ??""}</div>
+    <div class="blue alliance">{match?.blueAlliance ??""}</div>
     <div class="red teams">
         <span>{$teamList[match?.red1]?.displaynum.get() ?? ""}</span>
         <span>{$teamList[match?.red2]?.displaynum.get() ?? ""}</span>

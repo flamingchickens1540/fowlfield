@@ -74,6 +74,7 @@ export function getFowlTeamStore(data:ExtendedTeam): WritableTeamData {
             props.alliance.set(value.alliance)
             props.alliancePosition.set(value.alliancePosition)
             readonlyprops.matchStats.set(value.matchStats)
+            props.card.set(value.card)
             blockUpdates = false
         }
 

@@ -2,6 +2,7 @@ import { IPCClient } from "ipc/ipc";
 import { DriverStation, RobotHitState } from "../../../common/types/types";
 import rootLogger from "logger";
 import { bucketmanager } from "managers";
+import { BucketPattern } from "../../../common/types/stack_light_types";
 
 const logger = rootLogger.getLogger("hitmanager")
 let hitStates: { [key in DriverStation]: RobotHitState & { timeout: NodeJS.Timeout } } = {
@@ -49,7 +50,13 @@ function notifySubscriber(station: DriverStation) {
         count:state.count as 0|1|2|3,
         lastDisable: state.lastDisable
     })
-    bucketmanager.setPattern(station, state.count)
+    const pattern = {
+        0: BucketPattern.HITS_0,
+        1: BucketPattern.HITS_1,
+        2: BucketPattern.HITS_2,
+        3: BucketPattern.HITS_3
+    }
+    bucketmanager.setPattern(station, pattern[state.count])
 }
 
 export function getStates(): { [key in DriverStation]: RobotHitState } {

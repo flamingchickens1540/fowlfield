@@ -49,11 +49,7 @@
         blue2HitCount.set(states.B2.count);
         blue3HitCount.set(states.B3.count);
     });
-	$: {
-		Object.values($teamList).forEach((team) => {
-			teamNumberMap[team.id] = team.displaynum.get();
-		});
-	}
+
 
 	const icons: { [key in MatchPeriod]: string } = {
 		[MatchPeriod.PREMATCH]: "hourglass_top",
