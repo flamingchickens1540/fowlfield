@@ -24,12 +24,12 @@
             loserTo:{match:4, alliance:"blue"},
         },
         3:{
-            title:"Match 4",
+            title:"Match 3",
             winnerTo:{match:6, alliance:"red"},
             loserTo:{match:5, alliance:"red"},
         },
         4:{
-            title:"Match 3",
+            title:"Match 4",
             winnerTo:{match:5, alliance:"blue"},
         },
         5:{

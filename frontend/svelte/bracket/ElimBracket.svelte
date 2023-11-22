@@ -49,8 +49,8 @@
     
         <div class=matchcontainer id="container-sf1m1"><Match {lines} title="Match 1" id=sf1m1></Match></div>
         <div class=matchcontainer id="container-sf2m1"><Match {lines} title="Match 2" id=sf2m1></Match></div>
-        <div class=matchcontainer id="container-sf4m1"><Match {lines} title="Match 3" id=sf4m1></Match></div>
-        <div class=matchcontainer id="container-sf3m1"><Match {lines} title="Match 4" id=sf3m1></Match></div>
+        <div class=matchcontainer id="container-sf4m1"><Match {lines} title="Match 4" id=sf4m1></Match></div>
+        <div class=matchcontainer id="container-sf3m1"><Match {lines} title="Match 3" id=sf3m1></Match></div>
         <div class=matchcontainer id="container-sf5m1"><Match {lines} title="Match 5" id=sf5m1></Match></div>
         <div class=matchcontainer id="container-f1m1"> <Match {lines} title="Finals" id=f1m1></Match></div>
     
