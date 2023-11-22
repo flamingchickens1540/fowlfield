@@ -50,7 +50,7 @@
     dsStatuses.subscribe((statuses) => {
         if (statuses == null) {return}
         const station  = statuses[dsposstring]
-        disableHitButton = station.bypassed || !station.robotConnected || station.isEstopped || !station.enabled;
+        disableHitButton = station.bypassed ? false : !station.robotConnected || station.isEstopped || !station.enabled;
     })
 </script>
 

@@ -231,6 +231,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             if (id != match.id) { alert("Aborted non-loaded match"); return; }
             match.startTime = 0;
             match.state = MatchState.PENDING
+            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
             ipc.abort()
             probeEstops()
             io.to("dashboard").emit("abortMatch", match.getData())
