@@ -63,20 +63,31 @@
     </button>
     <div style=font-size:40px;>
         <div style="width:100%;height:calc(50% - 10px);padding-bottom:10px;margin:0;">
-            <button class="red-button btn" style="height:100%; width:100%;margin:0;" on:click={() => registerFoul(5)}>5pt Foul</button>
+            <button class="btn" style="height:100%; width:100%;margin:0;" on:click={() => registerFoul(5)}>5pt Foul</button>
         </div>
         <div style="width:100%;height:calc(50% - 10px);padding-top:10px;margin:0;">
-            <button class="red-button btn" style="height:100%; width:100%;margin:0;" on:click={() => registerFoul(10)}>10pt Foul</button>
+            <button class="btn" style="height:100%; width:100%;margin:0;" on:click={() => registerFoul(10)}>10pt Foul</button>
         </div>
     </div>
     <div style=display:flex;justify-content:space-evenly;flex-direction:column>
-        <span style=font-size:30px;>Auto Bunnies</span>
-        <div id=bunnybuttons style=width:100%>
-            <button class="red-button" on:click={() => $scoreBreakdown.autoBunnyCount--}>-</button>
+        <span style=font-size:30px;>Bunnies</span>
+        <div>
+        <span style=font-size:20px;>Auto</span>
+        <div class=bunnybuttons style=width:100%>
+            <button class="red-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount--}>-</button>
             <input type="number" bind:value={$scoreBreakdown.autoBunnyCount} />
-            <button class="green-button" on:click={() => $scoreBreakdown.autoBunnyCount++}>+</button>
+            <button class="green-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount++}>+</button>
         </div>
     </div>
+    <div>
+        <span style=font-size:20px;>Endgame</span>
+        <div class=bunnybuttons style=width:100%>
+            <button class="red-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount--}>-</button>
+            <input type="number" bind:value={$scoreBreakdown.finalBunnyCount} />
+            <button class="green-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount++}>+</button>
+        </div>
+    </div>
+</div>
     <div>
         <button class="btn" style="width:100%;height:100%;;box-sizing:border-box;margin:0;font-size:60px;background-color:black;border:1px solid #a0a0a0" on:click={estop}>Estop</button>
     </div>
@@ -107,15 +118,23 @@
             border: 1px white dashed;
         }
     }
+    .btn {
+        background-color:var(--buttoncolor,rgb(122,0,0));
+    }
     .red-button {
-        background-color: var(--buttoncolor,rgb(122, 0, 0));
+        background-color: rgb(122, 0, 0);
     }
     .green-button {
         background-color: green;
     }
-    #bunnybuttons > *{
-        height:50px;
+    .bunnybuttons > *{
+        height:60px;
         font-size: 20px;
+    }
+
+    .bunny-btn {
+        width:80px;
+        text-align:center;
     }
 
 </style>
