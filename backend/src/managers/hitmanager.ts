@@ -1,8 +1,7 @@
+import { BucketPattern, DriverStation, RobotHitState } from "@fowltypes";
 import { IPCClient } from "ipc/ipc";
-import { DriverStation, RobotHitState } from "../../../common/types/types";
 import rootLogger from "logger";
 import { bucketmanager } from "managers";
-import { BucketPattern } from "../../../common/types/stack_light_types";
 
 const logger = rootLogger.getLogger("hitmanager")
 let hitStates: { [key in DriverStation]: RobotHitState & { timeout: NodeJS.Timeout } } = {
@@ -47,7 +46,7 @@ export function configureHitManager(client: IPCClient, subscriber: (station: Dri
 function notifySubscriber(station: DriverStation) {
     const state = hitStates[station]
     hitChangeSubscriber(station, {
-        count:state.count as 0|1|2|3,
+        count: state.count as 0 | 1 | 2 | 3,
         lastDisable: state.lastDisable
     })
     const pattern = {
@@ -68,7 +67,7 @@ export function registerHit(station: DriverStation): boolean {
         return false
     }
     state.count++
-    
+
     if (state.count >= 3) {
         logger.log("disabling", station)
         ipc.tempDisable(station)
@@ -90,13 +89,13 @@ export function registerHit(station: DriverStation): boolean {
 
 export function undoHit(station: DriverStation) {
     const state = hitStates[station]
-    
+
     if (state.count >= 3) {
         if (state.timeout != null) {
             clearTimeout(state.timeout)
         }
         ipc.tempEnable(station)
-        state.lastDisable = Date.now()-5000
+        state.lastDisable = Date.now() - 5000
     }
     state.count = Math.max(Math.min(2, state.count - 1), 0) as 0 | 1 | 2 | 3
     logger.log("Undoing hit", station, state.count)

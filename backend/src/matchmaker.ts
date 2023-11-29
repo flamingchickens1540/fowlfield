@@ -5,6 +5,7 @@ import { DBMatch } from "./models/matches";
 import rootLogger from "logger";
 import { matchmanager, teammanager } from "managers";
 import { calculateAlliancePoints } from "@fowlutils/scores";
+import { getBlankScoreBreakdown } from '../../common/utils/blanks';
 
 const logger = rootLogger.getLogger("MatchMaker")
 
@@ -52,8 +53,8 @@ export class MatchMaker {
             blue1: 0,
             blue2: 0,
             blue3: 0,
-            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
-            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            redScoreBreakdown: getBlankScoreBreakdown(),
+            blueScoreBreakdown:  getBlankScoreBreakdown(),
             startTime: 0,
             redAlliance:0,
             blueAlliance:0,
@@ -83,8 +84,8 @@ export class MatchMaker {
             blue1: alliances[match.blue][0] ?? 0,
             blue2: alliances[match.blue][1] ?? 0,
             blue3: alliances[match.blue][2] ?? 0,
-            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
-            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            redScoreBreakdown: getBlankScoreBreakdown(),
+            blueScoreBreakdown: getBlankScoreBreakdown(),
             startTime: 0,
             redAlliance:match.red,
             blueAlliance:match.blue,

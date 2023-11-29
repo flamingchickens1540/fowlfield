@@ -1,10 +1,9 @@
 <script lang="ts">
-	import { derived, type Readable } from "svelte/store";
-	import { matchList } from "../store";
-	import TeamRanking from "./components/TeamRanking.svelte";
-	import { MatchState } from "../../../common/types/types";
+	import { MatchState } from "@fowltypes";
+	import { matchList, teamsSorted } from "@store";
 	import { onMount } from "svelte";
-	import { teamsSorted } from "@store";
+	import { derived, type Readable } from "svelte/store";
+	import TeamRanking from "./components/TeamRanking.svelte";
 	
 	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
 		let mostRecent = {id:"never",time:0};
