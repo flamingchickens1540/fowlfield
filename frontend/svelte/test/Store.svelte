@@ -17,7 +17,7 @@
         border: 1px solid rgb(115, 115, 115);
         padding-left:3px;
         &:not(:first-child) {
-            border-top-width: 0px;
+            border-top-width: 0;
         }
 
         

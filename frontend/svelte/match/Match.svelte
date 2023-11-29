@@ -285,9 +285,7 @@
 		#sorting-toggle{
 			grid-column:1/span 2;
 			margin:0;
-			border-radius: 0;
-			border-bottom-left-radius: 5px;
-			border-bottom-right-radius: 5px;
+			border-radius: 0 0 5px 5px;
 			background-color: rgb(99, 99, 99);
 		}
 		#matchGrid {

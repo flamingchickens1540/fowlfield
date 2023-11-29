@@ -78,7 +78,7 @@
 	}
 	.footer {
 		height: 100%;
-		box-shadow: 0px 15px 20px 20px hsl(0, 0%, 15%);
+		box-shadow: 0 15px 20px 20px hsl(0, 0%, 15%);
 		position: sticky;
 		z-index: 10;
 		bottom: 0;
@@ -96,7 +96,7 @@
 	}
 	
 	table {
-		font-family: arial;
+		font-family: arial,sans-serif;
 		
 		border-collapse: collapse;
 		border-spacing: 0;

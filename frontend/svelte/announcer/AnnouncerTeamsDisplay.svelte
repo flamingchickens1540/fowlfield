@@ -34,7 +34,7 @@
     
     .grid-rows-flux {
         display: grid;
-        place-items: center str;
+        place-items: center;
         /* gap: 10px; */
         grid-template-rows: 15vh repeat(3, calc(85vh / 3));
         height:100vh;

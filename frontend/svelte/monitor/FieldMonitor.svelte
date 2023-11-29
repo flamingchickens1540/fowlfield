@@ -36,7 +36,7 @@
 <style lang="scss">
     @import "./monitor.scss";
     #matchid {
-        background-color: gray;
+        background-color: grey;
         grid-column: 1/span 2;
         font-size: 20px;
         font-weight:700;

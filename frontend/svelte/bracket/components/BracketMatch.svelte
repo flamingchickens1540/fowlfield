@@ -93,7 +93,7 @@
 
 
     .fullsize {
-        background-color: gray;
+        background-color: rgb(128, 128, 128);
         border-radius: 5px;
         width:100%;
         height:125px;

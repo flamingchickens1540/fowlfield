@@ -61,7 +61,7 @@
     <button style="grid-column:1/span 2; height:100%; background-color:var(--buttoncolor); font-size:25px;display:flex;align-items:center;justify-content:center;" on:click={() => window.location.pathname = "/scoring/"+prompt("What station are you")}>
         <span>{pos.toUpperCase()} - {$robot}</span>
     </button>
-    <div style=font-size:40px;>
+    <div style="font-size:40px;">
         <div style="width:100%;height:calc(50% - 10px);padding-bottom:10px;margin:0;">
             <button class="btn" style="height:100%; width:100%;margin:0;" on:click={() => registerFoul(5)}>5pt Foul</button>
         </div>
@@ -70,18 +70,18 @@
         </div>
     </div>
     <div style=display:flex;justify-content:space-evenly;flex-direction:column>
-        <span style=font-size:30px;>Bunnies</span>
+        <span style="font-size:30px;">Bunnies</span>
         <div>
-        <span style=font-size:20px;>Auto</span>
-        <div class=bunnybuttons style=width:100%>
+        <span style="font-size:20px;">Auto</span>
+        <div class=bunnybuttons style="width:100%">
             <button class="red-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount--}>-</button>
             <input type="number" bind:value={$scoreBreakdown.autoBunnyCount} />
             <button class="green-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount++}>+</button>
         </div>
     </div>
     <div>
-        <span style=font-size:20px;>Endgame</span>
-        <div class=bunnybuttons style=width:100%>
+        <span style="font-size:20px;">Endgame</span>
+        <div class=bunnybuttons style="width:100%">
             <button class="red-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount--}>-</button>
             <input type="number" bind:value={$scoreBreakdown.finalBunnyCount} />
             <button class="green-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount++}>+</button>
@@ -103,8 +103,8 @@
     .scoring-container {
         display: grid;
         position: absolute;
-        top: 0px;
-        bottom: 0px;
+        top: 0;
+        bottom: 0;
         left: 0;
         right: 0;
         padding: 5px;

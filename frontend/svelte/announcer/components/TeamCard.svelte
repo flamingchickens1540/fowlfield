@@ -77,7 +77,6 @@
     .team-card {
         display:grid;
         grid-template-columns: auto auto;
-        grid-auto-flow: rows;
         grid-template-rows: 100px auto auto auto;
         border-radius: 25px;
         background-color:var(--colorA);

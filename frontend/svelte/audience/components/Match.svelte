@@ -241,8 +241,8 @@ xmlns="http://www.w3.org/2000/svg"
 		width: 3840px;
 		height: 2160px;
 		position: absolute;
-		left: 0px;
-		top: 0px;
+		left: 0;
+		top: 0;
 	}
 
 	.rectangle-8 {
@@ -250,7 +250,7 @@ xmlns="http://www.w3.org/2000/svg"
 		width: 3840px;
 		height: 104px;
 		position: absolute;
-		left: 0px;
+		left: 0;
 		top: 1755px;
 		//   box-shadow: 0px -4px 100px 0px rgba(0, 0, 0, 0.6);
 	}
@@ -260,7 +260,7 @@ xmlns="http://www.w3.org/2000/svg"
 		width: 3840px;
 		height: 301px;
 		position: absolute;
-		left: 0px;
+		left: 0;
 		top: 1859px;
 	}
 
@@ -525,7 +525,7 @@ xmlns="http://www.w3.org/2000/svg"
 		text-align: center;
 		font: 500 55px "Poppins-Medium", sans-serif;
 		position: absolute;
-		left: 0px;
+		left: 0;
 		top: 1755px;
 		width: 1672px;
 		height: 104px;

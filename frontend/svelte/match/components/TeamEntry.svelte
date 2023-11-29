@@ -12,8 +12,8 @@
     
     $: currentMatch = $id == $loaded
     
-    let dsColor
-    let robotColor
+    let dsColor:string
+    let robotColor:string
     dsStatuses.subscribe((statuses) => {
         if (statuses == null) {return}
         const status = statuses[station] 
@@ -43,7 +43,7 @@
 </div>
 
 <style lang=scss>
-    $inputcolor: rgb(59,59,59);
+   $inputcolor: rgb(59,59,59);
     .row {
         display:flex;
         margin:5px;
@@ -60,7 +60,7 @@
     input {
         /* width:80%; */
         background-color:$inputcolor;
-        border:0px;
+        border:0;
         height:20px;
         padding:3px 5px;
         width:var(--inputwidth);

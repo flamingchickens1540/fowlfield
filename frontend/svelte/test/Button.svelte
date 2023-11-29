@@ -21,7 +21,7 @@
     .parent {
         border: 1px solid rgb(115, 115, 115);
         &:not(:first-child) {
-            border-top-width: 0px;
+            border-top-width: 0;
         }
 
         
