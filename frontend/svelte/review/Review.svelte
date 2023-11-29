@@ -72,7 +72,7 @@
 	<div class="reviewcontainer">
 		<div>
 			<h2>Cards - Red Alliance</h2>
-			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:80px>
+			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:250px>
 				<Card isRedAlliance={true} stationid={1}></Card>
 				<Card isRedAlliance={true} stationid={2}></Card>
 				<Card isRedAlliance={true} stationid={3}></Card>
@@ -80,7 +80,7 @@
 		</div>
 		<div>
 			<h2>Cards - Blue Alliance</h2>
-			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:80px>
+			<div style=display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:250px>
 			<Card isRedAlliance={false} stationid={1}></Card>
 			<Card isRedAlliance={false} stationid={2}></Card>
 			<Card isRedAlliance={false} stationid={3}></Card>

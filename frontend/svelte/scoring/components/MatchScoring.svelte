@@ -114,7 +114,7 @@
 			</div>
 		</div>
 		<div id="mobility" style="display:flex;justify-content:space-evenly;flex-direction:column">
-			<button on:click={() => ($didTaxi = !$didTaxi)} style="background-color:{$didTaxi ? '#727e72' : '#1a1a1a'}">Taxi</button>
+			<button on:click={() => ($didTaxi = !$didTaxi)} style="background-color:{$didTaxi ? '#7e727e' : '#1a1a1a'}">Taxi</button>
 			<button on:click={() => ($didPark = !$didPark)} style="background-color:{$didPark ? '#727e72' : '#1a1a1a'}">Park</button>
 		</div>
 	</div>
