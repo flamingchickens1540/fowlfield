@@ -151,6 +151,6 @@
     }
     
     
-    @import "./event.scss"
+    @import "./event.scss";
     
 </style>

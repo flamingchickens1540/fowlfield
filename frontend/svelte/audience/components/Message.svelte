@@ -1,3 +1,4 @@
+<!--suppress CommaExpressionJS -->
 <script lang=ts>
     import {eventData} from "@store"
 

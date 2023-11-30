@@ -1,12 +1,11 @@
 <script lang="ts">
-	import type { DriverStation, RobotHitState } from "@fowltypes";
-	import { driverstations } from "../Scoring.svelte";
-	import matchData, { dsStatuses, teamList } from "@store";
-	import { derived, get } from "svelte/store";
+	import type { DriverStation } from "@fowltypes";
 	import socket from "@socket";
-	import { onMount } from "svelte/internal";
-	import EstopConfirm from "./EstopConfirm.svelte";
+	import matchData, { dsStatuses, teamList } from "@store";
 	import writableDerived from "svelte-writable-derived";
+	import { derived, get } from "svelte/store";
+	import { driverstations } from "../Scoring.svelte";
+	import EstopConfirm from "./EstopConfirm.svelte";
 
 	export let station: 1 | 2 | 3;
 	export let alliance: "red" | "blue";

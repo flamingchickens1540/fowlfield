@@ -8,7 +8,7 @@
 <div id=teammonitorgrid>
     <div class=row>
         <div id="matchid" class=centered>Match: {$id}</div>
-        <div id=matchstatus class=centered style="background-color:{isReady? "#9BBB59" : "#C0504E"}">{statusMessages[$state]} - {isReady ? "READY" : "NOT READY"}</div>
+        <div id=matchstatus class=centered style="background-color:{isReady? '#9BBB59' : '#C0504E'}">{statusMessages[$state]} - {isReady ? "READY" : "NOT READY"}</div>
     </div>
     <div class=row>
     <div class=header>Station</div>

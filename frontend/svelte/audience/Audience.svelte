@@ -12,24 +12,25 @@
 		if (atLunch) {
 			return "msg"
 		} else {
+			// TODO: Fix this
 			return $type == "elimination" ? "playoffResults" : "results"
 		}
 	});
 </script>
 
 
-<div style="display:{$shown == "msg" ? "contents": "none"}">
+<div style="display:{$shown === 'msg' ? 'contents': 'none'}">
 	<Message></Message>
 </div>
 
-<div style="display:{$shown == "results" ? "contents": "none"}">
+<div style="display:{$shown === 'results' ? 'contents': 'none'}">
 	<Results></Results>
 </div>
 
-<div style="display:{$shown == "playoffResults" ? "contents": "none"}">
+<div style="display:{$shown === 'playoffResults' ? 'contents': 'none'}">
 	<PlayoffResults></PlayoffResults>
 </div>
 
-<div style="display:{$shown == "match" ? "contents": "none"}">
+<div style="display:{$shown === 'match' ? 'contents': 'none'}">
 	<Match></Match>
 </div>

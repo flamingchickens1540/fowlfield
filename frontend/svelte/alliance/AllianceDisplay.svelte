@@ -30,7 +30,7 @@
 
 <datalist id="teams">
 	{#each Object.values($teamList) as team}
-		{#if team.alliance.get() == 0}
+		{#if team.alliance.get() === 0}
 			<option value={team.displaynum.get()}></option>
 		{/if}
 	{/each}

@@ -65,7 +65,7 @@ export interface ClientToServerEvents {
     startMatch(id: string): void;
     commitMatch(id: string): void;
 
-    nextMatch(type:"qualification"|"elimination"):void
+    nextMatch(type:string):void
     estop(station:DriverStation):void
     unestop(station:DriverStation):void
 
