@@ -1,7 +1,7 @@
 <script lang=ts>
-	import { teamList } from "@store";
-	import {alliances} from "alliance/AllianceDisplay.svelte";
-	import { derived } from "svelte/store";
+    import {teamList} from "@store";
+    import {alliances} from "../AllianceManager.svelte";
+    import {derived} from "svelte/store";
 
     export let index: 0|1|2|3
     const alliance = derived(alliances, ($alliances) => $alliances[index])
