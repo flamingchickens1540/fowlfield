@@ -1,10 +1,11 @@
 <script lang="ts">
 	import matchData from "@store";
-	const { redScoreBreakdown, blueScoreBreakdown } = matchData;
 	import Foul from "./components/Foul.svelte";
 	import CustomFoul from "./components/CustomFoul.svelte";
-	import { calculateAlliancePoints, calculatePointBreakdown } from "@fowlutils/scores";
+	import {calculateAlliancePoints, calculatePointBreakdown} from "@fowlutils/scores";
 	import Card from "./components/Card.svelte";
+
+	const { redScoreBreakdown, blueScoreBreakdown } = matchData;
 </script>
 
 <main>
@@ -71,16 +72,16 @@
 
 	<div class="reviewcontainer">
 		<div>
-			<h2>Cards - Red Alliance</h2>
-			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:250px">
+			<h2>Red Alliance Misc</h2>
+			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
 				<Card isRedAlliance={true} stationid={1}></Card>
 				<Card isRedAlliance={true} stationid={2}></Card>
 				<Card isRedAlliance={true} stationid={3}></Card>
 			</div>
 		</div>
 		<div>
-			<h2>Cards - Blue Alliance</h2>
-			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:250px">
+			<h2>Blue Alliance Misc</h2>
+			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
 			<Card isRedAlliance={false} stationid={1}></Card>
 			<Card isRedAlliance={false} stationid={2}></Card>
 			<Card isRedAlliance={false} stationid={3}></Card>

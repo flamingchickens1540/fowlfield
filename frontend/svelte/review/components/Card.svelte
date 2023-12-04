@@ -37,39 +37,84 @@
             return $breakdown;
         }
     );
+
+    const hits = writableDerived(
+        isRedAlliance ? matchData.redScoreBreakdown : matchData.blueScoreBreakdown,
+        ($breakdown) => $breakdown.targetHits[stationid - 1],
+        (newVal, $breakdown) => {
+            $breakdown.targetHits[stationid - 1] = newVal;
+            return $breakdown;
+        }
+    );
 </script>
 
 <div class="container">
     <div class="robotnumber">{$robot}</div>
+    <div class="linelabel">
+    {#if stationid == 2}
+        <span>Cards</span>
+    {/if}
+    </div>
     <select class="cardselector" bind:value={$card}
             style="background-color:{$card == Card.RED ? '#800000' : $card == Card.YELLOW ? '#6c6c00' : '#383838'}">
         <option value={Card.RED}>Red Card</option>
         <option value={Card.YELLOW}>Yellow Card</option>
         <option value={Card.NONE}>None</option>
     </select>
+    <div class="linelabel">
+    {#if stationid == 2}
+        <span>Hits</span>
+    {/if}
+    </div>
+    <input type="number" bind:value={$hits}>
+
+
+    <div class="linelabel">
+    {#if stationid == 2}
+        <span>Movement</span>
+    {/if}
+    </div>
     <button on:click={() => ($didTaxi = !$didTaxi)} style="background-color:{$didTaxi ? '#7e727e' : '#1a1a1a'}">Taxi
     </button>
     <button on:click={() => ($didPark = !$didPark)} style="background-color:{$didPark ? '#727e72' : '#1a1a1a'}">Park
     </button>
+
 </div>
 
 <style lang="scss">
   .container {
     .robotnumber {
-      font-size: 20px;
+      font-size: 30px;
       min-width: 50px;
+      font-weight:900;
     }
 
     .cardselector {
       padding: 5px;
       margin: 5px;
       font-size: 20px;
-      min-width: 100px;
+      width: 130px;
+    }
+
+    input {
+      padding: 5px;
+      margin: 5px;
+      font-size: 20px;
+      width: 120px;
     }
 
     button {
       min-width: 100px;
       font-size: 20px;
+    }
+
+    .linelabel {
+      height:40px;
+      display:flex;
+      span {
+        //font-size:10px;
+        align-self:flex-end
+      }
     }
 
     gap: 5px;
