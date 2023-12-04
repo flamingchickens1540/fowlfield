@@ -1,11 +1,10 @@
-import { MatchData, MatchState, Card } from "@fowltypes";
-import { DoubleEliminationBracket } from "./doubleEliminationBracket";
-import { getMatches } from "./models/db";
-import { DBMatch } from "./models/matches";
+import {Card, MatchData, MatchState} from "@fowltypes";
+import {DoubleEliminationBracket} from "./doubleEliminationBracket";
+import {DBMatch} from "./models/matches";
 import rootLogger from "logger";
-import { matchmanager, teammanager } from "managers";
-import { calculateAlliancePoints } from "@fowlutils/scores";
-import { getBlankScoreBreakdown } from '../../common/utils/blanks';
+import {matchmanager, teammanager} from "managers";
+import {calculateAlliancePoints} from "@fowlutils/scores";
+import {getBlankScoreBreakdown} from '@fowlutils/blanks';
 
 const logger = rootLogger.getLogger("MatchMaker")
 
@@ -61,7 +60,7 @@ export class MatchMaker {
             redCards:[Card.NONE, Card.NONE, Card.NONE],
             blueCards:[Card.NONE, Card.NONE, Card.NONE],
             state:MatchState.PENDING
-        });
+        } as MatchData);
     }
     
     advanceElimMatch(): DBMatch {
@@ -92,7 +91,7 @@ export class MatchMaker {
             redCards:[Card.NONE, Card.NONE, Card.NONE],
             blueCards:[Card.NONE, Card.NONE, Card.NONE],
             state:MatchState.PENDING
-        });
+        } as MatchData);
     }
 
     

@@ -1,8 +1,10 @@
 <script lang="ts">
-    import matchData, {matchTime, matchPeriod, remainingTimeInPeriod, elapsedTimeInPeriod} from "@store";
+    import matchData, {elapsedTimeInPeriod, matchPeriod, matchTime, remainingTimeInPeriod} from "@store";
     import StoreView from "./Store.svelte";
-	import Button from "./Button.svelte";
+    import Button from "./Button.svelte";
     import configureAudio from "audio";
+    import ScoreStore from "./ScoreStore.svelte";
+
     configureAudio()
 </script>
 
@@ -16,6 +18,8 @@
             {#each Object.entries(matchData) as [key, value]}
             <StoreView {key} store={value}></StoreView>
             {/each}
+            <ScoreStore key="redScoreBreakdown" store={matchData.redScoreBreakdown}></ScoreStore>
+            <ScoreStore key="blueScoreBreakdown" store={matchData.blueScoreBreakdown}></ScoreStore>
         </div>
     </div>
     <div class=section>
@@ -38,7 +42,7 @@
         justify-content:space-evenly;
     }
     .section {
-        width: 300px;
+        width: 400px;
         margin: 10px;
     }
 </style>
