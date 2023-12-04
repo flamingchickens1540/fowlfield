@@ -6,6 +6,8 @@
     import ScoreStore from "./ScoreStore.svelte";
 
     configureAudio()
+
+
 </script>
 
 <h1>Test Page</h1>
