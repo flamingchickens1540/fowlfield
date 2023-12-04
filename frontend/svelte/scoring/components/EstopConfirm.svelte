@@ -21,8 +21,8 @@
         </span>
     </slot>
     <form method="dialog">
-        <button value="0" formmethod="dialog" style=background-color:#505050;padding:20px;>Cancel</button>
-        <button value="1" formmethod="dialog" style=background-color:#8a3333;padding:20px;>Estop</button>
+        <button value="0" formmethod="dialog" style="background-color:#505050;padding:20px;">Cancel</button>
+        <button value="1" formmethod="dialog" style="background-color:#8a3333;padding:20px;">Estop</button>
     </form>
 </div>
 </dialog>

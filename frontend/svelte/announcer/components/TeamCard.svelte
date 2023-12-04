@@ -27,7 +27,7 @@
 </script>
 
 {#if team_num != 0}
-<div class="team-card" style="--colorA:{alliance == "red" ? "rgb(218, 56, 50)" :"rgb(42, 100, 173)"}; --colorB:{alliance == "red" ? "hsl(2, 63%, 45%)" :"hsl(213, 64%, 35%)"}">
+<div class="team-card" style="--colorA:{alliance == 'red' ? 'rgb(218, 56, 50)' :'rgb(42, 100, 173)'}; --colorB:{alliance == 'red' ? 'hsl(2, 63%, 45%)' : 'hsl(213, 64%, 35%)'}">
     <div class="team-num">{$teamList[team_num]?.displaynum?.get()}</div>
     <div class=conts>
         <div class="team-info-label">Team Name</div><div class=team-info-item>{$teamList[team_num]?.name?.get()}</div>
@@ -77,7 +77,6 @@
     .team-card {
         display:grid;
         grid-template-columns: auto auto;
-        grid-auto-flow: rows;
         grid-template-rows: 100px auto auto auto;
         border-radius: 25px;
         background-color:var(--colorA);

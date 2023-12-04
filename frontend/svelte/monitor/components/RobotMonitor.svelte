@@ -1,10 +1,9 @@
 <script lang="ts">
-    import type { WritableTeamData } from "socketStore";
-    import type { DriverStation } from "@fowltypes";
-    import { dsStatuses, teamList } from "@store";
-    import { derived, type Writable } from "svelte/store";
-    import { roundToPlaces } from "@fowlutils/format";
-    
+    import type {DriverStation} from "@fowltypes";
+    import {dsStatuses, teamList} from "@store";
+    import {derived} from "svelte/store";
+    import {roundToPlaces} from "@fowlutils/format";
+
     export let DSKey:DriverStation;
     
     const prettyTeamID = derived([dsStatuses, teamList], ([$statuses, $teams]) => $teams?.[$statuses?.[DSKey]?.assignedTeam]?.displaynum.get())
@@ -26,8 +25,8 @@
         <div class=entry><span style="font-size:60px;">{dsStatus?.isEstopped ? "E" : dsStatus?.isAuto ? "A": "T"}</span><div class="stateIndicator" data-estop={dsStatus?.isEstopped} data-value={dsStatus?.enabled}></div></div>
         <div class="entry">{dsStatus?.tripTime ?? ""}</div>
         <div class="entry">{dsStatus?.missedPackets ?? ""}</div>
-        <div class="entry"><span style="font-size:20px;">{dsStatus?.hardwareEstopOnline ? dsStatus?.hardwareEstopPressed ? "Pressed": dsStatus?.estopActive ? "Held" : "Good": "Offline"}</span><div class="stateIndicator indicator-{dsStatus?.hardwareEstopOnline ? dsStatus?.hardwareEstopPressed||dsStatus?.estopActive ? "orange": "green": "red"}"></div></div>
-        <div class="overlay" style="--zindex:{dsStatus?.bypassed ? "15": "auto"}; --color:{dsStatus?.bypassed ? "#949494d6" : dsStatus?.robotConnected ? "#ffffff00" : "#FFFF01aa"}"></div>
+        <div class="entry"><span style="font-size:20px;">{dsStatus?.hardwareEstopOnline ? dsStatus?.hardwareEstopPressed ? "Pressed": dsStatus?.estopActive ? "Held" : "Good": "Offline"}</span><div class="stateIndicator indicator-{dsStatus?.hardwareEstopOnline ? dsStatus?.hardwareEstopPressed||dsStatus?.estopActive ? 'orange': 'green': 'red'}"></div></div>
+        <div class="overlay" style="--zindex:{dsStatus?.bypassed ? '15': 'auto'}; --color:{dsStatus?.bypassed ? '#949494d6' : dsStatus?.robotConnected ? '#ffffff00' : '#FFFF01aa'}"></div>
     </div>
     
     <style lang=scss>

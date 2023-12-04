@@ -24,7 +24,7 @@ export function calculatePointBreakdown(breakdown: ScoreBreakdown):PointsBreakdo
         autoBunny  : 5 * breakdown.autoBunnyCount,
         finalBunny : 5 * breakdown.finalBunnyCount,
         autoTaxi   : 3 * breakdown.autoTaxiBonus.filter((v) => v).length,
-        endgamePark: 3 * breakdown.endgameParkBonus.filter((v) => v).length,
+        endgamePark: 5 * breakdown.endgameParkBonus.filter((v) => v).length,
         targetHits : 2 * sum(breakdown.targetHits, (v) => v),
         foulPoints : sum(breakdown.fouls, (v) => v.value)
     }

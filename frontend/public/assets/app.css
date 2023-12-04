@@ -89,10 +89,10 @@ input[type=number] {
 
 .sidebar-r {
   position: absolute;
-  right: 0px;
-  top: 0px;
+  right: 0;
+  top: 0;
   padding: 40px;
-  bottom: 0px;
+  bottom: 0;
   background-color: #303030;
   display: flex;
   flex-flow: column nowrap;
@@ -100,10 +100,10 @@ input[type=number] {
 }
 .sidebar-l {
   position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
   padding: 40px;
-  bottom: 0px;
+  bottom: 0;
   background-color: #303030;
 }
 
@@ -121,7 +121,7 @@ input[type="number"].number-input {
 }
 
 button {
-  margin:10px 0px;
+  margin:10px 0;
   color:white
 }
 button:disabled{

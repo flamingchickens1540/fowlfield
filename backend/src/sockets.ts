@@ -1,21 +1,39 @@
-import { MatchState, type ClientToServerEvents, type MatchData, type PartialMatch, type ServerToClientEvents, MatchPeriod, PartialTeam, TeamData, ExtendedTeam, IPCData, DSStatuses, DriverStation, StackLightColor, StackLightState, ExtendedDsStatuses, RobotHitState, Card, BucketPattern } from '@fowltypes';
+import {
+    BucketPattern,
+    Card,
+    type ClientToServerEvents,
+    DriverStation,
+    ExtendedDsStatuses,
+    ExtendedTeam,
+    type MatchData,
+    MatchPeriod,
+    MatchState,
+    type PartialMatch,
+    PartialTeam,
+    RobotHitState,
+    type ServerToClientEvents,
+    StackLightColor,
+    StackLightState,
+    TeamData
+} from '@fowltypes';
 import * as http from "http";
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 import consts from "../secrets.json";
 import * as matchmanager from "./managers/matchmanager";
-import { getMatchPeriod } from '@fowlutils/match_timer';
+import {getMatchPeriod} from '@fowlutils/match_timer';
 import * as teammanager from './managers/teammanager';
-import { buildStats } from 'models/teams';
-import { getDsStatus, isProduction } from 'index';
-import { IPCClient } from 'ipc/ipc';
+import {buildStats} from 'models/teams';
+import {getDsStatus, isProduction} from 'index';
+import {IPCClient} from 'ipc/ipc';
 import logger from "./logger"
-import { isMatchReady, probeEstops } from 'managers/statusmanager';
-import { handleEstop } from './managers/statusmanager';
-import { instrument } from "@socket.io/admin-ui"
-import { DBSettings } from 'models/settings';
-import { bucketmanager, hitmanager } from 'managers';
+import {probeEstops} from 'managers/statusmanager';
+import {handleEstop} from './managers/statusmanager';
+import {instrument} from "@socket.io/admin-ui"
+import {DBSettings} from 'models/settings';
+import {bucketmanager, hitmanager} from 'managers';
 
 import * as tba from "./tba/index";
+import {getBlankScoreBreakdown} from "@fowlutils/blanks";
 
 const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -263,10 +281,20 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
         })
 
         socket.on("nextMatch", (type) => {
-            const newmatch = matchmanager.advanceMatches(type)
+            const newmatch = matchmanager.advanceMatches(type as "elimination"|"qualification")
             if (newmatch != null) {
                 io.to("dashboard").emit("match", newmatch.getData())
             }
+        })
+
+        socket.on("resetMatch", (id) => {
+            const match = matchmanager.getMatch(id)
+            logger.warn("Resetting match", id)
+            match.state = MatchState.PENDING
+            match.startTime = 0
+            match.blueScoreBreakdown = getBlankScoreBreakdown()
+            match.redScoreBreakdown = getBlankScoreBreakdown()
+            io.to("dashboard").emit("match", match.getData())
         })
 
         socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))

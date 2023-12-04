@@ -1,5 +1,4 @@
 <script lang=ts>
-	import type { DriverStation } from "@fowltypes";
     import {dsStatuses} from "@store"
 	import Indicator from "./Indicator.svelte";
     

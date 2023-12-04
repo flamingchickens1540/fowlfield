@@ -1,6 +1,4 @@
-import type { IPCData } from "./ipctypes";
 import type {
-    DSStatuses,
     DriverStation,
     EventInfo,
     ExtendedDsStatuses,
@@ -64,8 +62,9 @@ export interface ClientToServerEvents {
     abortMatch(id: string): void;
     startMatch(id: string): void;
     commitMatch(id: string): void;
+    resetMatch(id:string):void;
 
-    nextMatch(type:"qualification"|"elimination"):void
+    nextMatch(type:string):void
     estop(station:DriverStation):void
     unestop(station:DriverStation):void
 
@@ -74,4 +73,6 @@ export interface ClientToServerEvents {
 
     getHitStates(cb:(states:{[key in DriverStation]:RobotHitState}) => void):void
     commitAlliances(cb:(ok:boolean) => void):void
+
+
 }

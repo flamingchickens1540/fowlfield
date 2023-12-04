@@ -8,7 +8,7 @@
 <div id=teammonitorgrid>
     <div class=row>
         <div id="matchid" class=centered>Match: {$id}</div>
-        <div id=matchstatus class=centered style="background-color:{isReady? "#9BBB59" : "#C0504E"}">{statusMessages[$state]} - {isReady ? "READY" : "NOT READY"}</div>
+        <div id=matchstatus class=centered style="background-color:{isReady? '#9BBB59' : '#C0504E'}">{statusMessages[$state]} - {isReady ? "READY" : "NOT READY"}</div>
     </div>
     <div class=row>
     <div class=header>Station</div>
@@ -36,7 +36,7 @@
 <style lang="scss">
     @import "./monitor.scss";
     #matchid {
-        background-color: gray;
+        background-color: grey;
         grid-column: 1/span 2;
         font-size: 20px;
         font-weight:700;

@@ -1,8 +1,6 @@
-import { Socket } from 'socket.io';
-import { DriverStation } from '../../../common/types/types';
-import { BucketPattern, ClientToServerEvents, ServerToClientEvents } from '@fowltypes';
+import { BucketPattern, ClientToServerEvents, DriverStation, ServerToClientEvents } from '@fowltypes';
 import rootLogger from 'logger';
-import { stat } from 'fs';
+import { Socket } from 'socket.io';
 
 const logger = rootLogger.getLogger("bucket")
 const buckets:{[key in DriverStation]:Socket<ClientToServerEvents, ServerToClientEvents>|null} = {

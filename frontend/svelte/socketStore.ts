@@ -1,10 +1,9 @@
-import type { Subscriber, Unsubscriber, Readable, Updater, Writable } from "svelte/store";
-import { derived, get, writable } from "svelte/store"
+import type {Readable, Subscriber, Unsubscriber, Updater, Writable} from "svelte/store";
+import {get, writable} from "svelte/store"
 
-import type { ExtendedTeam, MatchData, TeamData, TeamMatchStats } from '@fowltypes';
+import type {ExtendedTeam, MatchData, TeamData, TeamMatchStats} from '@fowltypes';
 import socket from "@socket";
-import matchData, { teamList } from "@store";
-
+import matchData from "@store";
 
 
 // let activeMatchID:string = ""

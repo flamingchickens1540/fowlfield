@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Card, type TeamData } from "@fowltypes";
+	import {Card} from "@fowltypes";
 	import socket from "@socket";
-	import type { WritableTeamData } from "socketStore";
+	import type {WritableTeamData} from "socketStore";
 	import writableDerived from "svelte-writable-derived";
-	import { writable, type Writable } from "svelte/store";
+	import {type Writable} from "svelte/store";
+
 	export let team: WritableTeamData;
 	const {id, displaynum, name, alliance, robotname, alliancePosition, card} = team
 	const alliancestring:Writable<string> = writableDerived(alliance, (currentalliance) => currentalliance?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)

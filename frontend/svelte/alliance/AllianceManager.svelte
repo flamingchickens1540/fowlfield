@@ -1,6 +1,7 @@
 <script lang=ts context=module>
-	import { teamList } from "@store";
-	import { derived } from "svelte/store";
+	import {teamList} from "@store";
+	import {derived} from "svelte/store";
+
 	export const alliances = derived(teamList, ($teamList) => {
 		const list = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
 		Object.values($teamList).forEach((team) => {
@@ -30,7 +31,7 @@
 
 <datalist id="teams">
 	{#each Object.values($teamList) as team}
-		{#if team.alliance.get() == 0}
+		{#if team.alliance.get() === 0}
 			<option value={team.displaynum.get()}></option>
 		{/if}
 	{/each}

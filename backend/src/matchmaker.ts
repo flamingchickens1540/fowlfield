@@ -1,42 +1,46 @@
-import { MatchData, MatchState, Card } from "@fowltypes";
-import { DoubleEliminationBracket } from "./doubleEliminationBracket";
-import { getMatches } from "./models/db";
-import { DBMatch } from "./models/matches";
+import {Card, MatchData, MatchState} from "@fowltypes";
+import {DoubleEliminationBracket} from "./doubleEliminationBracket";
+import {DBMatch} from "./models/matches";
 import rootLogger from "logger";
-import { matchmanager, teammanager } from "managers";
-import { calculateAlliancePoints } from "@fowlutils/scores";
+import {matchmanager, teammanager} from "managers";
+import {calculateAlliancePoints} from "@fowlutils/scores";
+import {getBlankScoreBreakdown} from '@fowlutils/blanks';
 
 const logger = rootLogger.getLogger("MatchMaker")
 
 export class MatchMaker {
     private bracket: DoubleEliminationBracket | null = null;
     private matchNum = 0;
-    
+
     constructor() {
+        this.remakeBracket()
+    }
+
+    remakeBracket() {
         const matches = matchmanager.getMatches()
-        let elimMatches:MatchData[] = []
+        let elimMatches: MatchData[] = []
         Object.values(matches)
-        .forEach((match) => {
-            if (match.type == "qualification") {
-                if (match.matchNumber > this.matchNum) {
-                    this.matchNum = match.matchNumber;
+            .forEach((match) => {
+                if (match.type == "qualification") {
+                    if (match.matchNumber > this.matchNum) {
+                        this.matchNum = match.matchNumber;
+                    }
+                } else {
+                    elimMatches.push(match)
                 }
-            } else {
-                elimMatches.push(match)
-            }
-        });
+            });
 
         this.initElims(elimMatches.length);
         elimMatches.forEach((match) => {
             if (match.state == MatchState.COMPLETE || match.state == MatchState.POSTED) {
-            this.bracket.update(
-                match.matchNumber,
-                calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
+                this.bracket.update(
+                    match.matchNumber,
+                    calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
                 );
             }
-            });
+        });
     }
-    
+
     advanceQualsMatch(): DBMatch {
         this.matchNum++;
         return matchmanager.newMatch({
@@ -52,22 +56,27 @@ export class MatchMaker {
             blue1: 0,
             blue2: 0,
             blue3: 0,
-            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
-            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            redScoreBreakdown: getBlankScoreBreakdown(),
+            blueScoreBreakdown: getBlankScoreBreakdown(),
             startTime: 0,
-            redAlliance:0,
-            blueAlliance:0,
-            redCards:[Card.NONE, Card.NONE, Card.NONE],
-            blueCards:[Card.NONE, Card.NONE, Card.NONE],
-            state:MatchState.PENDING
-        });
+            redAlliance: 0,
+            blueAlliance: 0,
+            redCards: [Card.NONE, Card.NONE, Card.NONE],
+            blueCards: [Card.NONE, Card.NONE, Card.NONE],
+            state: MatchState.PENDING
+        } as MatchData);
     }
-    
+
     advanceElimMatch(): DBMatch {
-        if (this.bracket == null) {logger.error("Must initialize elims before advancing");return}
-        
+        if (this.bracket == null) {
+            logger.error("Must initialize elims before advancing");
+            return
+        }
+
         let match = this.bracket.getNextMatch();
-        if (match == null) {return null}
+        if (match == null) {
+            return null
+        }
         const alliances = teammanager.getAlliances()
         logger.log("ELIM DATA", match, match.red, match.blue, alliances)
         return matchmanager.newMatch({
@@ -83,34 +92,38 @@ export class MatchMaker {
             blue1: alliances[match.blue][0] ?? 0,
             blue2: alliances[match.blue][1] ?? 0,
             blue3: alliances[match.blue][2] ?? 0,
-            redScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
-            blueScoreBreakdown: {autoBunnyCount:0, autoTaxiBonus:[false,false,false], finalBunnyCount:0, targetHits:[0,0,0], endgameParkBonus:[false,false,false], fouls:[]},
+            redScoreBreakdown: getBlankScoreBreakdown(),
+            blueScoreBreakdown: getBlankScoreBreakdown(),
             startTime: 0,
-            redAlliance:match.red,
-            blueAlliance:match.blue,
-            redCards:[Card.NONE, Card.NONE, Card.NONE],
-            blueCards:[Card.NONE, Card.NONE, Card.NONE],
-            state:MatchState.PENDING
-        });
+            redAlliance: match.red,
+            blueAlliance: match.blue,
+            redCards: [Card.NONE, Card.NONE, Card.NONE],
+            blueCards: [Card.NONE, Card.NONE, Card.NONE],
+            state: MatchState.PENDING
+        } as MatchData);
     }
 
-    
-    initElims(currentmatch) {
+
+    initElims(currentmatch: number) {
         this.bracket = new DoubleEliminationBracket(currentmatch);
     }
-        
+
     /**
-    *
-    * @param match
-    * @warning MATCH CANNOT END IN A TIE
-    */
+     *
+     * @param match
+     * @warning MATCH CANNOT END IN A TIE
+     */
     updateBracket(match: MatchData) {
         if (match.type == "elimination") {
-            this.bracket?.update(
+            const didUpdateSucceed = this.bracket?.update(
                 match.matchNumber,
                 calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
-                );
+            );
+            if (!didUpdateSucceed) {
+                logger.warn("rebuilding bracket")
+                this.remakeBracket()
             }
         }
     }
+}
     
