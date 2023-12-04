@@ -11,32 +11,36 @@ const logger = rootLogger.getLogger("MatchMaker")
 export class MatchMaker {
     private bracket: DoubleEliminationBracket | null = null;
     private matchNum = 0;
-    
+
     constructor() {
+        this.remakeBracket()
+    }
+
+    remakeBracket() {
         const matches = matchmanager.getMatches()
-        let elimMatches:MatchData[] = []
+        let elimMatches: MatchData[] = []
         Object.values(matches)
-        .forEach((match) => {
-            if (match.type == "qualification") {
-                if (match.matchNumber > this.matchNum) {
-                    this.matchNum = match.matchNumber;
+            .forEach((match) => {
+                if (match.type == "qualification") {
+                    if (match.matchNumber > this.matchNum) {
+                        this.matchNum = match.matchNumber;
+                    }
+                } else {
+                    elimMatches.push(match)
                 }
-            } else {
-                elimMatches.push(match)
-            }
-        });
+            });
 
         this.initElims(elimMatches.length);
         elimMatches.forEach((match) => {
             if (match.state == MatchState.COMPLETE || match.state == MatchState.POSTED) {
-            this.bracket.update(
-                match.matchNumber,
-                calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
+                this.bracket.update(
+                    match.matchNumber,
+                    calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
                 );
             }
-            });
+        });
     }
-    
+
     advanceQualsMatch(): DBMatch {
         this.matchNum++;
         return matchmanager.newMatch({
@@ -53,21 +57,26 @@ export class MatchMaker {
             blue2: 0,
             blue3: 0,
             redScoreBreakdown: getBlankScoreBreakdown(),
-            blueScoreBreakdown:  getBlankScoreBreakdown(),
+            blueScoreBreakdown: getBlankScoreBreakdown(),
             startTime: 0,
-            redAlliance:0,
-            blueAlliance:0,
-            redCards:[Card.NONE, Card.NONE, Card.NONE],
-            blueCards:[Card.NONE, Card.NONE, Card.NONE],
-            state:MatchState.PENDING
+            redAlliance: 0,
+            blueAlliance: 0,
+            redCards: [Card.NONE, Card.NONE, Card.NONE],
+            blueCards: [Card.NONE, Card.NONE, Card.NONE],
+            state: MatchState.PENDING
         } as MatchData);
     }
-    
+
     advanceElimMatch(): DBMatch {
-        if (this.bracket == null) {logger.error("Must initialize elims before advancing");return}
-        
+        if (this.bracket == null) {
+            logger.error("Must initialize elims before advancing");
+            return
+        }
+
         let match = this.bracket.getNextMatch();
-        if (match == null) {return null}
+        if (match == null) {
+            return null
+        }
         const alliances = teammanager.getAlliances()
         logger.log("ELIM DATA", match, match.red, match.blue, alliances)
         return matchmanager.newMatch({
@@ -86,31 +95,35 @@ export class MatchMaker {
             redScoreBreakdown: getBlankScoreBreakdown(),
             blueScoreBreakdown: getBlankScoreBreakdown(),
             startTime: 0,
-            redAlliance:match.red,
-            blueAlliance:match.blue,
-            redCards:[Card.NONE, Card.NONE, Card.NONE],
-            blueCards:[Card.NONE, Card.NONE, Card.NONE],
-            state:MatchState.PENDING
+            redAlliance: match.red,
+            blueAlliance: match.blue,
+            redCards: [Card.NONE, Card.NONE, Card.NONE],
+            blueCards: [Card.NONE, Card.NONE, Card.NONE],
+            state: MatchState.PENDING
         } as MatchData);
     }
 
-    
-    initElims(currentmatch) {
+
+    initElims(currentmatch: number) {
         this.bracket = new DoubleEliminationBracket(currentmatch);
     }
-        
+
     /**
-    *
-    * @param match
-    * @warning MATCH CANNOT END IN A TIE
-    */
+     *
+     * @param match
+     * @warning MATCH CANNOT END IN A TIE
+     */
     updateBracket(match: MatchData) {
         if (match.type == "elimination") {
-            this.bracket?.update(
+            const didUpdateSucceed = this.bracket?.update(
                 match.matchNumber,
                 calculateAlliancePoints(match.redScoreBreakdown) > calculateAlliancePoints(match.blueScoreBreakdown) ? "red" : "blue"
-                );
+            );
+            if (!didUpdateSucceed) {
+                logger.warn("rebuilding bracket")
+                this.remakeBracket()
             }
         }
     }
+}
     

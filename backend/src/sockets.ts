@@ -33,6 +33,7 @@ import {DBSettings} from 'models/settings';
 import {bucketmanager, hitmanager} from 'managers';
 
 import * as tba from "./tba/index";
+import {getBlankScoreBreakdown} from "@fowlutils/blanks";
 
 const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -284,6 +285,16 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             if (newmatch != null) {
                 io.to("dashboard").emit("match", newmatch.getData())
             }
+        })
+
+        socket.on("resetMatch", (id) => {
+            const match = matchmanager.getMatch(id)
+            logger.warn("Resetting match", id)
+            match.state = MatchState.PENDING
+            match.startTime = 0
+            match.blueScoreBreakdown = getBlankScoreBreakdown()
+            match.redScoreBreakdown = getBlankScoreBreakdown()
+            io.to("dashboard").emit("match", match.getData())
         })
 
         socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))

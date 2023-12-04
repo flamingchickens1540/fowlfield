@@ -1,4 +1,5 @@
 import rootLogger from "logger";
+
 const bracketLogger = rootLogger.getLoggerWithLevel("bracket", "debug")
 export type DoubleEliminationAlliance = 0|1|2|3|4
 
@@ -103,7 +104,7 @@ export class DoubleEliminationBracket {
     private scheduleIndex = 1;
     private netFinalWins = 0;
     
-    constructor(currentmatch) {
+    constructor(currentmatch:number) {
         this.scheduleIndex=currentmatch+1
         this.schedule[1].red = this.alliances[0];
         this.schedule[1].blue = this.alliances[3];
@@ -112,10 +113,10 @@ export class DoubleEliminationBracket {
     }
     private recordedMatches = []
 
-    update(matchNumber: number, winner: "red" | "blue") {
+    update(matchNumber: number, winner: "red" | "blue"):boolean {
         bracketLogger.debug("recording match", matchNumber)
         //the logic to make double elimination work
-        if (this.recordedMatches.includes(matchNumber)) {bracketLogger.warn("already recorded", matchNumber); return}
+        if (this.recordedMatches.includes(matchNumber)) {bracketLogger.warn("already recorded", matchNumber); return false}
         const match:DoubleEliminationMatch = this.schedule[matchNumber]
         
         const winningAlliance = winner === "red" ? match.red : match.blue;
@@ -142,6 +143,7 @@ export class DoubleEliminationBracket {
         
 
         this.recordedMatches.push(matchNumber)
+        return true
     }
     
     getNextMatch(): DoubleEliminationMatch {
