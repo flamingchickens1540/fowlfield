@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { DriverStation } from "@fowltypes";
+	import type {DriverStation} from "@fowltypes";
 	import socket from "@socket";
-	import matchData, { dsStatuses, teamList } from "@store";
+	import matchData, {dsStatuses, teamList} from "@store";
 	import writableDerived from "svelte-writable-derived";
-	import { derived, get } from "svelte/store";
-	import { driverstations } from "../Scoring.svelte";
+	import {derived, get} from "svelte/store";
+	import {driverstations} from "../Scoring.svelte";
 	import EstopConfirm from "./EstopConfirm.svelte";
 
 	export let station: 1 | 2 | 3;
@@ -94,21 +94,21 @@
 		</div>
 	</div>
 	<div style="display:flex;justify-content:space-between;flex-direction:row;padding:20px;;">
-		<div style="display:flex;justify-content:space-evenly;flex-direction:column">
-			<div style="background-color:#433e44;padding:10px;border-radius:5px;">
+		<div style="display:flex;justify-content:space-evenly;flex-direction:column;width:400px">
+			<div class="bunnycontainer">
 				<span style="font-size:25px;">Auto Bunnies</span>
-				<div class="bunnybuttons" style="width:100%">
-					<button class="red-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount--}>-</button>
+				<div class="bunnybuttons">
+					<button class="red-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount--}><span>-</span></button>
 					<input type="number" bind:value={$scoreBreakdown.autoBunnyCount} />
-					<button class="green-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount++}>+</button>
+					<button class="green-button bunny-btn" on:click={() => $scoreBreakdown.autoBunnyCount++}><span>+</span></button>
 				</div>
 			</div>
-			<div style="background-color:#433e44;padding:10px;border-radius:5px;">
+			<div class="bunnycontainer">
 				<span style="font-size:25px;">Endgame Bunnies</span>
-				<div class="bunnybuttons" style="width:100%">
-					<button class="red-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount--}>-</button>
+				<div class="bunnybuttons">
+					<button class="red-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount--}><span>-</span></button>
 					<input type="number" bind:value={$scoreBreakdown.finalBunnyCount} />
-					<button class="green-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount++}>+</button>
+					<button class="green-button bunny-btn" on:click={() => $scoreBreakdown.finalBunnyCount++}><span>+</span></button>
 				</div>
 			</div>
 		</div>
@@ -141,7 +141,7 @@
 		max-height: 100vh;
 		gap: 40px;
 		overflow: hidden;
-		grid-template-rows: 50px auto auto;
+		grid-template-rows: 50px 40vh 40vh;
 		grid-template-columns: 35% 60%;
 		grid-auto-flow: row;
 		> * {
@@ -157,24 +157,44 @@
 	.green-button {
 		background-color: green;
 	}
+	.bunnybuttons {
+		flex-direction: row;
+		display:flex;
+		justify-content: space-evenly;
+		align-items: center;
+		//width:80%;
+	}
+	.bunnycontainer {
+		background-color:#433e44;
+		padding:10px;
+		margin:3px;
+		border-radius:5px;
+	}
 	.bunnybuttons > * {
-		height: 120px;
+		height: 90px;
 		font-size: 40px;
 	}
 
 	.bunnybuttons input {
-		width: 200px;
-		text-align: center;
+		width: 120px;
+		text-align: center;;
 	}
 
 	.bunny-btn {
-		width: 130px;
-
+		width: 100px;
+		height:90px;
+		display:flex;
+		justify-content: center;
+		align-items: center;
 		text-align: center;
+		span {
+			margin:0;
+			padding:0;;
+		}
 	}
 
 	#mobility {
-		width: 400px;
+		min-width: 200px;
 		button {
 			font-size: 50px;
 			width: 100%;
