@@ -21,7 +21,7 @@
     import configureAudio from "audio";
     import {statusColors, statusMessages} from "consts";
 
-    import TeamDatalistEntry from "./components/TeamDatalistEntry.svelte";
+    import TeamDatalistEntry from "../lib/TeamDatalistEntry.svelte";
     import TeamEntry from "./components/TeamEntry.svelte";
 
     import Sortable, {Swap} from 'sortablejs';

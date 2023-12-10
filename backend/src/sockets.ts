@@ -26,7 +26,7 @@ import {buildStats} from 'models/teams';
 import {getDsStatus, isProduction} from 'index';
 import {IPCClient} from 'ipc/ipc';
 import logger from "./logger"
-import {probeEstops} from 'managers/statusmanager';
+import {isMatchReady, probeEstops} from 'managers/statusmanager';
 import {handleEstop} from './managers/statusmanager';
 import {instrument} from "@socket.io/admin-ui"
 import {DBSettings} from 'models/settings';
@@ -218,10 +218,10 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
             ipc.load(match.getData())
             await probeEstops()
-            // if (!isMatchReady()) {
-            //     alert("Match not ready")
-            //     return;
-            // }
+            if (!isMatchReady()) {
+                alert("Match not ready")
+                return;
+            }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
 

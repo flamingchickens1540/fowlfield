@@ -1,6 +1,6 @@
-import { BucketPattern, ClientToServerEvents, DriverStation, ServerToClientEvents } from '@fowltypes';
+import {BucketPattern, ClientToServerEvents, DriverStation, ServerToClientEvents} from '@fowltypes';
 import rootLogger from 'logger';
-import { Socket } from 'socket.io';
+import {Socket} from 'socket.io';
 
 const logger = rootLogger.getLogger("bucket")
 const buckets:{[key in DriverStation]:Socket<ClientToServerEvents, ServerToClientEvents>|null} = {
@@ -20,7 +20,11 @@ export function registerBucket(station:DriverStation, socket:Socket<ClientToServ
         buckets[station].disconnect(true)
     }
     buckets[station] = socket
-    setPattern(station, BucketPattern.RAINBOW)
+    if (station.startsWith("B")) {
+        setPattern(station, BucketPattern.BLUE_ALLIANCE)
+    } else {
+        setPattern(station, BucketPattern.RED_ALLIANCE)
+    }
 }
 
 export function setPattern(station:DriverStation, pattern:BucketPattern) {

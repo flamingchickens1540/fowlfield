@@ -1,7 +1,7 @@
 <script lang=ts>
-	import type { WritableTeamData } from "socketStore";
+    import type {WritableTeamData} from "../socketStore";
     import matchData from "@store";
-    
+
     export let team:WritableTeamData
     const {red1, red2, red3, blue1, blue2, blue3} = matchData
     const {displaynum, id} = team

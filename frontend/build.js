@@ -18,6 +18,7 @@ let pages = {
     "scoring":   ["Scoring",           true],
     "review":     ["Review", false],
     "alliance":  ["Alliance Selection",false],
+    "queuing":  ["Queuing",false],
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 //// Loads all subdirectories of /svelte
