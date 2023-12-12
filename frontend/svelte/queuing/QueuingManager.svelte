@@ -17,6 +17,7 @@
         if ($matchid == id) return "background-color:#006866"
         return ""
     }
+
     const {red1, red2, red3, blue1, blue2, blue3} = matchData
 </script>
 
@@ -41,18 +42,20 @@
                 </div>
             {/each}
         </div>
-        <button on:click={() => socket.emit("nextMatch", "qualification")} style="width:100%;font-size:25px;">New Match</button>
+        <button on:click={() => socket.emit("nextMatch", "qualification")} style="width:100%;font-size:25px;">New
+            Match
+        </button>
     </div>
     <div id="maincontainer">
         <h1>{$matchid}</h1>
-    <div id="teamcontainer">
-        <QueueItem label="Red 1" store={red1}></QueueItem>
-        <QueueItem label="Red 2" store={red2}></QueueItem>
-        <QueueItem label="Red 3" store={red3}></QueueItem>
-        <QueueItem label="Blue 1" store={blue1}></QueueItem>
-        <QueueItem label="Blue 2" store={blue2}></QueueItem>
-        <QueueItem label="Blue 3" store={blue3}></QueueItem>
-    </div>
+        <div id="teamcontainer">
+            <QueueItem label="Red 1" store={red1}></QueueItem>
+            <QueueItem label="Red 2" store={red2}></QueueItem>
+            <QueueItem label="Red 3" store={red3}></QueueItem>
+            <QueueItem label="Blue 1" store={blue1}></QueueItem>
+            <QueueItem label="Blue 2" store={blue2}></QueueItem>
+            <QueueItem label="Blue 3" store={blue3}></QueueItem>
+        </div>
     </div>
 </main>
 
@@ -62,17 +65,19 @@
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    height:100%;
-    width:100%;
+    height: 100%;
+    width: 100%;
   }
+
   #teamcontainer {
-    display:grid;
-    margin:5px;
-    width:90%;
-    height:70%;
+    display: grid;
+    margin: 5px;
+    width: 90%;
+    height: 70%;
     grid-template-rows: 1fr 1fr;
     grid-template-columns: 1fr 1fr 1fr;
   }
+
   main {
     position: absolute;
     left: 0;
@@ -151,5 +156,16 @@
       height: 60px;
       background-color: #1a1a1af0;
     }
+  }
+
+  :global(:root) {
+    touch-action: none;
+    height: 100%;
+    overscroll-behavior-y: none;
+  }
+
+  :global(body) {
+    margin: 0 !important;
+    padding: 0;
   }
 </style>

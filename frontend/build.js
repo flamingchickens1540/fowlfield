@@ -16,9 +16,9 @@ let pages = {
     "estop":     ["Estop Panel",       true],
     "rankings":  ["Rankings",          false],
     "scoring":   ["Scoring",           true],
-    "review":     ["Review", false],
+    "review":    ["Review",            true],
     "alliance":  ["Alliance Selection",false],
-    "queuing":  ["Queuing",false],
+    "queuing":   ["Queuing",           true],
 }
 let entryPoints = Object.keys(pages).map((file) => path.join("svelte", file, "index.ts"))
 //// Loads all subdirectories of /svelte
@@ -54,17 +54,17 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
     server.use("/", express.static("public"))
     if (mode == "dev" || mode=="watch") {await ctx.watch()}
     if (mode == "dev") {
-        
+
         let { host, port } = await ctx.serve({
             servedir:"dist",
             port:3002
         })
-        
+
         console.log(host, port)
         let myProxy = proxy.createProxyMiddleware({target:"http://localhost:"+port, pathRewrite: (path, req) => path.replace("/assets","")})
 
         server.use("/assets", myProxy)
-        
+
         server.use("/esbuild", myProxy)
     } else {
         server.use("/assets", express.static("dist"))
@@ -102,8 +102,8 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
     `)
     })
 
-    
-    
+
+
     server.listen(3001)
 } else {
     await ctx.dispose()

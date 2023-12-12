@@ -31,7 +31,7 @@
 
 <div class=row>
     <span>{label}</span>
-    <input disabled={$disableButton} bind:value={$prettyteamnum} list=teams/>
+    <input inputmode="numeric" disabled={$disableButton} bind:value={$prettyteamnum} list=teams/>
 </div>
 
 <style lang=scss>
