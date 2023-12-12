@@ -1,6 +1,8 @@
 <script lang="ts">
-	import type { Foul } from "@fowltypes";
-	import matchData, { teamList } from "@store";
+	import type {Foul} from "@fowltypes";
+	import matchData, {teamList} from "@store";
+	import {formatDuration} from "@fowlutils/format";
+
 	const startTime = matchData.startTime
 	export let foul:Foul
 	export let color:string
@@ -16,10 +18,12 @@
 			return breakdown
 		})
 	}
+	$: time = (foul.timestamp - $startTime)/1000 < 300 ? formatDuration((foul.timestamp - $startTime)/1000) : "Post Match"
+
 </script>
 <div class=gridrow style="--bgcolor:{color}">
 	<div>
-	<span style="display:inline-block;width:80px;text-align:end">{Math.round((foul.timestamp - $startTime)/1000)}s</span>
+	<span style="display:inline-block;width:80px;text-align:end">{time}</span>
 	<span style="display:inline-block;width:70px;text-align:start"> - {foul.value}pts</span>
 	<span> - {robot}</span>
 </div>

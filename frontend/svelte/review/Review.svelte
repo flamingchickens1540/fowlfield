@@ -122,4 +122,15 @@
 			height:50px;
 		}
 	}
+
+	:global(:root) {
+		touch-action: none;
+		height: 100%;
+		overscroll-behavior-y: none;
+	}
+
+	:global(body) {
+		margin: 0 !important;
+		padding: 0;
+	}
 </style>

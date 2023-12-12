@@ -2,13 +2,13 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/scoring",
-    "name": "FowlField Scoring",
+    "start_url": "/queuing",
+    "name": "FowlField Queuing",
     "orientation":"landscape",
-    "short_name": "Scoring",
+    "short_name": "Queuing",
     "icons": [
         {
-            "src": "/manifest/scoring.png",
+            "src": "/manifest/queuing.png",
             "sizes": "512x512",
             "type": "image/png"
         }
