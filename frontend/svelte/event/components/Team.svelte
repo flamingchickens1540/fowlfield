@@ -9,27 +9,13 @@
 	const {id, displaynum, name, alliance, robotname, alliancePosition, card} = team
 	const alliancestring:Writable<string> = writableDerived(alliance, (currentalliance) => currentalliance?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
 	const allianceposstring:Writable<string> = writableDerived(alliancePosition, (current) => current?.toString() ?? "0", (value) => (parseInt(value) ?? 0) as 0|1|2|3|4)
-
-	let nobodymove:boolean = false
-	alliance.subscribe((value) => {
-		if (nobodymove) {return}
-		nobodymove = true;
-		alliancestring.set((value ?? 0).toString())
-		nobodymove = false;
-	})
-	alliancestring.subscribe((value) => {
-		if (nobodymove) {return}
-		nobodymove = true;
-		alliance.set((parseInt(value) ?? 0) as 0|1|2|3|4)
-		nobodymove = false;
-	})
 </script>
 
 <div class=tablerow>	
 	<div class="tableitem darken">{id}</div>	
-	<input class="tableitem centertext" type="string" bind:value={$displaynum} />
-	<input class="tableitem" type="string" bind:value={$name} />
-	<input class="tableitem" type="string" bind:value={$robotname} />
+	<input class="tableitem centertext" type="text" bind:value={$displaynum} />
+	<input class="tableitem" type="text" bind:value={$name} />
+	<input class="tableitem" type="text" bind:value={$robotname} />
 	<select class="tableitem" bind:value={$alliancestring}>
 		<option value=0>None</option>
 		<option value=1>Alliance 1</option>
