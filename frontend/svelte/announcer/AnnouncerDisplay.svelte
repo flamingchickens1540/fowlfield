@@ -1,10 +1,11 @@
 <script lang=ts>
-    import matchData from "@store";
-	import AnnouncerTeamsDisplay from "./AnnouncerTeamsDisplay.svelte";
+    import matchData, {setPreloadingTrack} from "@store";
+    import AnnouncerTeamsDisplay from "./AnnouncerTeamsDisplay.svelte";
     import AnnouncerScoresDisplay from "./AnnouncerScoresDisplay.svelte";
-	import type { MatchState } from "@fowltypes";
-	
-    const {state} = matchData;
+    import type {MatchState} from "@fowltypes";
+
+    setPreloadingTrack(true)
+    const {state, id} = matchData;
     const components:{[key in MatchState]:any} = {
         "pending": AnnouncerTeamsDisplay,
         "progress": AnnouncerTeamsDisplay,
@@ -16,3 +17,20 @@
 
 
 <svelte:component this={activeComponent} />
+
+<div id="matchNum">
+    {$id.toUpperCase()}
+</div>
+
+<style>
+ #matchNum {
+     background-color: #575757;
+     border-radius: 5px;
+     padding:5px 10px;
+     position: absolute;
+     top:10px;
+     left:10px;
+     z-index: 100;
+     font-family: Hack,serif;
+ }
+</style>
