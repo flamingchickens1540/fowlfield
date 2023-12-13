@@ -275,7 +275,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             handleCard(match.blueCards[2], match.blue3)
             logger.log("Committing", id)
             // TODO: Actually commit w/ TBA
-            // tba.updateMatches()
+            tba.updateMatches()
 
             io.to("dashboard").emit("match", match.getData())
         })
