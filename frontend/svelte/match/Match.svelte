@@ -27,7 +27,7 @@
     import Sortable, {Swap} from 'sortablejs';
     import AllianceStationMonitor from "./components/AllianceStationMonitor.svelte";
     import AllianceStationMonitorParent from "./components/AllianceStationMonitorParent.svelte";
-    import ScoreSummary from "./components/ScoreSummary.svelte";
+    import ScoreSummary from "../lib/ScoreSummary.svelte";
 
     Sortable.mount(new Swap())
 

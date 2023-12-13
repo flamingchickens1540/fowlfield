@@ -1,7 +1,7 @@
 <script lang="ts">
     import matchData from "@store"
     import TeamCard from "./components/TeamCard.svelte";
-    
+
     const {red1, red2, red3, blue1, blue2, blue3, type, redAlliance, blueAlliance} = matchData
 </script>
 
@@ -37,6 +37,7 @@
         place-items: center;
         /* gap: 10px; */
         grid-template-rows: 15vh repeat(3, calc(85vh / 3));
+        grid-template-columns: 100%;
         height:100vh;
     }
     

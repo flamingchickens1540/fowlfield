@@ -1,5 +1,6 @@
 <script lang="ts">
-    import matchData, { teamList, teamRankings } from "@store"
+    import matchData, {teamList, teamRankings} from "@store"
+
     export let team_num: number;
     export let alliance: 'red' | 'blue'
     
@@ -81,6 +82,9 @@
         border-radius: 25px;
         background-color:var(--colorA);
         margin-bottom:10px;
+        box-sizing: border-box;
+        width:100%;
+        height:calc(100% - 10px);
         // height:100%;
     }
 </style>
