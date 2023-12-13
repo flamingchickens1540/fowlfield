@@ -275,7 +275,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             handleCard(match.blueCards[2], match.blue3)
             logger.log("Committing", id)
             // TODO: Actually commit w/ TBA
-            // tba.updateMatches()
+            tba.updateMatches()
 
             io.to("dashboard").emit("match", match.getData())
         })
@@ -335,6 +335,11 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
 
         })
 
+        socket.on("setBuckets", (stations:DriverStation[], pattern:BucketPattern) => {
+            stations?.forEach((station) => {
+                bucketmanager.setPattern(station, pattern)
+            })
+        })
         socket.on("undoHit", (station) => {
             hitmanager.undoHit(station)
             const match = matchmanager.getCurrentMatch()

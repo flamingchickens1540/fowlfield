@@ -4,6 +4,7 @@
     import Button from "./Button.svelte";
     import configureAudio from "audio";
     import ScoreStore from "./ScoreStore.svelte";
+    import BucketPanel from "./BucketPanel.svelte";
 
     configureAudio()
 
@@ -33,6 +34,11 @@
             <StoreView key="Elapsed Period" store={elapsedTimeInPeriod}></StoreView>
             <Button key="Reset" onclick={() => {matchData.startTime.set(Date.now())}}></Button>
         </div>
+    </div>
+
+    <div class=section>
+        <h2>Bucket State</h2>
+        <BucketPanel></BucketPanel>
     </div>
 </div>
 

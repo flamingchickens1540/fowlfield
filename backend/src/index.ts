@@ -1,13 +1,21 @@
-
-import { DSStatuses, DriverStation, ExtendedDsStatus, ExtendedDsStatuses, RobotHitState, StackLightColor, StackLightState } from '@fowltypes';
+import {
+    DriverStation,
+    DSStatuses,
+    ExtendedDsStatus,
+    ExtendedDsStatuses,
+    RobotHitState,
+    StackLightColor,
+    StackLightState
+} from '@fowltypes';
 import * as http from 'http';
 import rootLogger from 'logger';
-import { DBSettings } from 'models/settings';
-import {statusmanager, teammanager, matchmanager, hitmanager} from "managers";
+import {DBSettings} from 'models/settings';
+import {hitmanager, matchmanager, statusmanager, teammanager} from "managers";
 import * as tba from "./tba/index";
-import { IPCClient } from "./ipc/ipc";
+import {IPCClient} from "./ipc/ipc";
 import * as db from "./models/db";
 import startSockets from "./sockets";
+
 let driverStatuses:ExtendedDsStatuses
 
 const server = http.createServer()
@@ -41,9 +49,9 @@ async function configure() {
     ipc.load(matchmanager.getCurrentMatch().getData())
     // await tba.reset("match") // TODO: Remove this when teams are finalized
     await tba.updateEventTeams()
-    // await tba.updateAlliances()
-    // await tba.updateMatches()
-    // await tba.updateRankings()
+    await tba.updateAlliances()
+    await tba.updateMatches()
+    await tba.updateRankings()
 
 }
 
