@@ -1,4 +1,5 @@
-import type {
+import {
+    BucketPattern,
     DriverStation,
     EventInfo,
     ExtendedDsStatuses,
@@ -74,5 +75,5 @@ export interface ClientToServerEvents {
     getHitStates(cb:(states:{[key in DriverStation]:RobotHitState}) => void):void
     commitAlliances(cb:(ok:boolean) => void):void
 
-
+    setBuckets(stations:DriverStation[], pattern:BucketPattern):void
 }

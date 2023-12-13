@@ -335,6 +335,11 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
 
         })
 
+        socket.on("setBuckets", (stations:DriverStation[], pattern:BucketPattern) => {
+            stations?.forEach((station) => {
+                bucketmanager.setPattern(station, pattern)
+            })
+        })
         socket.on("undoHit", (station) => {
             hitmanager.undoHit(station)
             const match = matchmanager.getCurrentMatch()
