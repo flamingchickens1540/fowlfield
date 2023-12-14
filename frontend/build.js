@@ -89,6 +89,7 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
             ${showManifest ? `
             <meta name="apple-mobile-web-app-capable" content="yes">
             <link rel="manifest" href="/manifest/${page}.webmanifest" />
+            <link rel="apple-touch-icon" sizes="512x512" href="/manifest/${page}.png">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             
             `:''}
