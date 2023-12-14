@@ -62,7 +62,7 @@
         }
     }
 
-    let estopconfirm: EstopConfirm;
+    export let estopconfirm: EstopConfirm;
     setInterval(() => {
         const time = Math.round((Date.now() - lastHitTime) / 1000);
         undoStopwatchValue = time > 15 ? "—" : time + "s";
@@ -96,10 +96,10 @@
     );
 </script>
 
+<EstopConfirm bind:this={estopconfirm}>
+    <span slot="robot">{$robot}</span>
+</EstopConfirm>
 <div class="scoring-container" style="--buttoncolor:{alliance == 'red' ? 'rgb(122, 0, 0)' : 'rgb(0, 45, 122)'}">
-    <EstopConfirm bind:this={estopconfirm}>
-        <span slot="robot">{$robot}</span>
-    </EstopConfirm>
     <button style="grid-column:1/span 2; height:100%; background-color:var(--buttoncolor); font-size:25px;display:flex;align-items:center;justify-content:center;"
             on:click={() => (window.location.pathname = "/scoring/" + prompt("What station are you"))}>
         <span>{pos.toUpperCase()} - {$robot}</span>
