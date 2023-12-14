@@ -57,6 +57,7 @@
   }
   input {
     /* width:80%; */
+    color: #ececec;
     background-color:$inputcolor;
     border:0;
     height:50px;

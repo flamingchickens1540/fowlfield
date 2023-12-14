@@ -82,7 +82,7 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
         <html lang="en">
         <head>
             <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
             <script type="module" src="/assets/${page}/index.js"></script>
             <link rel="stylesheet" href="/assets/${page}/index.css"></link>
             <link rel="stylesheet" href="/assets/app.css"></link>
