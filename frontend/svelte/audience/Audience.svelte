@@ -7,6 +7,7 @@
     import {derived} from "svelte/store";
     import {MatchState} from "@fowltypes";
     import AllianceDisplay from "./components/AllianceDisplay.svelte";
+	import Blank from "./components/Blank.svelte";
 
 
     const isAlliance = window.location.pathname.endsWith("alliance")
@@ -16,6 +17,8 @@
         } else {
             if ($state == MatchState.POSTED) {
                 return $type == "elimination" ? "playoffResults" : "results"
+            } else if ($state == MatchState.COMPLETE) {
+                return "blank"
             } else {
                 return "match"
             }
@@ -40,5 +43,9 @@
 
     <div style="display:{$shown === 'match' ? 'contents': 'none'}">
         <Match></Match>
+    </div>
+
+    <div style="display:{$shown === 'blank' ? 'contents': 'none'}">
+        <Blank></Blank>
     </div>
 {/if}
