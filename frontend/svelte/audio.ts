@@ -15,7 +15,7 @@ export default function configureAudio() {
         console.log("playing", period, "sound")
         switch (period) {
             case MatchPeriod.AUTO: match_start.play();break;
-            case MatchPeriod.PAUSE: match_end.play();break;
+            // case MatchPeriod.PAUSE: match_end.play();break;
             case MatchPeriod.TELEOP: match_teleop.play();break;
             case MatchPeriod.POSTMATCH: match_end.play();break;
         }
