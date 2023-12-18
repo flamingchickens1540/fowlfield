@@ -6,7 +6,7 @@ import socket from "@socket";
 const match_end = new Audio("/assets/audio/match_end.wav");
 const match_start = new Audio("/assets/audio/match_start.wav");
 const match_teleop = new Audio("/assets/audio/match_teleop.wav");
-
+const match_endgame = new Audio("/assets/audio/match_endgame.wav")
 export default function configureAudio() {
     socket.on("abortMatch", () => {match_end.play()})
     matchPeriod.subscribe((period) => {
@@ -16,7 +16,13 @@ export default function configureAudio() {
         switch (period) {
             case MatchPeriod.AUTO: match_start.play();break;
             // case MatchPeriod.PAUSE: match_end.play();break;
-            case MatchPeriod.TELEOP: match_teleop.play();break;
+            case MatchPeriod.TELEOP: 
+                match_teleop.play();
+                setTimeout(() => {
+                    console.log("Playing endgame sound")
+                    match_endgame.play()
+                }, 120*1000)
+                break;
             case MatchPeriod.POSTMATCH: match_end.play();break;
         }
     })

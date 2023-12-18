@@ -12,11 +12,36 @@ import rootLogger from 'logger';
 import {DBSettings} from 'models/settings';
 import {hitmanager, matchmanager, statusmanager, teammanager} from "managers";
 import * as tba from "./tba/index";
-import {IPCClient} from "./ipc/ipc";
 import * as db from "./models/db";
 import startSockets from "./sockets";
 
-let driverStatuses:ExtendedDsStatuses
+
+function createStatus() {
+    return  {dsConnected: true,
+    radioConnected: true,
+    robotConnected: true,
+    enabled: true,
+    isAuto: true,
+    isTempStopped: false,
+    tripTime: 0 /* int */,
+    missedPackets: 0, /* int */
+    bypassed: false,
+    battery: 0 /* float64 */,
+    isEstopped: false,
+    estopActive: false,
+    hardwareEstopPressed: false,
+    hardwareEstopOnline: false,
+    assignedTeam: 0 /* int */
+    }
+}
+let driverStatuses:ExtendedDsStatuses = {
+    "B1": createStatus(),
+    B2: createStatus(),
+    B3: createStatus(),
+    R1: createStatus(),
+    R2: createStatus(),
+    R3: createStatus(),
+}
 
 const server = http.createServer()
 export const isProduction = process.env.NODE_ENV === "production"
@@ -24,10 +49,6 @@ export const isProduction = process.env.NODE_ENV === "production"
 
 
 
-
-const ipc = new IPCClient({
-    dsStatus: handleDSStatus,
-})
 let socketCallbacks:{
     emitDsStatus:(data:DSStatuses) => void,
     setLight:(color:StackLightColor, state:StackLightState) => void,
@@ -43,10 +64,9 @@ async function configure() {
     await teammanager.loadTeams()
     
     
-    socketCallbacks = await startSockets(server, ipc)
-    registerDSStatus = statusmanager.configure(socketCallbacks.setLight, ipc, socketCallbacks.pollEstopHosts).registerDSStatus
-    hitmanager.configureHitManager(ipc, socketCallbacks.emitHitStatus)
-    ipc.load(matchmanager.getCurrentMatch().getData())
+    socketCallbacks = await startSockets(server)
+    registerDSStatus = statusmanager.configure(socketCallbacks.setLight, socketCallbacks.pollEstopHosts).registerDSStatus
+    hitmanager.configureHitManager(socketCallbacks.emitHitStatus)
     // await tba.reset("match") // TODO: Remove this when teams are finalized
     await tba.updateEventTeams()
     await tba.updateAlliances()

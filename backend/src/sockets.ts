@@ -24,7 +24,6 @@ import {getMatchPeriod} from '@fowlutils/match_timer';
 import * as teammanager from './managers/teammanager';
 import {buildStats} from 'models/teams';
 import {getDsStatus, isProduction} from 'index';
-import {IPCClient} from 'ipc/ipc';
 import logger from "./logger"
 import {isMatchReady, probeEstops} from 'managers/statusmanager';
 import {handleEstop} from './managers/statusmanager';
@@ -39,7 +38,7 @@ const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 
-export default function startServer(server: http.Server, ipc: IPCClient) {
+export default function startServer(server: http.Server) {
     io = new Server(server, {
         cors: {
             origin: "*"
@@ -152,7 +151,6 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             Object.entries(hitmanager.getStates()).forEach(([station, state]) => { // TODO: make this a little nicer with a single event
                 io.to("dashboard").emit("robotHitState", station as DriverStation, state)
             })
-            ipc.load(match.getData())
             probeEstops().then((didSucceed) => { if (!didSucceed) alert("Estop responses not received, check online") })
             io.to("dashboard").emit("loadMatch", match.getData())
         })
@@ -216,33 +214,10 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
         socket.on("startMatch", async (id) => {
             const match = matchmanager.getCurrentMatch()
             if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
-            ipc.load(match.getData())
-            await probeEstops()
-            if (!isMatchReady()) {
-                alert("Match not ready")
-                return;
-            }
             match.startTime = Date.now();
             match.state = MatchState.IN_PROGRESS
-
-            ipc.start(match.getData())
-            ipc.awaitResponse(["matchhold", "matchconfirm"]).then((message) => {
-                if (message.cmd == "matchhold") {
-                    match.startTime = 0;
-                    match.state = MatchState.PENDING;
-                    alert("[IPC] Match not ready")
-                } else {
-                    matchLogger.log(match.id, "start confirmed")
-                    bucketmanager.setPatternAll(BucketPattern.HITS_0)
-                }
-            }).catch((reason) => {
-                alert("Did not recieve IPC response:", reason)
-                match.startTime = 0;
-                match.state = MatchState.PENDING;
-            }).finally(() => {
-                io.to("dashboard").emit("match", match.getData())
+            io.to("dashboard").emit("match", match.getData())
             })
-        })
         socket.on("abortMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
             matchLogger.log("aborting", id)
@@ -250,8 +225,6 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
             match.startTime = 0;
             match.state = MatchState.PENDING
             bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
-            ipc.abort()
-            probeEstops()
             io.to("dashboard").emit("abortMatch", match.getData())
         })
 
@@ -321,7 +294,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
         socket.on("registerHit", (station) => {
             const success = hitmanager.registerHit(station)
             const match = matchmanager.getCurrentMatch()
-            if (success) {
+          
                 const stationnum = parseInt(station[1]) - 1
                 if (station[0] == "B") {
                     match.redScoreBreakdown.targetHits[stationnum]++
@@ -331,7 +304,7 @@ export default function startServer(server: http.Server, ipc: IPCClient) {
                     match.blueScoreBreakdown = match.blueScoreBreakdown // Force DB save
                 }
                 io.to("dashboard").emit("match", match.getData())
-            }
+        
 
         })
 

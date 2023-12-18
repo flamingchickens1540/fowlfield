@@ -1,17 +1,15 @@
 import { DSStatuses, DriverStation, ExtendedDsStatuses, MatchState, StackLightColor, StackLightState } from "@fowltypes";
-import { IPCClient } from "ipc/ipc";
 import rootLogger from "logger";
 import { getCurrentMatch } from './matchmanager';
 let lightSetter: (light: StackLightColor, state: StackLightState) => void
 let estopProber: () => Promise<void>;
-let ipcClient: IPCClient
+
 
 const logger = rootLogger.getLogger("status")
 
-export function configure(setLight: (light: StackLightColor, state: StackLightState) => void, ipc: IPCClient, probeEstops: () => Promise<void>) {
+export function configure(setLight: (light: StackLightColor, state: StackLightState) => void, probeEstops: () => Promise<void>) {
     lightSetter = setLight
     estopProber = probeEstops
-    ipcClient = ipc
     return { registerDSStatus }
 }
 
@@ -101,22 +99,7 @@ export async function probeEstops(): Promise<boolean> {
 }
 
 export function handleEstop(station: DriverStation, state: boolean, isHardware: boolean) {
-    hardwareEstops[station].active = state;
-    if (isHardware) { hardwareEstops[station].online = true; hardwareEstops[station].pressed = state }
-
-
-    if (state) {
-        ipcClient.estop(station)
-        logger.log("estopping", station)
-    } else {
-        if (getCurrentMatch().state != MatchState.IN_PROGRESS) {
-            ipcClient.unestop(station)
-            logger.debug("lifting estop", station)
-        } else {
-            logger.debug('not lifting estop', station)
-        }
-    }
-    updateLights()
+    
 }
 
 

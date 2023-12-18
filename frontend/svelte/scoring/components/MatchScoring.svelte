@@ -153,7 +153,7 @@
     </div>
     <div class="hit-tracker">
         <button class="red-button btn" style="width:100%;height:70%;;box-sizing:border-box;margin:0;font-size:60px;"
-                on:click={registerHit} disabled={disableHitButton}>Hit
+                on:click={registerHit}>Hit
             ({$scoreBreakdownOpponent.targetHits[station - 1] ?? 0})
         </button>
         <div style="width:100%;height:calc(30% - 10px);padding-top:10px;margin:0;">

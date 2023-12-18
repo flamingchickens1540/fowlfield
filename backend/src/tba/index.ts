@@ -194,7 +194,9 @@ export async function updateMatches() {
         .filter((match) => match.state == MatchState.POSTED)
         .map(matchToTBAMatch)
     // resetMatches(matches)
+    
     await post("matches/update", data)
+    await updateRankings()
 }
 export async function resetRankings() {
     const body: TbaRankings = {
