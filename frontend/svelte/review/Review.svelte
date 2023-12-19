@@ -124,9 +124,8 @@
 	}
 
 	:global(:root) {
-		touch-action: none;
+		touch-action: pan-y;
 		height: 100%;
-		overscroll-behavior-y: none;
 	}
 
 	:global(body) {

@@ -60,6 +60,7 @@
 </main>
 
 <style lang=scss>
+
   #maincontainer {
     display: flex;
     flex-direction: column;
@@ -79,6 +80,7 @@
   }
 
   main {
+    color:white;
     position: absolute;
     left: 0;
     right: 0;
@@ -93,7 +95,7 @@
     height: 100%;
     width: 340px;
     background-color: #303030;
-    padding: 0 10px;
+    padding: 10px;
   }
 
   :global(body) {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {MatchPeriod} from "@fowltypes";
-	import matchData, {matchPeriod, remainingTimeInDisplayPeriod} from "@store";
+	import matchData, {matchPeriod, remainingTimeInDisplayPeriod, teamList} from "@store";
 	import {derived, writable} from "svelte/store";
 	import socket from "@socket";
 
@@ -10,6 +10,11 @@
     const allianceDisplay = derived(type, ($type) => ($type === "qualification" ? "none" : "block"));
 
     const teamNumberMap = {};
+    teamList.subscribe(($teamList) => {
+      Object.entries($teamList).forEach(([key, value]) => {
+        teamNumberMap[key] = value.displaynum.get()
+      })
+    })
     const red1HitCount = writable(0);
     const red2HitCount = writable(0);
     const red3HitCount = writable(0);

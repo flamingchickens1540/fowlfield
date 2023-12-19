@@ -39,7 +39,7 @@
     );
 
     const hits = writableDerived(
-        isRedAlliance ? matchData.redScoreBreakdown : matchData.blueScoreBreakdown,
+        !isRedAlliance ? matchData.redScoreBreakdown : matchData.blueScoreBreakdown,
         ($breakdown) => $breakdown.targetHits[stationid - 1],
         (newVal, $breakdown) => {
             $breakdown.targetHits[stationid - 1] = newVal;

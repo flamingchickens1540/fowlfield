@@ -82,16 +82,16 @@
 			redAllianceTo = "Replay";
 			blueAllianceTo = "Replay";
 		} else if (blueWon) {
-			if (schedule[$matchNumber].loserTo != null) {
-				redAllianceTo = "Advances to "+schedule[schedule[$matchNumber].loserTo!.match]?.title ?? "Unknown"
+			if (schedule[$matchNumber]?.loserTo != null) {
+				redAllianceTo = "Advances to "+schedule[schedule[$matchNumber]?.loserTo!.match]?.title ?? "Unknown"
 			} else {
 				redAllianceTo = "Eliminated";
 			}
-			blueAllianceTo = "Advances to "+ schedule[schedule[$matchNumber].winnerTo?.match]?.title ?? "Unknown"
+			blueAllianceTo = "Advances to "+ schedule[schedule[$matchNumber]?.winnerTo?.match]?.title ?? "Unknown"
 		} else {
-			redAllianceTo = "Advances to "+ schedule[schedule[$matchNumber].winnerTo?.match]?.title ?? "Unknown"
-			if (schedule[$matchNumber].loserTo != null) {
-				blueAllianceTo = "Advances to "+schedule[schedule[$matchNumber].loserTo!.match]?.title ?? "Unknown"
+			redAllianceTo = "Advances to "+ schedule[schedule[$matchNumber]?.winnerTo?.match]?.title ?? "Unknown"
+			if (schedule[$matchNumber]?.loserTo != null) {
+				blueAllianceTo = "Advances to "+schedule[schedule[$matchNumber]?.loserTo!.match]?.title ?? "Unknown"
 			} else {
 				blueAllianceTo = "Eliminated";
 			}

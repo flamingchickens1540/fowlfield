@@ -82,13 +82,14 @@ if (mode == "serve" || mode == "dev" || mode =="watch") {
         <html lang="en">
         <head>
             <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
             <script type="module" src="/assets/${page}/index.js"></script>
             <link rel="stylesheet" href="/assets/${page}/index.css"></link>
             <link rel="stylesheet" href="/assets/app.css"></link>
             ${showManifest ? `
             <meta name="apple-mobile-web-app-capable" content="yes">
             <link rel="manifest" href="/manifest/${page}.webmanifest" />
+            <link rel="apple-touch-icon" sizes="512x512" href="/manifest/${page}.png">
             <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
             
             `:''}

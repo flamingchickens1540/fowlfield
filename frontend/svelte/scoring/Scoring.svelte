@@ -32,6 +32,7 @@
         }, {passive: false});
     })
 </script>
+
 <MatchScoring {alliance} station={stationnum}></MatchScoring>
 
 
