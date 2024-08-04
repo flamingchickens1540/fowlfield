@@ -1,4 +1,3 @@
-import { DBMatch } from "../models/matches";
 import * as db from "../models/db"
 import { MatchState, PartialMatch, MatchData } from '~common/types';
 import { DBSettings } from "~/models/settings";
@@ -8,7 +7,6 @@ import {createLogger} from "~/logger";
 const logger = createLogger("matchmanager")
 
 
-let matches:{[key:string]:DBMatch}
 let isReady:boolean = false;
 let settings:DBSettings
 let matchMaker:MatchMaker

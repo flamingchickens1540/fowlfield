@@ -1,4 +1,5 @@
 import type { MatchData, ScoreBreakdown } from '../types/types';
+import {MatchScores} from "@prisma/client";
 
 type PointsBreakdown = {
     autoBunny:  number
@@ -9,7 +10,7 @@ type PointsBreakdown = {
     foulPoints : number
 }
 
-export function calculatePointBreakdown(breakdown: ScoreBreakdown):PointsBreakdown {
+export function calculatePointBreakdown(breakdown: MatchScores):PointsBreakdown {
     if (breakdown == null) {
         return {
             autoBunny: 0,
@@ -21,17 +22,22 @@ export function calculatePointBreakdown(breakdown: ScoreBreakdown):PointsBreakdo
         }
     }
     return {
-        autoBunny  : 5 * breakdown.autoBunnyCount,
-        finalBunny : 5 * breakdown.finalBunnyCount,
-        autoTaxi   : 3 * breakdown.autoTaxiBonus.filter((v) => v).length,
-        endgamePark: 5 * breakdown.endgameParkBonus.filter((v) => v).length,
-        targetHits : 2 * sum(breakdown.targetHits, (v) => v),
-        foulPoints : sum(breakdown.fouls, (v) => v.value)
+        autoBunny  : 5 * breakdown.auto_bunnies,
+        finalBunny : 5 * breakdown.final_bunnies,
+        autoTaxi   : 3 * addBools(breakdown.auto_taxi_bonus_robot1, breakdown.auto_taxi_bonus_robot2, breakdown.auto_taxi_bonus_robot3),
+        endgamePark: 5 * addBools(breakdown.endgame_park_bonus_robot1, breakdown.endgame_park_bonus_robot2, breakdown.endgame_park_bonus_robot3),
+        targetHits : 2 * sum((v) => v, breakdown.target_hits_robot1, breakdown.target_hits_robot2, breakdown.target_hits_robot3),
+        foulPoints : 0 // FIXME - need to add fouls
     }
 }
 
+function addBools(...bools:boolean[]) {
+    let sum = 0
+    bools.forEach((v) => sum += v ? 1 : 0)
+    return sum
+}
 
-function sum<T>(input:T[], converter: ((v:T) => number)) {
+function sum<T>(converter: ((v:T) => number), ...input:T[]) {
     let sum = 0
     input.forEach((v) => sum += converter(v))
     return sum
@@ -41,7 +47,7 @@ export function sumBreakdownPoints(c:PointsBreakdown) {
     return c.autoBunny + c.autoTaxi + c.endgamePark + c.finalBunny + c.targetHits + c.foulPoints
 }
 
-export function calculateAlliancePoints(c:ScoreBreakdown) {
+export function calculateAlliancePoints(c:MatchScores) {
     return sumBreakdownPoints(calculatePointBreakdown(c))
 }
 

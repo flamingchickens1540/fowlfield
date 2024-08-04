@@ -1,38 +1,48 @@
-import config from "~common/config"
-import mongoDB from "mongodb"
-import { DBMatch } from "./matches";
-import { Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from '~common/types';
-import { DBSettings, Settings } from "~/models/settings";
-import { DBTeam, buildStats } from "~/models/teams";
-import {createLogger} from "~/logger";
+import {Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData} from '~common/types';
+import {Settings} from "~/models/settings";
+import {buildStats, DBTeam} from "~/models/teams";
 
-const logger = createLogger("DB")
+import {PrismaClient} from '@prisma/client'
+import {createLogger} from '~/logger'
 
-const mongoURL = `mongodb://${config.mongo.username}:${config.mongo.password}@127.0.0.1:27017/${config.mongo.database}`
-const mongoClient = new mongoDB.MongoClient(mongoURL);
+const logger = createLogger("db")
+export const prisma = new PrismaClient({
+    log: [
+        {
+            emit: 'event',
+            level: 'query'
+        },
+        {
+            emit: 'event',
+            level: 'info'
+        },
+        {
+            emit: 'event',
+            level: 'warn'
+        },
+        {
+            emit: 'event',
+            level: 'error'
+        }
+    ]
+})
+export default prisma
 
-let teams: mongoDB.Collection<TeamData>;
-let matches: mongoDB.Collection<MatchData>;
-let settings: mongoDB.Collection<{ key: string, value: Settings[keyof Settings] }>;
-
-export async function connect() {
-    await mongoClient.connect()
-    teams = mongoClient.db().collection<TeamData>("teams");
-    teams.createIndex({ id: 1 }, { unique: true })
-    teams.createIndex({ alliance: 1 }, { unique: false })
-    matches = mongoClient.db().collection<MatchData>("matches");
-    matches.createIndex({ id: 1 }, { unique: true })
-    settings = mongoClient.db().collection("settings");
-    settings.createIndex({ key: 1 }, { unique: true })
+if (process.env.NODE_ENV != 'prod') {
+    prisma.$on('query', (e) => {
+        logger.trace({name: 'prisma'}, e.query)
+    })
 }
+prisma.$on('info', (e) => {
+    logger.info({ name: 'prisma' }, e.message)
+})
+prisma.$on('warn', (e) => {
+    logger.warn({ name: 'prisma' }, e.message)
+})
+prisma.$on('error', (e) => {
+    logger.error({ name: 'prisma' }, e.message)
+})
 
-export async function getMatches(): Promise<{ [key: string]: DBMatch }> {
-    let result: { [key: string]: DBMatch } = {}
-    for await (const match of matches.find()) {
-        result[match.id] = new DBMatch(match as unknown as MatchData)
-    }
-    return result
-}
 
 export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "matchStats">> {
     
@@ -43,36 +53,48 @@ export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "
         rp: 0,
         avg_score:0
     }
-    for await (const match of matches.find({ $or: [{ red1: team }, { red2: team }, { red3: team }, { blue1: team }, { blue2: team }, { blue3: team }] })) {
+    const matches = await prisma.match.findMany({
+        where: {
+            OR: [
+                { red1: team },
+                { red2: team },
+                { red3: team },
+                { blue1: team },
+                { blue2: team },
+                { blue3: team }
+            ]
+        }
+    })
+    for await (const match of matches) {
         let isRed = false;
         let card = Card.NONE;
         switch (team) {
             case match.red1: 
                 isRed = true;
-                card = match.redCards[0];
+                card = match.red1_card as Card;
                 break;
             case match.red2: 
                 isRed = true;
-                card = match.redCards[1];
+                card = match.red2_card as Card;
                 break;
             case match.red3: 
                 isRed = true;
-                card = match.redCards[2];
+                card = match.red3_card as Card;
                 break;
             case match.blue1: 
                 isRed = false;
-                card = match.blueCards[0];
+                card = match.blue1_card as Card;
                 break;
             case match.blue2: 
                 isRed = false;
-                card = match.blueCards[1];
+                card = match.blue2_card as Card;
                 break;
             case match.blue3: 
                 isRed = false;
-                card = match.blueCards[2];
+                card = match.blue3_card as Card;
                 break;
         }
-        buildStats(match, isRed, card == Card.RED, stats)
+        await buildStats(match, isRed, card == Card.RED, stats)
     }
     return {
         matchStats: stats

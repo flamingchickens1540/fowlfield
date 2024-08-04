@@ -23,6 +23,7 @@
     "vite": "^5.3.5"
   },
   "dependencies": {
+    "@prisma/client": "^5.17.0",
     "@socket.io/admin-ui": "^0.5.1",
     "@types/jsonwebtoken": "^9.0.6",
     "axios": "^1.7.3",
@@ -30,6 +31,7 @@
     "mongodb": "^6.8.0",
     "pino": "^9.3.2",
     "pino-pretty": "^11.2.2",
+    "prisma": "^5.17.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "svelte": "^4.2.18",
