@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {DriverStation} from "!common/types";
+	import type {DriverStation} from "~common/types";
 	import socket from "~/lib/socket";
 	import matchData, {dsStatuses, teamList} from "~/lib/store";
 	import {derived} from "svelte/store";

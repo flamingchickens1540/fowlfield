@@ -1,19 +1,19 @@
 
 
-import { MatchData, MatchID, MatchState, TeamData } from '@fowltypes';
-import { categorizeAlliances, getMatchTitle } from '@fowlutils/index';
-import { calculateScoringInfo } from '@fowlutils/scores';
+import { MatchData, MatchID, MatchState, TeamData } from '~common/types';
+import { categorizeAlliances, getMatchTitle } from '~common/utils';
+import { calculateScoringInfo } from '~common/utils/scores';
 import axios from "axios";
 import crypto from "crypto";
-import rootLogger from "logger";
-import { getMatches } from "managers/matchmanager";
-import { buildExtendedTeams, getTeams } from "managers/teammanager";
-import { tba } from "../../secrets.json";
+import rootLogger from "~/logger";
+import { getMatches } from "~/managers/matchmanager";
+import { buildExtendedTeams, getTeams } from "~/managers/teammanager";
+import config from "~common/config";
 import { TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaTeamNumber } from "./types";
 
 const logger = rootLogger.getLogger("tba")
 
-const isEnabled = (tba.id ?? "") != "" && (tba.secret ?? "") != ""
+const isEnabled = (config.tba.id ?? "") != "" && (config.tba.secret ?? "") != ""
 
 const baseUrl = "https://www.thebluealliance.com"
 const eventCode = "2023orbb"
@@ -21,8 +21,7 @@ const eventCode = "2023orbb"
 const http_client = axios.create({
     baseURL: baseUrl,
     headers: {
-        'X-TBA-Auth-Id': tba.id,
-
+        'X-TBA-Auth-Id': config.tba.id,
     }
 })
 
@@ -46,7 +45,7 @@ interface Endpoints {
 
 async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]):Promise<boolean> {
     const path = `/api/trusted/v1/event/${eventCode}/${endpoint}`
-    const signature = crypto.createHash('md5').update(tba.secret + path + JSON.stringify(body)).digest('hex')
+    const signature = crypto.createHash('md5').update(config.tba.secret + path + JSON.stringify(body)).digest('hex')
     let response;
     try {
         response = await http_client.post(path, body, {

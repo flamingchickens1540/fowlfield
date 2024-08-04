@@ -1,5 +1,12 @@
 {
   "type": "module",
+  "scripts": {
+    "frontend:dev": "vite dev",
+    "frontend:build": "vite build",
+    "backend:build": "tsx ./build-server.ts",
+    "backend:dev": "tsx --tsconfig server/tsconfig.json ./server/index.ts",
+    "backend:lint": "tsc --noEmit --skipLibCheck --project server/tsconfig.json"
+  },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
     "@types/express": "^4.17.21",
@@ -10,10 +17,15 @@
     "http-proxy-middleware": "^3.0.0",
     "sass": "^1.77.8",
     "svelte-preprocess": "^6.0.2",
+    "tsx": "^4.16.5",
     "typescript-cookie": "^1.0.6",
     "vite": "^5.3.5"
   },
   "dependencies": {
+    "@socket.io/admin-ui": "^0.5.1",
+    "axios": "^1.7.3",
+    "mongodb": "^6.8.0",
+    "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "svelte": "^4.2.18",
     "vite-tsconfig-paths": "^4.3.2"

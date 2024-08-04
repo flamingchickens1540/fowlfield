@@ -1,10 +1,10 @@
-import {Card, MatchData, MatchState} from "@fowltypes";
+import {Card, MatchData, MatchState} from '~common/types';
 import {DoubleEliminationBracket} from "./doubleEliminationBracket";
 import {DBMatch} from "./models/matches";
-import rootLogger from "logger";
-import {matchmanager, teammanager} from "managers";
-import {calculateAlliancePoints} from "@fowlutils/scores";
-import {getBlankScoreBreakdown} from '@fowlutils/blanks';
+import rootLogger from "~/logger";
+import {matchmanager, teammanager} from "~/managers";
+import {calculateAlliancePoints} from "~common/utils/scores";
+import {getBlankScoreBreakdown} from '~common/utils/blanks';
 
 const logger = rootLogger.getLogger("MatchMaker")
 

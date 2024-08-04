@@ -1,5 +1,5 @@
 
-import { MatchData, PartialMatch } from "@fowltypes";
+import { MatchData, PartialMatch } from '~common/types';
 import * as db from "./db";
 import * as matchmanager from "../managers/matchmanager"
 

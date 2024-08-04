@@ -1,4 +1,4 @@
-import rootLogger from "logger";
+import rootLogger from "~/logger";
 
 const bracketLogger = rootLogger.getLoggerWithLevel("bracket", "debug")
 export type DoubleEliminationAlliance = 0|1|2|3|4

@@ -15,24 +15,24 @@ import {
     StackLightColor,
     StackLightState,
     TeamData
-} from '@fowltypes';
+} from '~common/types';
 import * as http from "http";
 import {Server} from "socket.io";
-import consts from "../secrets.json";
+import config from "~common/config";
 import * as matchmanager from "./managers/matchmanager";
-import {getMatchPeriod} from '@fowlutils/match_timer';
+import {getMatchPeriod} from '~common/utils/match_timer';
 import * as teammanager from './managers/teammanager';
-import {buildStats} from 'models/teams';
-import {getDsStatus, isProduction} from 'index';
+import {buildStats} from '~/models/teams';
+import {getDsStatus, isProduction} from '~/index';
 import logger from "./logger"
-import {isMatchReady, probeEstops} from 'managers/statusmanager';
+import {isMatchReady, probeEstops} from '~/managers/statusmanager';
 import {handleEstop} from './managers/statusmanager';
 import {instrument} from "@socket.io/admin-ui"
-import {DBSettings} from 'models/settings';
-import {bucketmanager, hitmanager} from 'managers';
+import {DBSettings} from '~/models/settings';
+import {bucketmanager, hitmanager} from '~/managers';
 
-import * as tba from "./tba/index";
-import {getBlankScoreBreakdown} from "@fowlutils/blanks";
+import * as tba from "./tba";
+import {getBlankScoreBreakdown} from "~common/utils/blanks";
 
 const matchLogger = logger.getLogger("match")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -60,7 +60,7 @@ export default function startServer(server: http.Server) {
 
     io.on("connection", (socket) => {
         
-        if (socket.handshake.auth?.key?.trim() !== consts.socket.key) {
+        if (socket.handshake.auth?.key?.trim() !== config.socket.key) {
             socket.disconnect(true)
             logger.log("unauthorized connection from", socket.handshake.address, socket.handshake.url, socket.handshake.auth)
             return;

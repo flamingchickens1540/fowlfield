@@ -6,12 +6,12 @@ import {
     RobotHitState,
     StackLightColor,
     StackLightState
-} from '@fowltypes';
+} from '~common/types';
 import * as http from 'http';
-import rootLogger from 'logger';
-import {DBSettings} from 'models/settings';
-import {hitmanager, matchmanager, statusmanager, teammanager} from "managers";
-import * as tba from "./tba/index";
+import rootLogger from '~/logger';
+import {DBSettings} from '~/models/settings';
+import {hitmanager, matchmanager, statusmanager, teammanager} from "~/managers";
+import * as tba from "~/tba";
 import * as db from "./models/db";
 import startSockets from "./sockets";
 

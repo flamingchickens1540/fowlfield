@@ -1,14 +1,14 @@
-import { mongo } from "../../secrets.json"
+import config from "~common/config"
 import mongoDB from "mongodb"
 import { DBMatch } from "./matches";
-import { Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from "@fowltypes";
-import { DBSettings, Settings } from "models/settings";
-import { DBTeam, buildStats } from "models/teams";
-import rootLogger from "logger";
-import { UsageReportingOutput } from "usageReport";
+import { Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from '~common/types';
+import { DBSettings, Settings } from "~/models/settings";
+import { DBTeam, buildStats } from "~/models/teams";
+import rootLogger from "~/logger";
+import { UsageReportingOutput } from "~/usageReport";
 
 const logger = rootLogger.getLogger("DB")
-const mongoURL = `mongodb://${mongo.username}:${mongo.password}@127.0.0.1:27017/${mongo.database}`
+const mongoURL = `mongodb://${config.mongo.username}:${config.mongo.password}@127.0.0.1:27017/${config.mongo.database}`
 const mongoClient = new mongoDB.MongoClient(mongoURL);
 
 let teams: mongoDB.Collection<TeamData>;

@@ -1,7 +1,7 @@
-import rootLogger from "logger"
-import { recordUsageReport } from "models/db"
+import rootLogger from "~/logger"
+import { recordUsageReport } from "~/models/db"
 const logger = rootLogger.getLogger("report")
-const codes = [ // https://github.com/wpilibsuite/ni-libraries/blob/0be7f5385b3a80a86a0b50ddbf64c85026bf8a08/src/include/FRC_NetworkCommunication/UsageReporting.h
+const codes = [ // https://github.com/wpilibsuite/ni-libraries/blob/0be7f5385b3a80a86a0b50ddbf64c85026bf8a08/~/include/FRC_NetworkCommunication/UsageReporting.h
     "Controller",
     "Module",
     "Language",

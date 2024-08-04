@@ -2,8 +2,6 @@
 import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import tsconfigPaths from "vite-tsconfig-paths";
-import * as fs from "node:fs";
 
 
 let pages = ["estop", "alliance"]
@@ -16,7 +14,7 @@ let pages = ["estop", "alliance"]
 //     }
 // })
 
-let entrypoints = {}
+let entrypoints:Record<string, string> = {}
 for (const key of pages) {
     entrypoints[key] = resolve(__dirname, `svelte/pages/${key}/index.html`)
 }

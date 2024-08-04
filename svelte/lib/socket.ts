@@ -14,7 +14,7 @@ import {
 import type {ClientToServerEvents, ServerToClientEvents} from '~common/types';
 
 
-const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(null || window.location.origin, {
+const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(window.location.origin, {
     auth: {
         key: getCookie("auth")
     },

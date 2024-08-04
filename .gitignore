@@ -1,9 +1,9 @@
-node_modules
-backend/index.cjs*
-frontend/dist
-data
-backend/secrets.json
-frontend/consts.json
-pi/**/consts.json
+/node_modules
+/backend_
+/data
+/config/*.json
+!/config/example.json
+
 .idea
-dist
+/dist
+/build

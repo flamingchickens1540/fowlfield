@@ -1,4 +1,4 @@
-import { EventInfo } from "@fowltypes";
+import { EventInfo } from '~common/types';
 import * as db from "./db"
 
 export interface Settings extends EventInfo {

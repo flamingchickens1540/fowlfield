@@ -1,0 +1,14 @@
+{
+  "mongo": {
+    "username":"app",
+    "password": "mymongopassword",
+    "database": "fowlfield"
+  },
+  "socket": {
+    "key": "fowlfield"
+  },
+  "tba": {
+    "id": "",
+    "secret": ""
+  }
+}

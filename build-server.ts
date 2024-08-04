@@ -6,17 +6,17 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 
 const ctx = await context({
-    entryPoints: ["src/index.ts"],
-    outfile: "index.cjs",
+    entryPoints: ["server/index.ts"],
+    outfile: "build/server.js",
     bundle: true,
     sourcemap:"both",
     platform:"node",
     logLevel: "info",
+    packages: 'external',
+    format: "esm",
+    tsconfig: 'server/tsconfig.json',
+
     absWorkingDir: __dirname,
-    alias: {
-        "@fowlutils":"../common/utils",
-        "@fowltypes":"../common/types"
-    }
 })
 
 

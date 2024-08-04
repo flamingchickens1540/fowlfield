@@ -1,8 +1,8 @@
-import { Card, ExtendedTeam, PartialTeam, TeamData } from "@fowltypes";
-import { average } from '@fowlutils/index';
-import { calculateAlliancePoints } from "@fowlutils/scores";
-import { DBTeam, buildStats } from "models/teams";
-import { matchmanager } from ".";
+import { Card, ExtendedTeam, PartialTeam, TeamData } from '~common/types';
+import { average } from '~common/utils';
+import { calculateAlliancePoints } from "~common/utils/scores";
+import { DBTeam, buildStats } from "~/models/teams";
+import { matchmanager } from "./index";
 import * as db from "../models/db";
 
 

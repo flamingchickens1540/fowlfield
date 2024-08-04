@@ -5,7 +5,7 @@ export function formatDuration(duration:number) {
     return `${minutes}:${seconds}`;
 }
 
-export function roundToPlaces(value: number, places: number): number {
+export function roundToPlaces(value: number, places: number): number|null {
     if (value == null) {return null}
     const pad = 10 ** places
     return Math.round(value * pad) / pad

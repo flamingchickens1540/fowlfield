@@ -17,5 +17,5 @@
       "~common/*": ["../common/*"]
     },
     "baseUrl": "."
-  },
+  }
 }

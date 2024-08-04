@@ -1,5 +1,5 @@
-import {BucketPattern, ClientToServerEvents, DriverStation, ServerToClientEvents} from '@fowltypes';
-import rootLogger from 'logger';
+import {BucketPattern, ClientToServerEvents, DriverStation, ServerToClientEvents} from '~common/types';
+import rootLogger from '~/logger';
 import {Socket} from 'socket.io';
 
 const logger = rootLogger.getLogger("bucket")

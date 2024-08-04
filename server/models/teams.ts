@@ -1,7 +1,7 @@
-import { Card, ExtendedTeam, MatchData, PartialTeam, TeamData, TeamMatchStats } from "@fowltypes";
+import { Card, ExtendedTeam, MatchData, PartialTeam, TeamData, TeamMatchStats } from '~common/types';
 import * as db from "./db"
 import { DBMatch } from "./matches";
-import { calculateAlliancePoints } from "@fowlutils/scores";
+import { calculateAlliancePoints } from "~common/utils/scores";
 
 export class DBTeam implements TeamData {
     get id() {return this.data.id}

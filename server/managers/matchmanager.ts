@@ -1,9 +1,9 @@
 import { DBMatch } from "../models/matches";
 import * as db from "../models/db"
-import { MatchState, PartialMatch, MatchData } from '@fowltypes';
-import { DBSettings } from "models/settings";
-import { MatchMaker } from "matchmaker";
-import rootLogger from "logger";
+import { MatchState, PartialMatch, MatchData } from '~common/types';
+import { DBSettings } from "~/models/settings";
+import { MatchMaker } from "~/matchmaker";
+import rootLogger from "~/logger";
 
 const logger = rootLogger.getLogger("matchmanager")
 

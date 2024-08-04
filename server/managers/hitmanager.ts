@@ -1,6 +1,6 @@
-import { BucketPattern, DriverStation, RobotHitState } from "@fowltypes";
-import rootLogger from "logger";
-import { bucketmanager } from "managers";
+import { BucketPattern, DriverStation, RobotHitState } from "~common/types";
+import rootLogger from "~/logger";
+import { bucketmanager } from "~/managers/index";
 
 const logger = rootLogger.getLogger("hitmanager")
 let hitStates: { [key in DriverStation]: RobotHitState & { timeout: NodeJS.Timeout } } = {

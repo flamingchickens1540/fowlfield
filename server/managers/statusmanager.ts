@@ -1,5 +1,5 @@
-import { DSStatuses, DriverStation, ExtendedDsStatuses, MatchState, StackLightColor, StackLightState } from "@fowltypes";
-import rootLogger from "logger";
+import { DSStatuses, DriverStation, ExtendedDsStatuses, MatchState, StackLightColor, StackLightState } from '~common/types';
+import rootLogger from "~/logger";
 import { getCurrentMatch } from './matchmanager';
 let lightSetter: (light: StackLightColor, state: StackLightState) => void
 let estopProber: () => Promise<void>;

@@ -1,4 +1,4 @@
-import type { AllianceStationStatus, IPCData, Match, Team } from "./ipctypes"
+
 
 
 export type DriverStation = "R1"| "R2" | "R3" | "B1" | "B2" | "B3"
@@ -11,7 +11,19 @@ export enum Card {
     YELLOW = "yellow",
     RED = "red"
 }
-export interface MatchData extends Match {
+export interface MatchData {
+    id: string;
+    matchNumber: number /* int */;
+    elimRound: number /* int */;
+    elimGroup: number /* int */;
+    elimInstance: number /* int */;
+    type: 'qualification'|'elimination';
+    red1: number /* int */;
+    red2: number /* int */;
+    red3: number /* int */;
+    blue1: number /* int */;
+    blue2: number /* int */;
+    blue3: number /* int */;
     redAlliance:number,
     blueAlliance:number,
     blueScoreBreakdown:ScoreBreakdown
@@ -43,12 +55,9 @@ export interface EventInfo {
     lunchReturnTime:number
 }
 
-export type RobotHitState = {
-    count: 0|1|2|3
-    lastDisable: number
-}
 
-export interface TeamData extends Team {
+export interface TeamData {
+    id:number
     name:string
     displaynum:string
     robotname?:string
@@ -84,15 +93,6 @@ export enum MatchPeriod {
     POSTMATCH="post"
 }
 
-
-
-export type DSStatuses = { [key in DriverStation]: AllianceStationStatus}
-
-export type ExtendedDsStatus = DSStatuses[DriverStation]& {
-    hardwareEstopPressed:boolean
-    hardwareEstopOnline:boolean
-}
-export type ExtendedDsStatuses = {[key in DriverStation]:DSStatuses[key]& ExtendedDsStatus}
 
 
 export type MatchID = `${"qm"|"qf"|"sf"|"f"}${number}m${number}`
