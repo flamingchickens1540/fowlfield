@@ -1,11 +1,4 @@
-import {
-    EventInfo,
-    ExtendedTeam,
-    MatchData,
-    PartialMatch,
-    PartialTeam,
-    TeamData,
-} from ".";
+import {EventInfo, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData,} from ".";
 
 export interface ServerToClientEvents {
     match(data: MatchData): void;
@@ -30,9 +23,12 @@ export interface ServerToClientEvents {
     abortMatch(data: MatchData): void;
     
     alert(message:string):void
+
+    login(payload:{success:boolean, token?:string}):void
 }
 
 export interface ClientToServerEvents {
+    login(password:string):void
     partialMatch(data: PartialMatch): void;
     partialTeam(data: PartialTeam): void;
     partialEvent(data: Partial<EventInfo>): void;

@@ -1,7 +1,7 @@
 // vite.config.js
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
-import { svelte } from '@sveltejs/vite-plugin-svelte';
+import {resolve} from 'path'
+import {defineConfig} from 'vite'
+import {svelte} from '@sveltejs/vite-plugin-svelte';
 
 
 let pages = ["estop", "alliance"]
@@ -30,12 +30,14 @@ export default defineConfig({
         }
     },
     root: resolve(__dirname, "./svelte/pages"),
+    publicDir: resolve(__dirname, "./public"),
     build: {
         emptyOutDir: true,
         outDir: resolve(__dirname, "./dist"),
         rollupOptions: {
             input: entrypoints,
         },
+
 
     },
 

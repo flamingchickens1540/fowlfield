@@ -1,5 +1,5 @@
 import {io, type Socket} from "socket.io-client";
-import {getCookie, setCookie} from 'typescript-cookie';
+import {setCookie} from 'typescript-cookie';
 
 import {
     updateEventInfo,
@@ -13,11 +13,22 @@ import {
 import type {ClientToServerEvents, ServerToClientEvents} from '~common/types';
 
 
-const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(window.location.origin, {
+const socket:Socket<ServerToClientEvents, ClientToServerEvents> = io(window.location.protocol + "//"+window.location.hostname+":3000", {
     auth: {
-        key: getCookie("auth")
+        token: localStorage.getItem("auth"),
     },
+    path: "/ws",
     autoConnect:false
+})
+
+socket.on("login", ({success, token}) => {
+    console.info("Logged in", success, token)
+    if (token) {
+        localStorage.setItem("auth", token)
+    }
+    if (!success) {
+        socket.emit("login", prompt("Enter password")!)
+    }
 })
 
 socket.on("match", updateMatchStores)
@@ -45,6 +56,7 @@ socket.on("disconnect", (reason) => {
             expires:365
         })
         window.location.reload()
+
     } else {
         alert("Disconnected from socket server")
     }

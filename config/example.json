@@ -5,7 +5,9 @@
     "database": "fowlfield"
   },
   "socket": {
-    "key": "fowlfield"
+    "password": "fowlfield",
+    "view_password": "fowlfield2",
+    "signingKey": "abcdefg"
   },
   "tba": {
     "id": "",
