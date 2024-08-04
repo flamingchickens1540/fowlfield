@@ -3,9 +3,10 @@
   "scripts": {
     "frontend:dev": "vite dev",
     "frontend:build": "vite build",
+    "frontend:check": "tsc --noEmit --skipLibCheck --project svelte/tsconfig.json",
     "backend:build": "tsx ./build-server.ts",
     "backend:dev": "tsx --tsconfig server/tsconfig.json ./server/index.ts",
-    "backend:lint": "tsc --noEmit --skipLibCheck --project server/tsconfig.json"
+    "backend:check": "tsc --noEmit --skipLibCheck --project server/tsconfig.json"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^3.1.1",
@@ -25,6 +26,8 @@
     "@socket.io/admin-ui": "^0.5.1",
     "axios": "^1.7.3",
     "mongodb": "^6.8.0",
+    "pino": "^9.3.2",
+    "pino-pretty": "^11.2.2",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
     "svelte": "^4.2.18",

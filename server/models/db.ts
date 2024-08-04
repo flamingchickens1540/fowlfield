@@ -4,17 +4,16 @@ import { DBMatch } from "./matches";
 import { Card, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData } from '~common/types';
 import { DBSettings, Settings } from "~/models/settings";
 import { DBTeam, buildStats } from "~/models/teams";
-import rootLogger from "~/logger";
-import { UsageReportingOutput } from "~/usageReport";
+import {createLogger} from "~/logger";
 
-const logger = rootLogger.getLogger("DB")
+const logger = createLogger("DB")
+
 const mongoURL = `mongodb://${config.mongo.username}:${config.mongo.password}@127.0.0.1:27017/${config.mongo.database}`
 const mongoClient = new mongoDB.MongoClient(mongoURL);
 
 let teams: mongoDB.Collection<TeamData>;
 let matches: mongoDB.Collection<MatchData>;
 let settings: mongoDB.Collection<{ key: string, value: Settings[keyof Settings] }>;
-let reporting: mongoDB.Collection<{ team: number, raw:string, report:UsageReportingOutput}>;
 
 export async function connect() {
     await mongoClient.connect()
@@ -25,8 +24,6 @@ export async function connect() {
     matches.createIndex({ id: 1 }, { unique: true })
     settings = mongoClient.db().collection("settings");
     settings.createIndex({ key: 1 }, { unique: true })
-    reporting = mongoClient.db().collection("reporting");
-    reporting.createIndex({ team: 1 }, { unique: true })
 }
 
 export async function getMatches(): Promise<{ [key: string]: DBMatch }> {
@@ -141,12 +138,5 @@ export async function deleteTeam(id:number) {
     const resp = await teams.deleteOne({ id: id })
     if (!resp.acknowledged) {
         logger.warn("Could not delete team", id)
-    }
-}
-
-export async function recordUsageReport(team:number, raw:string,report:UsageReportingOutput) {
-    const resp = await reporting.replaceOne({ team }, { team, raw, report }, {upsert:true})
-    if (!resp.acknowledged) {
-        logger.warn("Could not record usage report", team)
     }
 }

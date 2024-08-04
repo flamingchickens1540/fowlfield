@@ -33,7 +33,6 @@ export function getAlliances():{1:number[], 2:number[], 3:number[], 4:number[]} 
             alliances[element.alliance][element.alliancePosition-1] = element.id
         }
     });
-    console.log(alliances)
     return alliances;
 
 }

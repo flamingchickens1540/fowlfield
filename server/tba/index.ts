@@ -5,13 +5,13 @@ import { categorizeAlliances, getMatchTitle } from '~common/utils';
 import { calculateScoringInfo } from '~common/utils/scores';
 import axios from "axios";
 import crypto from "crypto";
-import rootLogger from "~/logger";
+import {createLogger} from "~/logger";
 import { getMatches } from "~/managers/matchmanager";
 import { buildExtendedTeams, getTeams } from "~/managers/teammanager";
 import config from "~common/config";
 import { TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaTeamNumber } from "./types";
 
-const logger = rootLogger.getLogger("tba")
+const logger = createLogger("tba")
 
 const isEnabled = (config.tba.id ?? "") != "" && (config.tba.secret ?? "") != ""
 
@@ -53,7 +53,7 @@ async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]):
                 'X-TBA-Auth-Sig': signature
             }
         })
-        logger.log(response.status, response.statusText, path, body)
+        logger.info(response.status, response.statusText, path, body)
         if (response.status == 200) {
             return true
         }

@@ -12,7 +12,7 @@
     "moduleResolution": "bundler",
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "target": "ESNext",
-    "module": "esnext"
+    "target": "es2022",
+    "module": "es2022"
   },
 }

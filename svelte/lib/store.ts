@@ -1,4 +1,4 @@
-import type {EventInfo, ExtendedDsStatuses} from "~common/types";
+import type {EventInfo} from "~common/types";
 import {Card, type ExtendedTeam, type MatchData, MatchState} from '~common/types';
 import {getBlankScoreBreakdown} from '~common/utils/blanks';
 import {
@@ -87,9 +87,6 @@ export const teamRankings: Readable<{ [key: number]: number }> = derived(teamsSo
     return map;
 })
 
-export const dsStatuses: Writable<ExtendedDsStatuses> = writable()
-
-
 export const eventData = new SocketDataStore<EventInfo>({
     lunchReturnTime: 0,
     atLunch: false
@@ -111,9 +108,6 @@ export function abortMatch() {
 
 export function commitMatch() {
     socket.emit("commitMatch", currentMatchID)
-}
-export function updateDSStatuses(data: ExtendedDsStatuses) {
-    dsStatuses.set(data)
 }
 
 export function updateEventInfo(data: EventInfo) {
@@ -165,7 +159,7 @@ export function updateMatchStores(data: MatchData) {
     matchList.update((list) => { list[data.id] = data; return list })
     if (data.id !== currentMatchID) { return }
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
-        (store as FowlMatchStore<any, any>).setQuiet(data[key])
+        (store as FowlMatchStore<any, any>).setQuiet(data[key as keyof MatchData])
     })
 }
 

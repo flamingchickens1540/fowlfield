@@ -1,12 +1,12 @@
 import {Card, MatchData, MatchState} from '~common/types';
 import {DoubleEliminationBracket} from "./doubleEliminationBracket";
 import {DBMatch} from "./models/matches";
-import rootLogger from "~/logger";
 import {matchmanager, teammanager} from "~/managers";
 import {calculateAlliancePoints} from "~common/utils/scores";
 import {getBlankScoreBreakdown} from '~common/utils/blanks';
+import {createLogger} from "~/logger";
 
-const logger = rootLogger.getLogger("MatchMaker")
+const logger = createLogger("MatchMaker")
 
 export class MatchMaker {
     private bracket: DoubleEliminationBracket | null = null;
@@ -78,7 +78,7 @@ export class MatchMaker {
             return null
         }
         const alliances = teammanager.getAlliances()
-        logger.log("ELIM DATA", match, match.red, match.blue, alliances)
+        logger.info("ELIM DATA", match, match.red, match.blue, alliances)
         return matchmanager.newMatch({
             id: match.matchId,
             matchNumber: match.matchNumber,

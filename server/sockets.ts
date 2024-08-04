@@ -1,19 +1,14 @@
 import {
-    BucketPattern,
     Card,
     type ClientToServerEvents,
     DriverStation,
-    ExtendedDsStatuses,
     ExtendedTeam,
     type MatchData,
     MatchPeriod,
     MatchState,
     type PartialMatch,
     PartialTeam,
-    RobotHitState,
     type ServerToClientEvents,
-    StackLightColor,
-    StackLightState,
     TeamData
 } from '~common/types';
 import * as http from "http";
@@ -23,18 +18,15 @@ import * as matchmanager from "./managers/matchmanager";
 import {getMatchPeriod} from '~common/utils/match_timer';
 import * as teammanager from './managers/teammanager';
 import {buildStats} from '~/models/teams';
-import {getDsStatus, isProduction} from '~/index';
-import logger from "./logger"
-import {isMatchReady, probeEstops} from '~/managers/statusmanager';
-import {handleEstop} from './managers/statusmanager';
+import {createLogger} from "./logger"
 import {instrument} from "@socket.io/admin-ui"
 import {DBSettings} from '~/models/settings';
-import {bucketmanager, hitmanager} from '~/managers';
 
 import * as tba from "./tba";
 import {getBlankScoreBreakdown} from "~common/utils/blanks";
+import {isProduction} from "~/index";
 
-const matchLogger = logger.getLogger("match")
+const logger = createLogger("socket")
 let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 
@@ -46,7 +38,7 @@ export default function startServer(server: http.Server) {
     })
 
     if (!isProduction) {
-        console.log("starting admin server")
+        console.info("starting admin server")
         instrument(io, {
             auth: {
                 type: "basic",
@@ -62,14 +54,13 @@ export default function startServer(server: http.Server) {
         
         if (socket.handshake.auth?.key?.trim() !== config.socket.key) {
             socket.disconnect(true)
-            logger.log("unauthorized connection from", socket.handshake.address, socket.handshake.url, socket.handshake.auth)
+            logger.warn("unauthorized connection from", socket.handshake.address, socket.handshake.url, socket.handshake.auth)
             return;
         }
-        logger.log("new connection from", socket.id, socket.handshake.address, socket.handshake.auth.role ?? "default")
+        logger.info("new connection from", socket.id, socket.handshake.address, socket.handshake.auth.role ?? "default")
 
         if ((socket.handshake.auth.role ?? "") == "estop") {
             socket.join("estop")
-            probeEstops()
         } else if ((socket.handshake.auth.role ?? "") == "light") {
             socket.join("light")
         } else if ((socket.handshake.auth.role ?? "") == "robot") {
@@ -86,7 +77,6 @@ export default function startServer(server: http.Server) {
                 socket.disconnect(true)
                 return;
             }
-            bucketmanager.registerBucket(robot_id, socket)
         } else {
             socket.join("dashboard")
 
@@ -116,7 +106,6 @@ export default function startServer(server: http.Server) {
             socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
             socket.emit("matches", matches)
             socket.emit("teams", teams)
-            socket.emit("dsStatus", getDsStatus())
             socket.emit("syncTime", Date.now()) // Account for time zone differences
             DBSettings.getInstance().then((settings) => {
                 socket.emit("event", {
@@ -137,26 +126,15 @@ export default function startServer(server: http.Server) {
         })
 
         socket.on("preloadMatch", (id: string) => {
-            matchLogger.log("preloading", id)
+            logger.info("preloading", id)
             const match = matchmanager.setPreloadMatch(id)
-            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
             io.to("dashboard").emit("preloadMatch", match.getData())
         })
 
         socket.on("loadMatch", (id: string) => {
-            matchLogger.log("loading", id)
+            logger.info("loading", id)
             const match = matchmanager.setLoadedMatch(id)
-            hitmanager.reset()
-            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
-            Object.entries(hitmanager.getStates()).forEach(([station, state]) => { // TODO: make this a little nicer with a single event
-                io.to("dashboard").emit("robotHitState", station as DriverStation, state)
-            })
-            probeEstops().then((didSucceed) => { if (!didSucceed) alert("Estop responses not received, check online") })
             io.to("dashboard").emit("loadMatch", match.getData())
-        })
-
-        socket.on("getHitStates", (cb) => {
-            cb(hitmanager.getStates())
         })
 
 
@@ -185,7 +163,7 @@ export default function startServer(server: http.Server) {
         })
 
         socket.on("deleteTeam", async (id: number) => {
-            logger.log("deleting team", id)
+            logger.info("deleting team", id)
             teammanager.deleteTeam(id)
 
             io.to("dashboard").emit("teams", teammanager.buildExtendedTeams())
@@ -220,11 +198,10 @@ export default function startServer(server: http.Server) {
             })
         socket.on("abortMatch", (id) => {
             const match = matchmanager.getCurrentMatch()
-            matchLogger.log("aborting", id)
+            logger.info("aborting", id)
             if (id != match.id) { alert("Aborted non-loaded match"); return; }
             match.startTime = 0;
             match.state = MatchState.PENDING
-            bucketmanager.setPatternAll(BucketPattern.ALLIANCE_STATION)
             io.to("dashboard").emit("abortMatch", match.getData())
         })
 
@@ -237,7 +214,7 @@ export default function startServer(server: http.Server) {
                 const team = teammanager.getTeam(teamnum)
                 if (team == null) { return }
                 team.card = Card.YELLOW
-                logger.log("Committing", card, "card for", teamnum)
+                logger.info("Committing", card, "card for", teamnum)
                 io.to("dashboard").emit("team", await team.getExtendedData())
             }
             handleCard(match.redCards[0], match.red1)
@@ -246,7 +223,7 @@ export default function startServer(server: http.Server) {
             handleCard(match.blueCards[0], match.blue1)
             handleCard(match.blueCards[1], match.blue2)
             handleCard(match.blueCards[2], match.blue3)
-            logger.log("Committing", id)
+            logger.info("Committing", id)
             // TODO: Actually commit w/ TBA
             tba.updateMatches()
 
@@ -270,11 +247,9 @@ export default function startServer(server: http.Server) {
             io.to("dashboard").emit("match", match.getData())
         })
 
-        socket.on("estop", (s) => handleEstop(s, true, socket.rooms.has("estop")))
-        socket.on("unestop", (s) => handleEstop(s, false, socket.rooms.has("estop")))
 
         socket.on("partialEvent", async (data) => {
-            console.log("recieved partial event", data)
+            console.info("recieved partial event", data)
             const settings = await DBSettings.getInstance()
             if (data.atLunch != null) { settings.atLunch = data.atLunch }
             if (data.lunchReturnTime != null) { settings.lunchReturnTime = data.lunchReturnTime }
@@ -285,114 +260,29 @@ export default function startServer(server: http.Server) {
         })
 
         socket.on("disconnect", () => {
-            logger.log("disconnected", socket.id, socket.handshake.auth.role)
-            if (socket.handshake.auth.role == "estop") {
-                probeEstops()
-            }
-        })
-
-        socket.on("registerHit", (station) => {
-            const success = hitmanager.registerHit(station)
-            const match = matchmanager.getCurrentMatch()
-          
-                const stationnum = parseInt(station[1]) - 1
-                if (station[0] == "B") {
-                    match.redScoreBreakdown.targetHits[stationnum]++
-                    match.redScoreBreakdown = match.redScoreBreakdown // Force DB save
-                } else {
-                    match.blueScoreBreakdown.targetHits[stationnum]++
-                    match.blueScoreBreakdown = match.blueScoreBreakdown // Force DB save
-                }
-                io.to("dashboard").emit("match", match.getData())
-        
-
-        })
-
-        socket.on("setBuckets", (stations:DriverStation[], pattern:BucketPattern) => {
-            stations?.forEach((station) => {
-                bucketmanager.setPattern(station, pattern)
-            })
-        })
-        socket.on("undoHit", (station) => {
-            hitmanager.undoHit(station)
-            const match = matchmanager.getCurrentMatch()
-            const stationnum = parseInt(station[1]) - 1
-            if (station[0] == "B") {
-                match.redScoreBreakdown.targetHits[stationnum]--
-                if (match.redScoreBreakdown.targetHits[stationnum] < 0) {
-                    match.redScoreBreakdown.targetHits[stationnum] = 0
-                }
-                match.redScoreBreakdown = match.redScoreBreakdown // Force DB save
-            } else {
-                match.blueScoreBreakdown.targetHits[stationnum]--
-                if (match.blueScoreBreakdown.targetHits[stationnum] < 0) {
-                    match.blueScoreBreakdown.targetHits[stationnum] = 0
-                }
-                match.blueScoreBreakdown = match.blueScoreBreakdown // Force DB save
-            }
-            io.to("dashboard").emit("match", match.getData())
+            logger.info("disconnected", socket.id, socket.handshake.auth.role)
         })
 
         function alert(...message: string[]) {
-            matchLogger.warn("ALERT", ...message)
+            logger.warn("ALERT", ...message)
             socket.emit("alert", message.join(" "))
         }
     })
 
 
-    async function pollEstopHosts(): Promise<void> {
-        let complete: () => void
-        io.to("estop").timeout(300).emit("queryEstop", (err, responses) => {
-            if (responses == null || responses.length == 0) { logger.warn("No Estop Response"); return; }
-            responses.forEach((data) => {
-                if (data == null) { logger.warn("No Estop Response"); return; }
-                if (data.B1 != null) { handleEstop("B1", data.B1, true) }
-                if (data.B2 != null) { handleEstop("B2", data.B2, true) }
-                if (data.B3 != null) { handleEstop("B3", data.B3, true) }
-                if (data.R1 != null) { handleEstop("R1", data.R1, true) }
-                if (data.R2 != null) { handleEstop("R2", data.R2, true) }
-                if (data.R3 != null) { handleEstop("R3", data.R3, true) }
-            })
-            complete()
-
-        })
-        const success: Promise<void> = new Promise((resolve, reject) => {
-            complete = resolve;
-        })
-        const timeout: Promise<void> = new Promise((resolve, reject) => {
-            setTimeout(() => resolve(), 300);
-        });
-
-        return Promise.race([success, timeout])
-
-
-    }
 
     setInterval(() => {
         if (!matchmanager.isDBLoaded()) { return; }
         const match = matchmanager.getCurrentMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
-            probeEstops()
-            matchLogger.log("Transitioning match", match.id, "to completed")
+            logger.info("Transitioning match", match.id, "to completed")
             io.to("dashboard").emit("match", match.getData())
         }
     }, 50)
 
 
-    return {
-        emitDsStatus(statuses: ExtendedDsStatuses) {
-            io.to("dashboard").emit("dsStatus", statuses)
-        },
-        setLight(light: StackLightColor, state: StackLightState) {
-            // console.log("Setting lights", light, on)
-            io.to("light").emit("setLight", light, state)
-        },
-        pollEstopHosts,
-        emitHitStatus(station: DriverStation, state: RobotHitState) {
-            io.to("dashboard").emit("robotHitState", station, state)
-        }
-    }
+    return
 
 }
 

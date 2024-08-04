@@ -1,15 +1,9 @@
 import {
-    BucketPattern,
-    DriverStation,
     EventInfo,
-    ExtendedDsStatuses,
     ExtendedTeam,
     MatchData,
     PartialMatch,
     PartialTeam,
-    RobotHitState,
-    StackLightColor,
-    StackLightState,
     TeamData,
 } from ".";
 
@@ -34,15 +28,8 @@ export interface ServerToClientEvents {
      */
     loadMatch(matdatach: MatchData): void;
     abortMatch(data: MatchData): void;
-    dsStatus(data:ExtendedDsStatuses):void
     
     alert(message:string):void
-
-    robotHitState(ds:DriverStation, hitState:RobotHitState):void
-
-    queryEstop(cb:(data:Partial<{[key in DriverStation]:boolean}>)=>void):void
-    setLight(color:StackLightColor, state:StackLightState):void
-    setBucketState(state:number):void
 }
 
 export interface ClientToServerEvents {
@@ -66,14 +53,5 @@ export interface ClientToServerEvents {
     resetMatch(id:string):void;
 
     nextMatch(type:string):void
-    estop(station:DriverStation):void
-    unestop(station:DriverStation):void
-
-    registerHit(station:DriverStation):void
-    undoHit(station:DriverStation):void
-
-    getHitStates(cb:(states:{[key in DriverStation]:RobotHitState}) => void):void
     commitAlliances(cb:(ok:boolean) => void):void
-
-    setBuckets(stations:DriverStation[], pattern:BucketPattern):void
 }

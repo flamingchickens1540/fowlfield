@@ -1,6 +1,6 @@
-import rootLogger from "~/logger";
+import {createLogger} from "~/logger";
 
-const bracketLogger = rootLogger.getLoggerWithLevel("bracket", "debug")
+const bracketLogger = createLogger("bracket", {level:"debug"})
 export type DoubleEliminationAlliance = 0|1|2|3|4
 
 export type DoubleEliminationMatch = {
