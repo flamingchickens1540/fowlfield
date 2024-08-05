@@ -53,7 +53,7 @@ model Match {
   stage_index Int
   type        Match_Type
   elim_info   Match_ElimInfo?
-  startTime   DateTime
+  startTime   Int?
   state       Match_State
   red1        Int
   red2        Int

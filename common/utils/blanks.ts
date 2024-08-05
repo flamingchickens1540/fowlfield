@@ -1,4 +1,4 @@
-import { Match, Match_AllianceResults } from '@prisma/client'
+import { Match, Match_AllianceResults, Team } from '@prisma/client'
 
 
 export function getBlankScoreBreakdown(): Match_AllianceResults {
@@ -20,7 +20,15 @@ export function getBlankScoreBreakdown(): Match_AllianceResults {
         fouls: []
     }
 }
-
+export function getBlankTeam():Required<Team> {
+    return {
+        id: 0,
+        display_number: "",
+        team_name: "",
+        robot_name: "",
+        has_card: false
+    }
+}
 export function getBlankMatch():Required<Match> {
     return {
         id: "",
@@ -32,7 +40,7 @@ export function getBlankMatch():Required<Match> {
             blue_alliance: 0,
             red_alliance: 0
         },
-        startTime: new Date(0),
+        startTime: 0,
         state: "not_started",
         red_scores: getBlankScoreBreakdown(),
         blue_scores: getBlankScoreBreakdown(),

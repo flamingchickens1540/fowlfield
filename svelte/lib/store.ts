@@ -1,6 +1,5 @@
-import type {EventInfo} from "~common/types";
-import {Card, type ExtendedTeam, type MatchData, MatchState} from '~common/types';
-import { getBlankMatch, getBlankScoreBreakdown } from '~common/utils/blanks'
+
+import {type ExtendedTeam} from '~common/types';
 import {
     getElapsedTimeInPeriod,
     getMatchPeriod,
@@ -11,60 +10,40 @@ import {calculatePointsTotal} from '~common/utils/scores';
 import socket from "~/lib/socket";
 import {derived, type Readable, writable, type Writable} from "svelte/store";
 import {
-    FowlMatchStore,
-    getFowlTeamStore,
+    createFowlMatchStore,
+    createFowlTeamStore,
     getReadonlyStore,
     gettableStore,
-    SocketDataStore,
-    type WritableTeamData
-} from "./socketStore";
-import { Match } from '@prisma/client'
+    SocketWritable, SocketWritableOf
+} from './socketStore'
+import { Match, Team } from '@prisma/client'
 
-
-let currentMatchID: string = ""
 let serverTimeOffset: number = 0;
+let loadTrack: "load"|"preload" = "load";
 
-let listenForPreload: boolean = false;
-const preloadedMatch = gettableStore("")
-const loadedMatch = gettableStore("")
+
 export function setPreloadingTrack(shouldPreload: boolean) {
-    listenForPreload = shouldPreload;
-    matchDataPrivate.id.set((shouldPreload ? preloadedMatch : loadedMatch).get())
+    loadTrack = shouldPreload ? "preload" : "load";
+    matchDataPrivate.id.set((shouldPreload ? loadedMatches.preloaded : loadedMatches.loaded))
 }
 
-type WritableOf<T> = T extends object ? { [key in keyof T]: WritableOf<T[key]> } : Writable<T>
 
-const matchDataPrivate:WritableOf<Match> = {
-    id: new FowlMatchStore("id", currentMatchID),
-    startTime: new FowlMatchStore("startTime", new Date(0)),
-    state: new FowlMatchStore("state", MatchState.PENDING),
-
-    redScoreBreakdown: new FowlMatchStore("redScoreBreakdown", getBlankScoreBreakdown()),
-    blueScoreBreakdown: new FowlMatchStore("blueScoreBreakdown", getBlankScoreBreakdown()),
-    redAlliance: new FowlMatchStore("redAlliance", 0),
-    blueAlliance: new FowlMatchStore("blueAlliance", 0),
-
-    matchNumber: new FowlMatchStore("matchNumber", 0),
-    elimRound: new FowlMatchStore("elimRound", 0),
-    elimGroup: new FowlMatchStore("elimGroup", 0),
-    elimInstance: new FowlMatchStore("elimInstance", 0),
-    type: new FowlMatchStore("type", "qualification"),
-    red1: new FowlMatchStore("red1", 0),
-    red2: new FowlMatchStore("red2", 0),
-    red3: new FowlMatchStore("red3", 0),
-    blue1: new FowlMatchStore("blue1", 0),
-    blue2: new FowlMatchStore("blue2", 0),
-    blue3: new FowlMatchStore("blue3", 0),
-    redCards: new FowlMatchStore("redCards", [Card.NONE, Card.NONE, Card.NONE]),
-    blueCards: new FowlMatchStore("blueCards", [Card.NONE, Card.NONE, Card.NONE]),
+const matchDataPrivate:SocketWritableOf<Match> = {
+    id: createFowlMatchStore('id'),
+    startTime: createFowlMatchStore('startTime'),
+    state: createFowlMatchStore('state'),
+    red_scores: createFowlMatchStore('red_scores'),
+    blue_scores: createFowlMatchStore('blue_scores'),
+    red1: createFowlMatchStore('red1'),
+    red2: createFowlMatchStore('red2'),
+    red3: createFowlMatchStore('red3'),
+    blue1: createFowlMatchStore('blue1'),
+    blue2: createFowlMatchStore('blue2'),
+    blue3: createFowlMatchStore('blue3'),
+    stage_index: createFowlMatchStore('stage_index'),
+    type: createFowlMatchStore('type'),
+    elim_info: createFowlMatchStore('elim_info'),
 };
-
-const setPath = (object:Record<string, unknown>, path:string, value:any) => path
-    .split('.')
-    .reduce((o,p,i) => o[p] = path.split('.').length === ++i ? value : o[p] || {}, object)
-
-const blankMatch = getBlankMatch()
-
 
 export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {
     const interval = setInterval(() => { set(($time == 0 ? 0 : Date.now() - serverTimeOffset - $time) / 1000) }, 50) // TODO: tune time if needed
@@ -77,104 +56,99 @@ export const remainingTimeInDisplayPeriod = derived(matchTime, ($time) => { retu
 export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time));
 
 
-export function isMatchLoaded(match: string) { return match == loadedMatch.get() }
-export function isMatchPreloaded(match: string) { return match == preloadedMatch.get() }
+export function isMatchLoaded(match: string) { return match == loadedMatches.loaded }
+export function isMatchPreloaded(match: string) { return match == loadedMatches.preloaded }
 
-export const matchList: Writable<{ [key: string]: MatchData }> = writable({})
-export const teamList: Writable<{ [key: number]: WritableTeamData }> = writable({})
-export const teamsSorted: Readable<WritableTeamData[]> = derived(teamList, ($teams) =>
-    (Object.values($teams) ?? []).sort(
-        (a, b) => b.matchStats.get().rp - a.matchStats.get().rp
-    )
-);
-export const teamRankings: Readable<{ [key: number]: number }> = derived(teamsSorted, ($teams) => {
-    let map: { [key: number]: number } = {};
-    ($teams ?? []).forEach((team, index, _array) => {
-        map[team.id] = index
-    });
-    return map;
-})
+export const matchList: Writable<{ [key: string]: Match }> = writable({})
+export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> = writable({})
 
-export const eventData = new SocketDataStore<EventInfo>({
-    lunchReturnTime: 0,
-    atLunch: false
-}, (data) => {
-    socket.emit("partialEvent", data)
-})
+// export const eventData = new SocketDataStore<EventInfo>({
+//     lunchReturnTime: 0,
+//     atLunch: false
+// }, (data) => {
+//     socket.emit("partialEvent", data)
+// })
 
 export function updateTimeOffset(serverTime: number) {
     serverTimeOffset = Date.now() - serverTime
 }
 
 export function startMatch() {
-    socket.emit("startMatch", currentMatchID)
+    socket.emit("startMatch", matchDataPrivate.id.get())
 }
 
 export function abortMatch() {
-    socket.emit("abortMatch", currentMatchID)
+    socket.emit("abortMatch", matchDataPrivate.id.get())
 }
 
 export function commitMatch() {
-    socket.emit("commitMatch", currentMatchID)
+    socket.emit("commitMatch", matchDataPrivate.id.get())
 }
 
-export function updateEventInfo(data: EventInfo) {
-    eventData.setQuiet(data)
-}
-matchDataPrivate.id.subscribeLocal((value) => currentMatchID = value)
+// export function updateEventInfo(data: EventInfo) {
+//     eventData.setQuiet(data)
+// }
 
-export function updateLoadedMatch(isPreload: boolean, data: MatchData) {
-    if (isPreload) {
-        preloadedMatch.set(data.id);
+
+export function updateLoadedMatch(loadType: "preload"|"load", data: Match) {
+    if (loadType == "preload") {
+        loadedMatches.preloaded = data.id;
     } else {
-        loadedMatch.set(data.id);
+        loadedMatches.loaded = data.id;
     }
-    currentMatchID = (listenForPreload ? preloadedMatch : loadedMatch).get()
-    updateMatchStores(data)
+    if (loadTrack == loadType) {
+        updateStoredMatch(data)
+    }
 }
 
 export const loadedMatches = {
-    preloaded: getReadonlyStore(preloadedMatch),
-    loaded: getReadonlyStore(loadedMatch),
+    preloaded: "",
+    loaded: ""
 }
 
-export function updateTeamList(data: { [key: number]: ExtendedTeam }) {
+function getTeamStores(team:Team):SocketWritableOf<Team> {
+    return {
+        id: createFowlTeamStore(team, 'id'),
+        display_number: createFowlTeamStore(team, 'display_number'),
+        team_name: createFowlTeamStore(team, 'team_name'),
+        robot_name: createFowlTeamStore(team, 'robot_name'),
+        has_card: createFowlTeamStore(team, 'has_card'),
+    }
+}
+export function updateTeamList(data: { [key: number]: Team }) {
     teamList.update((list) => {
         list = {}
         Object.values(data).forEach(element => {
-            list[element.id] = getFowlTeamStore(element)
+            list[element.id] = getTeamStores(element)
         });
         return list
     })
 }
-export function updateTeamStores(data: ExtendedTeam) {
+export function updateTeamStores(data: Team) {
     teamList.update((list) => {
         if (list[data.id] == null) {
-            list[data.id] = getFowlTeamStore(data)
+            list[data.id] = getTeamStores(data)
         } else {
-            list[data.id].setQuiet(data)
+            list[data.id].setL(data)
         }
         return list;
     })
-
-
 }
 
 export function updateMatchList(data: { [key: string]: MatchData }) {
     matchList.set(data)
 }
-export function updateMatchStores(data: MatchData) {
+export function updateStoredMatch(data: Match) {
     matchList.update((list) => { list[data.id] = data; return list })
-    if (data.id !== currentMatchID) { return }
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
-        (store as FowlMatchStore<any, any>).setQuiet(data[key as keyof MatchData])
+        (store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
     })
 }
 
 
-const matchData: { [key in keyof MatchData]: Writable<MatchData[key]> } & { redScore: Readable<number>, blueScore: Readable<number> } = {
+export const matchData: SocketWritableOf<Match> & { redScore: Readable<number>, blueScore: Readable<number> } = {
     ...matchDataPrivate,
-    redScore: derived(matchDataPrivate.redScoreBreakdown, (b, set) => { set(calculatePointsTotal(b)) }),
-    blueScore: derived(matchDataPrivate.blueScoreBreakdown, (b, set) => { set(calculatePointsTotal(b)) })
+    redScore: derived(matchDataPrivate.red_scores, calculatePointsTotal, 0),
+    blueScore: derived(matchDataPrivate.blue_scores, calculatePointsTotal, 0),
 }
 export default matchData
