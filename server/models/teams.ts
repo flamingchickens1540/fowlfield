@@ -1,7 +1,7 @@
-import { Card, ExtendedTeam, MatchData, PartialTeam, TeamData, TeamMatchStats } from '~common/types';
+import { ExtendedTeam, PartialTeam,  TeamMatchStats } from '~common/types';
 import * as db from "./db"
 import { DBMatch } from "./matches";
-import { calculateAlliancePoints } from "~common/utils/scores";
+import { calculatePointsTotal } from "~common/utils/scores";
 import {Match} from "@prisma/client";
 import {prisma} from "./db";
 
@@ -66,25 +66,9 @@ const registerDraw = (stats:TeamMatchStats, teamScore: number) => {
 }
 
 export async function buildStats(match: Match, isRed:boolean, isDQ:boolean, stats:TeamMatchStats) {
-    const redScores = await prisma.matchScores.findUnique({
-        where: {
-            match_number_is_red_alliance: {
-                match_number: match.match_number,
-                is_red_alliance: true
-            }
-        },
-    })
-    const blueScores = await prisma.matchScores.findUnique({
-        where: {
-            match_number_is_red_alliance: {
-                match_number: match.match_number,
-                is_red_alliance: true
-            }
-        },
-    })
-    const redScore = isDQ ? 0 : calculateAlliancePoints(redScores)
-    const blueScore = isDQ ? 0 : calculateAlliancePoints(blueScores)
-    if (match.is_elimination) {return;}
+    const redScore = isDQ ? 0 : calculatePointsTotal(match.red_scores)
+    const blueScore = isDQ ? 0 : calculatePointsTotal(match.blue_scores)
+    if (match.type == "elimination") {return;}
     if (redScore > blueScore) {
         registerWin(stats, isRed, redScore, blueScore)
     } else if (redScore < blueScore) {

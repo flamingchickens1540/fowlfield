@@ -1,8 +1,10 @@
 import * as db from "../models/db"
-import { MatchState, PartialMatch, MatchData } from '~common/types';
+import { PartialMatch } from '~common/types';
 import { DBSettings } from "~/models/settings";
 import { MatchMaker } from "~/matchmaker";
 import {createLogger} from "~/logger";
+import {prisma} from "~/models/db";
+import {Match, Match_State} from "@prisma/client";
 
 const logger = createLogger("matchmanager")
 
@@ -11,10 +13,10 @@ let isReady:boolean = false;
 let settings:DBSettings
 let matchMaker:MatchMaker
 export async function loadMatches() {
-    matches = await db.getMatches()
     settings = await DBSettings.getInstance()
     matchMaker = new MatchMaker()
-    if (Object.keys(matches).length == 0) {
+    const matchCount = await prisma.match.count()
+    if (matchCount == 0) {
         const match = matchMaker.advanceQualsMatch()
         settings.loadedMatch = match.id;
         settings.preloadedMatch = match.id;
@@ -26,45 +28,33 @@ export function isDBLoaded() {
     return isReady
 }
 export function getMatch(id:string) {
-    return matches[id]
+    return prisma.match.findUnique({where:{id}})
 }
 
-export function getMatches():{[key:string]:DBMatch} {
-    return matches;
+
+export async function updateMatch(data:PartialMatch) {
+    return prisma.match.update({where:{id:data.id}, data})
 }
 
-export function updateMatch(data:PartialMatch) {
-    if (matches[data.id] == null) {logger.warn("cannot find match with id", data.id);return}
-    matches[data.id]?.update(data)
-    return matches[data.id]
+export async function getLoadedMatch():Promise<Match> {
+    return prisma.match.findUnique({where: {id: settings.loadedMatch}});
 }
 
-export function getCurrentMatch():DBMatch {
-    return getMatch(settings.loadedMatch) ?? Object.values(matches)[0]
+export async function getPreloadedMatch():Promise<Match> {
+    return prisma.match.findUnique({where: {id: settings.preloadedMatch}});
 }
 
-export function getPreloadMatch():DBMatch {
-    return getMatch(settings.preloadedMatch) ?? Object.values(matches)[0]
-}
-
-export function setPreloadMatch(id:string):DBMatch {
+export async function updatePreloadedMatch(id:string):Promise<Match> {
     settings.preloadedMatch = id;
-    return getPreloadMatch()
+    return getPreloadedMatch()
 }
-export function setLoadedMatch(id:string):DBMatch {
+export function updateLoadedMatch(id:string):Promise<Match> {
     settings.loadedMatch = id;
-    return getCurrentMatch()
+    return getLoadedMatch()
 }
 
 export function getMatchMaker():MatchMaker {
     return matchMaker
-}
-
-export function newMatch(data:MatchData) {
-    if (matches[data.id] != null) {logger.warn("already have match with id", data.id);return matches[data.id]}
-    db.setMatch(data)
-    matches[data.id] = new DBMatch(data)
-    return matches[data.id]
 }
 
 export function advanceMatches(type:'qualification'|"elimination") {
@@ -76,8 +66,8 @@ export function advanceMatches(type:'qualification'|"elimination") {
 }
 
 
-export function notifyMatchUpdated(match:DBMatch) {
-    if (match.state == MatchState.POSTED) {
-        matchMaker.updateBracket(match.getData())
+export function notifyMatchUpdated(match:Match) {
+    if (match.state == "posted") {
+        matchMaker.updateBracket(match)
     }
 }

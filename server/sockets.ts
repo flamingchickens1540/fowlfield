@@ -94,7 +94,7 @@ export default function startServer(server: http.Server) {
 
     setInterval(() => {
         if (!matchmanager.isDBLoaded()) { return; }
-        const match = matchmanager.getCurrentMatch()
+        const match = matchmanager.getLoadedMatch()
         if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
             match.state = MatchState.COMPLETE;
             logger.info("Transitioning match", match.id, "to completed")
@@ -154,7 +154,7 @@ function setupSocket(socket:Socket<ClientToServerEvents, ServerToClientEvents>) 
         });
 
         // Send initial data
-        socket.emit("loadMatch", matchmanager.getCurrentMatch().getData())
+        socket.emit("loadMatch", matchmanager.getLoadedMatch().getData())
         socket.emit("preloadMatch", matchmanager.getPreloadMatch().getData())
         socket.emit("matches", matches)
         socket.emit("teams", teams)
@@ -185,7 +185,7 @@ function setupSocket(socket:Socket<ClientToServerEvents, ServerToClientEvents>) 
 
     socket.on("loadMatch", (id: string) => {
         logger.info("loading", id)
-        const match = matchmanager.setLoadedMatch(id)
+        const match = matchmanager.updateLoadedMatch(id)
         io.to("dashboard").emit("loadMatch", match.getData())
     })
 
@@ -242,14 +242,14 @@ function setupSocket(socket:Socket<ClientToServerEvents, ServerToClientEvents>) 
     })
 
     socket.on("startMatch", async (id) => {
-        const match = matchmanager.getCurrentMatch()
+        const match = matchmanager.getLoadedMatch()
         if (id != match.id) { alert("Attempted to start a non-loaded match"); return; }
         match.startTime = Date.now();
         match.state = MatchState.IN_PROGRESS
         io.to("dashboard").emit("match", match.getData())
     })
     socket.on("abortMatch", (id) => {
-        const match = matchmanager.getCurrentMatch()
+        const match = matchmanager.getLoadedMatch()
         logger.info("aborting", id)
         if (id != match.id) { alert("Aborted non-loaded match"); return; }
         match.startTime = 0;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {MatchState} from "~common/types";
-	import {calculateAlliancePoints} from "~common/utils/scores";
+	import {calculatePointsTotal} from "~common/utils/scores";
 	import {matchList, teamList} from "~/lib/store";
 	import LeaderLine from "leader-line-new";
 	import type {Writable} from "svelte/store";
@@ -14,8 +14,8 @@
 	$: lossline = $lines[id]?.[1];
 	$: match = $matchList[id];
 
-	$: redscore = calculateAlliancePoints(match?.redScoreBreakdown);
-	$: bluescore = calculateAlliancePoints(match?.blueScoreBreakdown);
+	$: redscore = calculatePointsTotal(match?.redScoreBreakdown);
+	$: bluescore = calculatePointsTotal(match?.blueScoreBreakdown);
 	$: winner = match?.state != MatchState.POSTED || redscore == bluescore ? "none" : redscore > bluescore ? "red" : "blue"; //TODO: check ties
 
 	$: {

@@ -2,7 +2,7 @@
 
 import { MatchData, MatchID, MatchState, TeamData } from '~common/types';
 import { categorizeAlliances, getMatchTitle } from '~common/utils';
-import { calculateScoringInfo } from '~common/utils/scores';
+import { getScores } from '~common/utils/scores';
 import axios from "axios";
 import crypto from "crypto";
 import {createLogger} from "~/logger";
@@ -139,7 +139,7 @@ export async function updateRankings() {
 }
 function matchToTBAMatch(match: MatchData): TbaMatch {
     const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
-    const { redBreakdown, redScore, blueBreakdown, blueScore } = calculateScoringInfo(match)
+    const { redBreakdown, redScore, blueBreakdown, blueScore } = getScores(match)
 
     return {
         comp_level: match.type == "qualification" ? "qm" : decodedMatchId[1] as any,

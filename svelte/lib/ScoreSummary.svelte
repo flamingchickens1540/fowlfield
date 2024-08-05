@@ -1,13 +1,13 @@
 <script lang="ts">
     import {getBlankScoreBreakdown} from "utils/blanks";
     import matchData from "~/lib/store"
-    import {calculatePointBreakdown} from "utils/scores";
+    import {calculateScoreBreakdown} from "utils/scores";
     import {derived} from "svelte/store";
 
 
     const defaultData = getBlankScoreBreakdown()
-    const redBreakdown = derived(matchData.redScoreBreakdown, (breakdown) => calculatePointBreakdown(breakdown))
-    const blueBreakdown = derived(matchData.blueScoreBreakdown, (breakdown) => calculatePointBreakdown(breakdown))
+    const redBreakdown = derived(matchData.redScoreBreakdown, (breakdown) => calculateScoreBreakdown(breakdown))
+    const blueBreakdown = derived(matchData.blueScoreBreakdown, (breakdown) => calculateScoreBreakdown(breakdown))
     const {redScore, blueScore} = matchData
 </script>
 

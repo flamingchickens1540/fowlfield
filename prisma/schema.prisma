@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = "mongodb://127.0.0.1:27017/fowlfield?directConnection=true"
+}
+
+enum Match_State {
+  not_started
+  in_progress
+  ended
+  posted
+}
+
+enum Match_Type {
+  qualification
+  elimination
+}
+
+type Match_ElimInfo {
+  round         Int
+  group         Int
+  instance      Int
+  red_alliance  Int
+  blue_alliance Int
+}
+
+enum Card {
+  none
+  yellow
+  red
+}
+
+type Match_Cards {
+  red1  Card
+  red2  Card
+  red3  Card
+  blue1 Card
+  blue2 Card
+  blue3 Card
+}
+
+model Match {
+  id          String                @id @map("_id")
+  stage_index Int
+  type        Match_Type
+  elim_info   Match_ElimInfo?
+  startTime   DateTime
+  state       Match_State
+  red1        Int
+  red2        Int
+  red3        Int
+  blue1       Int
+  blue2       Int
+  blue3       Int
+  red_scores  Match_AllianceResults
+  blue_scores Match_AllianceResults
+
+  @@unique([stage_index, type])
+}
+
+type Match_AllianceResults {
+  card_robot1               Card
+  card_robot2               Card
+  card_robot3               Card
+  auto_bunnies              Int
+  final_bunnies             Int
+  auto_taxi_bonus_robot1    Boolean
+  auto_taxi_bonus_robot2    Boolean
+  auto_taxi_bonus_robot3    Boolean
+  target_hits_robot1        Int
+  target_hits_robot2        Int
+  target_hits_robot3        Int
+  endgame_park_bonus_robot1 Boolean
+  endgame_park_bonus_robot2 Boolean
+  endgame_park_bonus_robot3 Boolean
+  fouls                     Foul[]
+}
+
+type Foul {
+  timestamp   DateTime
+  team_number Int
+  foul_points Int
+}
+
+model Team {
+  id             Int     @id @map("_id")
+  team_name      String?
+  robot_name     String?
+  display_number String  @unique
+  has_card       Boolean @default(false)
+}
+
+model PlayoffAlliance {
+  seed        Int  @id @map("_id")
+  captain     Int?
+  first_pick  Int?
+  second_pick Int?
+  third_pick  Int?
+}
+
+model Setting {
+  key   String @id @map("_id")
+  value String
+}

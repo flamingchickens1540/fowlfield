@@ -7,7 +7,7 @@ import {
     getRemainingTimeInDisplayPeriod,
     getRemainingTimeInPeriod
 } from "~common/utils/match_timer";
-import {calculateAlliancePoints} from '~common/utils/scores';
+import {calculatePointsTotal} from '~common/utils/scores';
 import socket from "~/lib/socket";
 import {derived, type Readable, writable, type Writable} from "svelte/store";
 import {
@@ -166,7 +166,7 @@ export function updateMatchStores(data: MatchData) {
 
 const matchData: { [key in keyof MatchData]: Writable<MatchData[key]> } & { redScore: Readable<number>, blueScore: Readable<number> } = {
     ...matchDataPrivate,
-    redScore: derived(matchDataPrivate.redScoreBreakdown, (b, set) => { set(calculateAlliancePoints(b)) }),
-    blueScore: derived(matchDataPrivate.blueScoreBreakdown, (b, set) => { set(calculateAlliancePoints(b)) })
+    redScore: derived(matchDataPrivate.redScoreBreakdown, (b, set) => { set(calculatePointsTotal(b)) }),
+    blueScore: derived(matchDataPrivate.blueScoreBreakdown, (b, set) => { set(calculatePointsTotal(b)) })
 }
 export default matchData
