@@ -94,8 +94,8 @@ export const eventData = new SocketDataStore<EventInfo>({
     socket.emit("partialEvent", data)
 })
 
-export function updateTimeOffset(time: number) {
-    serverTimeOffset = Date.now() - time
+export function updateTimeOffset(serverTime: number) {
+    serverTimeOffset = Date.now() - serverTime
 }
 
 export function startMatch() {

@@ -1,26 +1,22 @@
-import {EventInfo, ExtendedTeam, MatchData, PartialMatch, PartialTeam, TeamData,} from ".";
+import {EventInfo, ExtendedTeam, PartialMatch, PartialTeam,} from ".";
+import { Match, Team } from '@prisma/client'
 
 export interface ServerToClientEvents {
-    match(data: MatchData): void;
-    matches(data: { [key: string]: MatchData }): void;
-    team(data: ExtendedTeam): void;
-    teams(data: { [key: string]: ExtendedTeam }): void;
+    match(data: Match): void;
+    matches(data: Record<string, Match>): void;
+    team(data: Team): void;
+    teams(data: Record<string, Team>): void;
     event(data: EventInfo): void;
-    /**
-     *
-     * @param time the current server-side time (ms)
-     * @returns
-     */
-    syncTime(time: number): void;
+
     /**
      * Update displays that are used before the match
      */
-    preloadMatch(data: MatchData): void;
+    preloadMatch(data: Match): void;
     /**
      * Update displays that are used during and after the match
      */
-    loadMatch(matdatach: MatchData): void;
-    abortMatch(data: MatchData): void;
+    loadMatch(data: Match): void;
+    abortMatch(data: Match): void;
     
     alert(message:string):void
 
@@ -29,11 +25,13 @@ export interface ServerToClientEvents {
 
 export interface ClientToServerEvents {
     login(password:string):void
+    ping(cb:(time:number)=>void):void
+
     partialMatch(data: PartialMatch): void;
     partialTeam(data: PartialTeam): void;
     partialEvent(data: Partial<EventInfo>): void;
 
-    newTeam(data: TeamData): void;
+    newTeam(data: Team): void;
     deleteTeam(id:number): void;
     /*
     Update displays that are used before the match

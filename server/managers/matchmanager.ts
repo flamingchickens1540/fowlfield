@@ -5,28 +5,27 @@ import { MatchMaker } from "~/matchmaker";
 import {createLogger} from "~/logger";
 import {prisma} from "~/models/db";
 import {Match, Match_State} from "@prisma/client";
+import { settings } from '~/managers/settings'
+import { io } from '~/sockets'
 
 const logger = createLogger("matchmanager")
 
-
-let isReady:boolean = false;
-let settings:DBSettings
 let matchMaker:MatchMaker
 export async function loadMatches() {
-    settings = await DBSettings.getInstance()
     matchMaker = new MatchMaker()
     const matchCount = await prisma.match.count()
     if (matchCount == 0) {
-        const match = matchMaker.advanceQualsMatch()
+        const match = await matchMaker.advanceQualsMatch()
         settings.loadedMatch = match.id;
         settings.preloadedMatch = match.id;
     }
-    isReady = true;
 }
 
-export function isDBLoaded() {
-    return isReady
+export async function getMatches():Promise<Record<string, Match>> {
+    const matches = await prisma.match.findMany()
+    return Object.fromEntries(matches.map((match) => [match.id, match]));
 }
+
 export function getMatch(id:string) {
     return prisma.match.findUnique({where:{id}})
 }
@@ -44,13 +43,13 @@ export async function getPreloadedMatch():Promise<Match> {
     return prisma.match.findUnique({where: {id: settings.preloadedMatch}});
 }
 
-export async function updatePreloadedMatch(id:string):Promise<Match> {
+export async function updatePreloadedMatch(id:string) {
     settings.preloadedMatch = id;
-    return getPreloadedMatch()
+    io.emit("preloadMatch", await getPreloadedMatch())
 }
-export function updateLoadedMatch(id:string):Promise<Match> {
+export async function updateLoadedMatch(id:string) {
     settings.loadedMatch = id;
-    return getLoadedMatch()
+    io.emit("loadMatch", await getLoadedMatch())
 }
 
 export function getMatchMaker():MatchMaker {

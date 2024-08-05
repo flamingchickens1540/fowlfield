@@ -5,7 +5,7 @@ type PartialWithFields<T, F extends keyof T> = Pick<T, F> & Partial<T>
 
 
 export type PartialMatch = PartialWithFields<Match, "id">
-export type PartialTeam = PartialWithFields<Team, "number">
+export type PartialTeam = PartialWithFields<Team, "id">
 
 export interface EventInfo {
     atLunch:boolean
@@ -13,6 +13,7 @@ export interface EventInfo {
 }
 
 export interface TeamMatchStats {
+    count:number
     win:number
     loss:number
     tie:number

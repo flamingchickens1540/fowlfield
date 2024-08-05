@@ -38,7 +38,6 @@ socket.on("teams", updateTeamList)
 socket.on("abortMatch", updateMatchStores)
 socket.on("preloadMatch", (match) => updateLoadedMatch(true, match))
 socket.on("loadMatch", (match) => updateLoadedMatch(false, match))
-socket.on("syncTime", updateTimeOffset)
 socket.on("event", updateEventInfo)
 // socket.on("matchData", (data) => {
 //     updateMatchData(data)
@@ -69,4 +68,12 @@ socket.on("alert", (msg) => {
 
 socket.connect()
 
+function setTimeOffset() {
+    let start = Date.now()
+    socket.emit("ping", (time) => {
+        let delta = (Date.now() - start)/2
+        updateTimeOffset(time+delta)
+    })
+}
+setTimeOffset()
 export default socket

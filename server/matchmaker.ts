@@ -1,7 +1,6 @@
 import {DoubleEliminationBracket} from "./doubleEliminationBracket";
-import {DBMatch} from "./models/matches";
-import {matchmanager, teammanager} from "~/managers";
-import {calculatePointsTotal, getWinner} from "~common/utils/scores";
+import {teammanager} from "~/managers";
+import {getWinner} from "~common/utils/scores";
 import {getBlankScoreBreakdown} from '~common/utils/blanks';
 import {createLogger} from "~/logger";
 import {Match} from "@prisma/client";
@@ -74,29 +73,31 @@ export class MatchMaker {
         }
         const alliances = teammanager.getAlliances()
         logger.info("ELIM DATA", match, match.red, match.blue, alliances)
-        return prisma.match.create({data:{
-            id: match.matchId,
-            stage_index: match.matchNumber,
-            elim_info: {
-                round: match.elimRound,
-                group: match.elimGroup,
-                instance: match.elimInstance,
-                red_alliance: match.red,
-                blue_alliance: match.blue
-            },
-            type: "elimination",
+        return prisma.match.create({
+            data: {
+                id: match.matchId,
+                stage_index: match.matchNumber,
+                elim_info: {
+                    round: match.elimRound,
+                    group: match.elimGroup,
+                    instance: match.elimInstance,
+                    red_alliance: match.red,
+                    blue_alliance: match.blue
+                },
+                type: "elimination",
                 state: "not_started",
-            red1: alliances[match.red][0] ?? 0,
-            red2: alliances[match.red][1] ?? 0,
-            red3: alliances[match.red][2] ?? 0,
-            blue1: alliances[match.blue][0] ?? 0,
-            blue2: alliances[match.blue][1] ?? 0,
-            blue3: alliances[match.blue][2] ?? 0,
-            red_scores: getBlankScoreBreakdown(),
-            blue_scores: getBlankScoreBreakdown(),
-            startTime: new Date(0),
+                red1: alliances[match.red][0] ?? 0,
+                red2: alliances[match.red][1] ?? 0,
+                red3: alliances[match.red][2] ?? 0,
+                blue1: alliances[match.blue][0] ?? 0,
+                blue2: alliances[match.blue][1] ?? 0,
+                blue3: alliances[match.blue][2] ?? 0,
+                red_scores: getBlankScoreBreakdown(),
+                blue_scores: getBlankScoreBreakdown(),
+                startTime: new Date(0),
 
-        }});
+            }
+        });
     }
 
 
@@ -109,7 +110,7 @@ export class MatchMaker {
      * @param match
      * @warning MATCH CANNOT END IN A TIE
      */
-    updateBracket(match: Match) {
+    async updateBracket(match: Match) {
         if (match.type == "elimination") {
             const didUpdateSucceed = this.bracket?.update(
                 match.stage_index,
@@ -117,7 +118,7 @@ export class MatchMaker {
             );
             if (!didUpdateSucceed) {
                 logger.warn("rebuilding bracket")
-                this.buildBracket()
+                await this.buildBracket()
             }
         }
     }

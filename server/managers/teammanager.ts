@@ -1,144 +1,86 @@
-import {Card, ExtendedTeam, PartialMatch, PartialTeam, TeamData} from '~common/types';
-import {average} from '~common/utils';
-import {calculatePointsTotal} from "~common/utils/scores";
-import {buildStats, DBTeam} from "~/models/teams";
-import {matchmanager} from "./index";
-import * as db from "../models/db";
-import {$Enums} from "@prisma/client";
-import {Settings} from "~/models/settings";
-import prisma from "~/models/db";
+import { PartialTeam, TeamMatchStats } from '~common/types'
+import { getBlueAlliance, getRedAlliance, getScores } from '~common/utils/scores'
+import { Team } from '@prisma/client'
+import prisma from '~/models/db'
 
-
-let teams: { [key: number]: DBTeam }
-let isReady: boolean = false;
-
-export async function loadTeams() {
-    teams = await db.getTeams()
-    isReady = true;
-}
-
-export function isDBLoaded() {
-    return isReady
-}
 
 export function getTeam(id: number) {
-    return teams[id]
+    return prisma.team.findUnique({where: {id}})
 }
 
-export function getTeams(): { [key: number]: DBTeam } {
-    return teams;
+export async function getTeams(): Promise<Record<string, Team>> {
+    const teams = await prisma.team.findMany()
+    return Object.fromEntries(teams.map((team) => [team.id.toString(), team]));
 }
 
 
-export function getAlliances(): { 1: number[], 2: number[], 3: number[], 4: number[] } {
-    const alliances: { 1: number[], 2: number[], 3: number[], 4: number[] } = {1: [], 2: [], 3: [], 4: []}
-    Object.values(teams).forEach(element => {
-        if (element.alliance != 0 && element.alliancePosition != 0) {
-            alliances[element.alliance][element.alliancePosition - 1] = element.id
-        }
-    });
-    return alliances;
-
+export async function getAlliances() {
+    const alliances = await prisma.playoffAlliance.findMany({})
+    return new Map(alliances.map((alliance) => [alliance.seed, alliance]));
 }
 
 
 
-export function buildExtendedTeams(): { [key: number]: ExtendedTeam } {
-    const teams: { [key: number]: ExtendedTeam & { _matchscores: number[] } } = {}
-    Object.entries(getTeams()).forEach(([key, team]) => {
-        teams[key] = {
-            ...team.getData(),
-            matchStats: {win: 0, loss: 0, tie: 0, rp: 0},
-            _matchscores: []
+export async function getMatchStats(): Promise<{ [team: number]: TeamMatchStats }> {
+    const stats: { [team: number]: TeamMatchStats } = {}
+    const teams = await prisma.team.findMany()
+    teams.forEach((team) => {
+        stats[team.id] = {
+            count: 0,
+            win: 0,
+            loss: 0,
+            tie: 0,
+            rp: 0,
+            avg_score: 0
         }
     })
-    Object.values(matchmanager.getMatches()).forEach((match) => {
-        const matchteams = [match.red1, match.red2, match.red3, match.blue1, match.blue2, match.blue3]
-
-        matchteams.forEach((team: number, index: number) => {
-            if (teams[team] == null) {
-                return
+    const matches = await prisma.match.findMany()
+    matches.forEach((match) => {
+        const scores = getScores(match)
+        getRedAlliance(match).forEach(({ team, card }) => {
+            stats[team].count++
+            switch (scores.winner) {
+                case "red":
+                    stats[team].win++
+                    break;
+                case "blue":
+                    stats[team].loss++
+                    break;
+                case "tie":
+                    stats[team].tie++
+                    break;
             }
-            const isRed = index < 3
-            teams[team]._matchscores.push(isRed ? calculatePointsTotal(match.redScoreBreakdown) : calculatePointsTotal(match.blueScoreBreakdown))
-            const dq = (isRed ? match.redCards : match.blueCards)[index % 3] == Card.RED
-            buildStats(match, isRed, dq, teams[team].matchStats)
+            if (card == "none") {
+                stats[team].rp += scores.redRP
+            }
+            stats[team].avg_score += scores.redScore
         })
-    });
-
-    Object.values(teams).forEach((team) => {
-        team.matchStats.avg_score = average(team._matchscores)
+        getBlueAlliance(match).forEach(({ team, card }) => {
+            stats[team].count++
+            switch (scores.winner) {
+                case "blue":
+                    stats[team].win++
+                    break;
+                case "red":
+                    stats[team].loss++
+                    break;
+                case "tie":
+                    stats[team].tie++
+                    break;
+            }
+            if (card == "none") {
+                stats[team].rp += scores.blueRP
+            }
+            stats[team].avg_score += scores.blueScore
+        })
     })
 
-    return teams
-}
-
-
-export async function getTeamMatches(team: number): Promise<Pick<ExtendedTeam, "matchStats">> {
-
-    let stats = {
-        win: 0,
-        loss: 0,
-        tie: 0,
-        rp: 0,
-        avg_score: 0
-    }
-    const matches = await prisma.match.findMany({
-        where: {
-            OR: [
-                {red1: team},
-                {red2: team},
-                {red3: team},
-                {blue1: team},
-                {blue2: team},
-                {blue3: team}
-            ]
-        }
+    Object.entries(stats).forEach(([team, stat]) => {
+        stat.avg_score /= stat.count
     })
-    for await (const match of matches) {
-        let isRed = false;
-        let card: $Enums.Card = "none";
-        switch (team) {
-            case match.red1:
-                isRed = true;
-                card = match.red_scores.card_robot1;
-                break;
-            case match.red2:
-                isRed = true;
-                card = match.red_scores.card_robot2;
-                break;
-            case match.red3:
-                isRed = true;
-                card = match.red_scores.card_robot2;
-                break;
-            case match.blue1:
-                isRed = false;
-                card = match.blue_scores.card_robot1;
-                break;
-            case match.blue2:
-                isRed = false;
-                card = match.blue_scores.card_robot2;
-                break;
-            case match.blue3:
-                isRed = false;
-                card = match.blue_scores.card_robot3;
-                break;
-        }
-        await buildStats(match, isRed, card == "red", stats)
-    }
-    return {
-        matchStats: stats
-    }
+
+    return stats
 }
-
-
-export async function updateSetting<K extends keyof Settings, T extends Settings[K]>(key: K, value: T) {
-    const resp = await settings.replaceOne({key}, {key, value}, {upsert: true})
-    if (!resp.acknowledged) {
-        logger.warn("Could not store setting", key, value)
-    }
-}
-
 
 
 
