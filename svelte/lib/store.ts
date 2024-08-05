@@ -1,6 +1,6 @@
 import type {EventInfo} from "~common/types";
 import {Card, type ExtendedTeam, type MatchData, MatchState} from '~common/types';
-import {getBlankScoreBreakdown} from '~common/utils/blanks';
+import { getBlankMatch, getBlankScoreBreakdown } from '~common/utils/blanks'
 import {
     getElapsedTimeInPeriod,
     getMatchPeriod,
@@ -18,6 +18,7 @@ import {
     SocketDataStore,
     type WritableTeamData
 } from "./socketStore";
+import { Match } from '@prisma/client'
 
 
 let currentMatchID: string = ""
@@ -31,9 +32,11 @@ export function setPreloadingTrack(shouldPreload: boolean) {
     matchDataPrivate.id.set((shouldPreload ? preloadedMatch : loadedMatch).get())
 }
 
-const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchData[key]> } = {
+type WritableOf<T> = T extends object ? { [key in keyof T]: WritableOf<T[key]> } : Writable<T>
+
+const matchDataPrivate:WritableOf<Match> = {
     id: new FowlMatchStore("id", currentMatchID),
-    startTime: new FowlMatchStore("startTime", 0),
+    startTime: new FowlMatchStore("startTime", new Date(0)),
     state: new FowlMatchStore("state", MatchState.PENDING),
 
     redScoreBreakdown: new FowlMatchStore("redScoreBreakdown", getBlankScoreBreakdown()),
@@ -56,6 +59,11 @@ const matchDataPrivate: { [key in keyof MatchData]: FowlMatchStore<key, MatchDat
     blueCards: new FowlMatchStore("blueCards", [Card.NONE, Card.NONE, Card.NONE]),
 };
 
+const setPath = (object:Record<string, unknown>, path:string, value:any) => path
+    .split('.')
+    .reduce((o,p,i) => o[p] = path.split('.').length === ++i ? value : o[p] || {}, object)
+
+const blankMatch = getBlankMatch()
 
 
 export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {

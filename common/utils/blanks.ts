@@ -1,4 +1,4 @@
-import {Match_AllianceResults} from "@prisma/client";
+import { Match, Match_AllianceResults } from '@prisma/client'
 
 
 export function getBlankScoreBreakdown(): Match_AllianceResults {
@@ -18,5 +18,30 @@ export function getBlankScoreBreakdown(): Match_AllianceResults {
         target_hits_robot2: 0,
         target_hits_robot3: 0,
         fouls: []
+    }
+}
+
+export function getBlankMatch():Required<Match> {
+    return {
+        id: "",
+        stage_index: 0,
+        elim_info: {
+            group: 0,
+            instance: 0,
+            round: 0,
+            blue_alliance: 0,
+            red_alliance: 0
+        },
+        startTime: new Date(0),
+        state: "not_started",
+        red_scores: getBlankScoreBreakdown(),
+        blue_scores: getBlankScoreBreakdown(),
+        type: "qualification",
+        red1: 0,
+        red2: 0,
+        red3: 0,
+        blue1: 0,
+        blue2: 0,
+        blue3: 0,
     }
 }

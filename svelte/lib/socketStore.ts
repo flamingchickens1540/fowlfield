@@ -4,6 +4,7 @@ import {get, writable} from "svelte/store"
 import type {ExtendedTeam, MatchData, TeamData, TeamMatchStats} from '~common/types';
 import socket from "~/lib/socket";
 import matchData from "~/lib/store";
+import { Match } from '@prisma/client'
 
 
 // let activeMatchID:string = ""
@@ -81,59 +82,61 @@ export function getFowlTeamStore(data:ExtendedTeam): WritableTeamData {
     
 }
 
-export class FowlMatchStore<K extends keyof MatchData, T extends MatchData[K]> implements Writable<T>{
-    private key: K
-    private value: Writable<T>
-    private blockUpdates: boolean = false;
-    
-    constructor(key: K, initialValue: T) {
-        this.key = key;
-        this.blockUpdates = true;
-        this.value = writable(initialValue)
-        this.value.subscribe((value) => {
-            if (!this.blockUpdates) {
-                
-                const sentValue = typeof initialValue === "number" && typeof value === "string" ? parseInt(value) as T : value
-                console.debug("SENDING MATCHDATA", this.key, sentValue)
-                socket.emit("partialMatch", { id: get(matchData.id), [this.key]: sentValue})
-            } else {
-                console.debug("RECIEVING MATCHDATA", this.key, value)
-            }
+type SocketWritable<V> = Writable<V> & {setQuiet(value:V):void, subscribeLocal(run:Subscriber<V>, invalidate?:((value?:V|undefined) => void) | undefined):Unsubscriber, getReadonly():Readable<V>}
+type SocketWritableOf<T> = T extends object ? { [key in keyof T]: SocketWritableOf<T[key]> } : SocketWritable<T>
+function createFowlMatchStore<P,K extends keyof P, V extends P[K]>(parent:P, key:K, initialValue: V): SocketWritableOf<V> {
+    if (initialValue instanceof Object) {
+        const store = {} as { [key in keyof V]: SocketWritableOf<V[key]> }
+        Object.entries(initialValue).forEach(([key, value]) => {
+            store[key as keyof V] = createFowlMatchStore(initialValue, key as keyof V, value) as SocketWritableOf<V[keyof V]>
         })
-        this.blockUpdates = false;
+        return store
     }
+    let blockUpdates = true;
+    const store = writable(initialValue)
+    store.subscribe((value) => {
+        if (!blockUpdates) {
+            const sentValue = typeof initialValue === "number" && typeof value === "string" ? parseInt(value) : value
+            console.debug("SENDING MATCHDATA", key, sentValue)
+            socket.emit("partialMatch", { id: get(matchData.id), [key]: sentValue})
+        } else {
+            console.debug("RECIEVING MATCHDATA", key, value)
+        }
+    })
+    blockUpdates = false;
     
-    
-    setQuiet(value: T) {
-        this.blockUpdates = true
-        this.value.set(value)
-        this.blockUpdates = false
-    }
-    
-    set(value: T) {
-        this.value.set(value)
-    }
-    
-    update(updater: Updater<T>) {
-        this.value.update(updater)
-    }
-    
-    subscribe(run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber {
-        return this.value.subscribe(run, invalidate)
-    }
-    
-    subscribeLocal(run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber {
-        return this.value.subscribe((value) => {
-            if (!this.blockUpdates) {
-                run(value)
-            }
-        }, invalidate)
-    }
-    
-    getReadonly(): Readable<T> {
-        return { 
-            subscribe: (run: Subscriber<T>, invalidate?: ((value?: T | undefined) => void) | undefined): Unsubscriber => {
-                return this.value.subscribe(run, invalidate)
+    return {
+        setQuiet(newValue: V) {
+            blockUpdates = true
+            store.set(newValue)
+            blockUpdates = false
+        },
+
+        set(value: V) {
+            store.set(value)
+        },
+
+        update(updater: Updater<V>) {
+            store.update(updater)
+        },
+
+        subscribe(run: Subscriber<V>, invalidate?: ((value?: V | undefined) => void) | undefined): Unsubscriber {
+            return store.subscribe(run, invalidate)
+        },
+
+        subscribeLocal(run: Subscriber<V>, invalidate?: ((value?: V | undefined) => void) | undefined): Unsubscriber {
+            return store.subscribe((value) => {
+                if (!blockUpdates) {
+                    run(value)
+                }
+            }, invalidate)
+        },
+
+        getReadonly(): Readable<V> {
+            return {
+                subscribe: (run: Subscriber<V>, invalidate?: ((value?: V | undefined) => void) | undefined): Unsubscriber => {
+                    return store.subscribe(run, invalidate)
+                }
             }
         }
     }
