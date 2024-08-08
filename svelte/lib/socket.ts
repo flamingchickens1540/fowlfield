@@ -2,14 +2,12 @@ import {io, type Socket} from "socket.io-client";
 import {setCookie} from 'typescript-cookie';
 
 import {
-    updateEventInfo,
     updateLoadedMatch,
     updateMatchList,
-    updateStoredMatch,
+    updateStoredMatch, updateStoredTeam,
     updateTeamList,
-    updateTeamStores,
     updateTimeOffset
-} from '~/lib/store';
+} from '~/lib/store'
 import type {ClientToServerEvents, ServerToClientEvents} from '~common/types';
 
 
@@ -33,12 +31,12 @@ socket.on("login", ({success, token}) => {
 
 socket.on("match", updateStoredMatch)
 socket.on("matches", updateMatchList)
-socket.on("team", updateTeamStores)
+socket.on("team", updateStoredTeam)
 socket.on("teams", updateTeamList)
 socket.on("abortMatch", updateStoredMatch)
 socket.on("preloadMatch", (match) => updateLoadedMatch("preload", match))
 socket.on("loadMatch", (match) => updateLoadedMatch("load", match))
-socket.on("event", updateEventInfo)
+// socket.on("event", updateEventInfo)
 // socket.on("matchData", (data) => {
 //     updateMatchData(data)
 // })

@@ -1,6 +1,6 @@
 import { Match, Match_AllianceResults } from '@prisma/client'
 
-type PointsBreakdown = {
+export type PointsBreakdown = {
     autoBunny: number
     finalBunny: number
     autoTaxi: number

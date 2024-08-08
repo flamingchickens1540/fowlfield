@@ -8,11 +8,6 @@ import { Match, Setting, Team } from '@prisma/client'
 import writableDerived from 'svelte-writable-derived'
 import { getBlankMatch, getBlankTeam } from '~common/utils/blanks'
 
-
-// let activeMatchID:string = ""
-// matchData.id.subscribe((value) => {
-//     activeMatchID = value
-// })
 export interface GettableStore<T> extends Readable<T>{
     get():T
 }

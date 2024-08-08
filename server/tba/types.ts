@@ -4,7 +4,8 @@ export type TbaEventInfo = {
     webcasts?:{url:string}[]
     remap_teams: {[key:string]:string}
 }
-export type TbaTeamNumber = string;
+export type DisplayNumber = number|`${number}${"B"|"C"|"D"|"E"|"F"|"G"|"H"|"J"|"K"|"L"|"M"|"N"|"P"|"Q"|"R"|"S"|"T"|"U"|"V"|"W"|"X"|"Y"|"Z"|""}`
+export type TbaTeamNumber = `frc${DisplayNumber}`;
 export interface TbaMatch {
     comp_level: "qm"|"ef"|"qf"|"sf"|"f"
     set_number: number;
@@ -16,7 +17,7 @@ export interface TbaMatch {
     display_name?: string;
 }
 
-type TbaScoreBreakdown =  {
+export type TbaScoreBreakdown =  {
     "activationBonusAchieved":boolean
     "adjustPoints":number
     "autoBridgeState":"Level"|"NotLevel"

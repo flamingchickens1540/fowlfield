@@ -1,15 +1,27 @@
 
 
-import { MatchData, MatchID, MatchState, TeamData } from '~common/types';
+import {  MatchID  } from '~common/types';
 import { categorizeAlliances, getMatchTitle } from '~common/utils';
-import { getScores } from '~common/utils/scores';
+import { calculateScoreBreakdown, getScores, PointsBreakdown, sumBreakdownPoints } from '~common/utils/scores'
 import axios from "axios";
 import crypto from "crypto";
 import {createLogger} from "~/logger";
 import { getMatches } from "~/managers/matchmanager";
-import { buildExtendedTeams, getTeams } from "~/managers/teammanager";
+import { buildRankings, getTeams } from '~/managers/teammanager'
 import config from "~common/config";
-import { TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaTeamNumber } from "./types";
+import {
+    DisplayNumber,
+    TbaAlliance,
+    TbaEventInfo,
+    TbaMatch,
+    TbaPlayoffAlliances,
+    TbaPlayoffType,
+    TbaRanking,
+    TbaRankings, TbaScoreBreakdown,
+    TbaTeamNumber
+} from './types'
+import prisma from '~/models/db'
+import { Match, Match_AllianceResults, Team } from '@prisma/client'
 
 const logger = createLogger("tba")
 
@@ -22,14 +34,14 @@ const http_client = axios.create({
     baseURL: baseUrl,
     headers: {
         'X-TBA-Auth-Id': config.tba.id,
-    }
+    },
 })
 
 function isTBATeamNumber(obj: unknown): obj is TbaTeamNumber {
-    return obj.toString().startsWith("frc")
+    return typeof obj == "string" && obj.startsWith("frc")
 }
-function getTBATeamNumber(teamNumber: number | string): TbaTeamNumber {
-    return "frc" + teamNumber
+function getTBATeamNumber(teamNumber: DisplayNumber): TbaTeamNumber {
+    return `frc${teamNumber}`
 }
 
 interface Endpoints {
@@ -64,11 +76,11 @@ async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]):
 }
 
 
-export async function updateEventInfo(teams: TeamData[] = Object.values(getTeams())) {
+export async function updateEventInfo(teams: Team[] = Object.values(getTeams())) {
     const remap_teams = {}
-    teams.forEach(({ id, displaynum }) => {
-        if (id.toString() != displaynum && !displaynum.endsWith("A")) {
-            remap_teams[getTBATeamNumber(id)] = getTBATeamNumber(displaynum)
+    teams.forEach(({ id, display_number }) => {
+        if (id.toString() != display_number && !display_number.endsWith("A")) {
+            remap_teams[getTBATeamNumber(id)] = getTBATeamNumber(display_number as DisplayNumber)
         }
     })
 
@@ -93,10 +105,14 @@ export async function updateEventTeams() {
 
 export async function updateAlliances():Promise<boolean> {
     const teams = Object.values(getTeams())
-    const alliances = categorizeAlliances(teams)
+    const alliances = await prisma.playoffAlliance.findMany({orderBy: {seed: "asc"}})
     const body = alliances.map((alliance) => {
-        const teams = alliance.map((team) => getTBATeamNumber(team))
-        return teams.filter((element) => element != "frc0")
+        const tbaAlliance = []
+        alliance.captain && tbaAlliance.push(getTBATeamNumber(alliance.captain))
+        alliance.first_pick && tbaAlliance.push(getTBATeamNumber(alliance.first_pick))
+        alliance.second_pick && tbaAlliance.push(getTBATeamNumber(alliance.second_pick))
+        alliance.third_pick && tbaAlliance.push(getTBATeamNumber(alliance.third_pick))
+        return tbaAlliance
     })
     return await post("alliance_selections/update", body)
 }
@@ -109,19 +125,18 @@ export async function reset(...fields: ('alliance' | 'team' | 'match' | 'ranking
 
 }
 export async function updateRankings() {
-    const teams = Object.values(buildExtendedTeams())
-    teams.sort((a, b) => b.matchStats.rp - a.matchStats.rp)
-    const rankings: TbaRanking[] = teams.map((team, index) => ({
-        team_key: getTBATeamNumber(team.id),
+    const rankings = await buildRankings()
+    const tba_rankings: TbaRanking[] = rankings.map((ranking, index) => ({
+        team_key: getTBATeamNumber(ranking.team),
         rank: index + 1,
-        wins: team.matchStats.win,
-        losses: team.matchStats.loss,
-        ties: team.matchStats.tie,
-        played: team.matchStats.loss + team.matchStats.win + team.matchStats.tie,
+        wins: ranking.match_stats.win,
+        losses: ranking.match_stats.loss,
+        ties: ranking.match_stats.tie,
+        played: ranking.match_stats.count,
         qual_average: 0,
         dqs: 0,
-        "Ranking Score": team.matchStats.rp,
-        "Avg Match": team.matchStats.avg_score,
+        "Ranking Score": ranking.match_stats.rp,
+        "Avg Match": ranking.match_stats.avg_score,
         "Avg Charge Station": -1,
         "Avg Auto": 0
     }))
@@ -133,50 +148,38 @@ export async function updateRankings() {
             "Avg Charge Station",
             "Avg Auto"
         ],
-        rankings
+        rankings: tba_rankings
     }
     await post("rankings/update", body)
 }
-function matchToTBAMatch(match: MatchData): TbaMatch {
+function matchToTBAMatch(match: Match): TbaMatch {
     const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
-    const { redBreakdown, redScore, blueBreakdown, blueScore } = getScores(match)
-
+    const { redBreakdown, redScore, redRP, blueBreakdown, blueScore, blueRP } = getScores(match)
+    const getTBAScoreBreakdown = (({score_breakdown, rp}:{score_breakdown:Match_AllianceResults, rp:number}):Partial<TbaScoreBreakdown> => {
+        const pointsBreakdown = calculateScoreBreakdown(score_breakdown)
+        const totalPoints = sumBreakdownPoints(pointsBreakdown)
+        return {
+            rp,
+            teleopPoints: pointsBreakdown.targetHits + pointsBreakdown.finalBunny,
+            totalPoints: totalPoints,
+            foulCount: score_breakdown.fouls.length,
+            foulPoints: pointsBreakdown.foulPoints,
+            adjustPoints: 0,
+            mobilityRobot1: score_breakdown.auto_taxi_bonus_robot1 ? "Yes" : "No",
+            mobilityRobot2: score_breakdown.auto_taxi_bonus_robot2 ? "Yes" : "No",
+            mobilityRobot3: score_breakdown.auto_taxi_bonus_robot3 ? "Yes" : "No",
+            autoMobilityPoints: pointsBreakdown.autoTaxi,
+            endGameParkPoints: pointsBreakdown.endgamePark,
+            autoPoints: pointsBreakdown.autoTaxi + pointsBreakdown.autoBunny
+        }
+    })
     return {
         comp_level: match.type == "qualification" ? "qm" : decodedMatchId[1] as any,
         set_number: match.type == "qualification" ? 1 : parseInt(decodedMatchId[2]),
-        match_number: match.type == "qualification" ? match.matchNumber : parseInt(decodedMatchId[3]),
+        match_number: match.type == "qualification" ? match.stage_index : parseInt(decodedMatchId[3]),
         score_breakdown: {
-            red: {
-                rp: redScore > blueScore ? redScore + blueScore : redScore,
-                teleopPoints: redBreakdown.targetHits + redBreakdown.finalBunny,
-                totalPoints: redScore,
-                techFoulCount: 0, // TODO: Implement once penalties are done
-                foulCount: 0,
-                foulPoints: 0,
-                adjustPoints: 0,
-                mobilityRobot1: match.redScoreBreakdown.autoTaxiBonus[0] ? "Yes" : "No",
-                mobilityRobot2: match.redScoreBreakdown.autoTaxiBonus[1] ? "Yes" : "No",
-                mobilityRobot3: match.redScoreBreakdown.autoTaxiBonus[2] ? "Yes" : "No",
-                autoMobilityPoints: redBreakdown.autoTaxi,
-                endGameParkPoints: redBreakdown.endgamePark,
-                autoPoints: redBreakdown.autoTaxi + redBreakdown.autoBunny
-
-            },
-            blue: {
-                rp: blueScore > redScore ? redScore + blueScore : blueScore,
-                teleopPoints: blueBreakdown.targetHits + blueBreakdown.finalBunny,
-                totalPoints: blueScore,
-                techFoulCount: 0, // TODO: Implement once penalties are done
-                foulCount: 0,
-                foulPoints: 0,
-                adjustPoints: 0,
-                mobilityRobot1: match.blueScoreBreakdown.autoTaxiBonus[0] ? "Yes" : "No",
-                mobilityRobot2: match.blueScoreBreakdown.autoTaxiBonus[1] ? "Yes" : "No",
-                mobilityRobot3: match.blueScoreBreakdown.autoTaxiBonus[2] ? "Yes" : "No",
-                autoMobilityPoints: blueBreakdown.autoTaxi,
-                endGameParkPoints: blueBreakdown.endgamePark,
-                autoPoints: blueBreakdown.autoTaxi + blueBreakdown.autoBunny
-            }
+            red: getTBAScoreBreakdown({score_breakdown:match.red_scores, rp: redRP}),
+            blue: getTBAScoreBreakdown({score_breakdown:match.blue_scores, rp: blueRP})
         },
         alliances: {
             red: new TbaAlliance(match.red1, match.red2, match.red3, redScore),
@@ -190,7 +193,7 @@ function matchToTBAMatch(match: MatchData): TbaMatch {
 }
 export async function updateMatches() {
     const data: TbaMatch[] = Object.values(getMatches())
-        .filter((match) => match.state == MatchState.POSTED)
+        .filter((match) => match.state == "posted")
         .map(matchToTBAMatch)
     // resetMatches(matches)
     

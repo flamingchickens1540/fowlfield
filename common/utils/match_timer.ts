@@ -25,37 +25,37 @@ export function getPeriodDuration(period: MatchPeriod): number {
     return durations[period]
 }
 export function getRemainingTimeInPeriod(time: number) {
-    const [period, totaltime] = getTimingInfo(time)
-    return roundToPlaces(totaltime - time, 3)
+    const { period, periodEndTime }= getTimingInfo(time)
+    return roundToPlaces(periodEndTime - time, 3)
 }
 
 export function getRemainingTimeInDisplayPeriod(time: number):number {
-    const [period, totaltime] = getTimingInfo(time)
+    const { period, periodEndTime } = getTimingInfo(time)
     switch (period) {
         case MatchPeriod.PREMATCH: return getPeriodDuration(MatchPeriod.AUTO);
-        case MatchPeriod.AUTO: return roundToPlaces(totaltime - time, 3);
+        case MatchPeriod.AUTO: return roundToPlaces(periodEndTime - time, 3);
         case MatchPeriod.PAUSE: return getPeriodDuration(MatchPeriod.TELEOP);
-        case MatchPeriod.TELEOP: return roundToPlaces(totaltime - time, 3);
+        case MatchPeriod.TELEOP: return roundToPlaces(periodEndTime - time, 3);
         case MatchPeriod.POSTMATCH: return 0;
     }
 }
 
 export function getElapsedTimeInPeriod(time: number) {
-    const [period, totaltime] = getTimingInfo(time)
-    return roundToPlaces(time - totaltime + getPeriodDuration(period), 3)
+    const { period, periodEndTime } = getTimingInfo(time)
+    return roundToPlaces(time - periodEndTime + getPeriodDuration(period), 3)
 }
 
 
 export function getMatchPeriod(seconds: number): MatchPeriod {
-    return getTimingInfo(seconds)[0]
+    return getTimingInfo(seconds).period
 }
 
-function getTimingInfo(time: number): [MatchPeriod, number] {
+function getTimingInfo(time: number): { period:MatchPeriod, periodEndTime:number } {
     let cumulative = 0;
     let output = orderedPeriods.find((period) => {
         cumulative += durations[period]
         return (cumulative >= time)
     })
-    return [output ?? MatchPeriod.POSTMATCH, cumulative];
+    return {period:output ?? MatchPeriod.POSTMATCH, periodEndTime: cumulative};
 }
 

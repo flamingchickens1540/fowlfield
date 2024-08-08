@@ -1,16 +1,7 @@
-import { MatchData, TeamData } from '../types';
+import { Match } from '@prisma/client'
+import { MatchPrefix } from '../types'
+import { getBracketInfo } from './elims_bracket'
 
-type Alliance = [number,number,number,number]
-type Alliances = [Alliance, Alliance, Alliance, Alliance]
-
-export function categorizeAlliances(teams:TeamData[]):Alliances {
-    const alliances:Alliances = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-    teams.forEach((team) => {
-        if (team.alliance == 0 || team.alliancePosition == 0) {return}
-        alliances[team.alliance-1][team.alliancePosition-1] = team.id
-    })
-    return alliances
-}
 
 
 
@@ -22,16 +13,28 @@ export function average(values:number[]) {
 }
 
 
-export function getCompLevel(match:MatchData):"qm"|"qf"|"sf"|"f" {
+export function getCompLevel(match:Match):MatchPrefix {
     if (match.type == "qualification") {return "qm"}
-    if (match.elimRound == 4) {return "qf"}
-    if (match.elimRound == 2) {return "sf"}
-    if (match.elimRound == 1) {return "f"}
+    if (match.elim_info?.round == 4) {return "qf"}
+    if (match.elim_info?.round == 2) {return "sf"}
+    if (match.elim_info?.round == 1) {return "f"}
     console.warn("Unknown match type!")
     return "qm"
 }
 
-export function getMatchTitle(match:MatchData):string {
-    if (match.type == "qualification") {return `Quals ${match.matchNumber}`}
-    return `Match ${match.matchNumber}`
+export function getMatchTitle(match:Match):string {
+    const compLevel = getCompLevel(match)
+    const {round, group, instance} = match.elim_info??{round:0,group:0,instance:0}
+    if (compLevel == "qm") {return `Quals ${match.stage_index}`}
+    if (compLevel == "f") {return `Finals ${instance}`}
+    return `Match ${match.stage_index}`
+}
+
+
+export function getMatchTitleLong(match:Match):string {
+    const compLevel = getCompLevel(match)
+    if (match.type == "qualification") {return `Qualifications ${match.stage_index}`}
+    const elimInfo = getBracketInfo(match)!
+    if (compLevel == "f") {return `Finals ${elimInfo.elimInstance}`}
+    return `${elimInfo.isUpper ? "Upper" : "Lower"} Bracket Round ${elimInfo.elimRound} - Match ${elimInfo.elimInstance}`
 }

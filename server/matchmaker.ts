@@ -30,12 +30,16 @@ export class MatchMaker {
         });
 
         this.initElims(elimMatches.length);
+
         elimMatches.forEach((match) => {
             if (match.state == "ended" || match.state == "posted") {
-                this.bracket.update(
-                    match.stage_index,
-                    getWinner(match)
-                );
+                const winner = getWinner(match);
+                if (winner != "tie") {
+                    this.bracket.update(
+                        match.stage_index,
+                        winner
+                    );
+                }
             }
         });
     }
@@ -48,7 +52,7 @@ export class MatchMaker {
                 stage_index: this.latestQualsMatch,
                 type: "qualification",
                 state: "not_started",
-                startTime: new Date(0),
+                startTime: 0,
                 red1: 0,
                 red2: 0,
                 red3: 0,
@@ -75,12 +79,12 @@ export class MatchMaker {
         logger.info("ELIM DATA", match, match.red, match.blue, alliances)
         return prisma.match.create({
             data: {
-                id: match.matchId,
-                stage_index: match.matchNumber,
+                id: match.details.matchId,
+                stage_index: match.details.matchNumber,
                 elim_info: {
-                    round: match.elimRound,
-                    group: match.elimGroup,
-                    instance: match.elimInstance,
+                    round: match.details.elimRound,
+                    group: match.details.elimGroup,
+                    instance: match.details.elimInstance,
                     red_alliance: match.red,
                     blue_alliance: match.blue
                 },
@@ -94,7 +98,7 @@ export class MatchMaker {
                 blue3: alliances[match.blue][2] ?? 0,
                 red_scores: getBlankScoreBreakdown(),
                 blue_scores: getBlankScoreBreakdown(),
-                startTime: new Date(0),
+                startTime: 0,
 
             }
         });
@@ -112,9 +116,14 @@ export class MatchMaker {
      */
     async updateBracket(match: Match) {
         if (match.type == "elimination") {
+            const winner = getWinner(match);
+            if (winner == "tie") {
+                logger.error("Match cannot end in a tie")
+                return
+            }
             const didUpdateSucceed = this.bracket?.update(
                 match.stage_index,
-                getWinner(match)
+                winner
             );
             if (!didUpdateSucceed) {
                 logger.warn("rebuilding bracket")

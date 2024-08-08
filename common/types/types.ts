@@ -25,14 +25,11 @@ export interface ExtendedTeam extends Team {
     matchStats: TeamMatchStats
 }
 
-export enum MatchPeriod {
-    PREMATCH="pre",
-    AUTO="auto",
-    PAUSE="pause",
-    TELEOP="teleop",
-    POSTMATCH="post"
+
+export type MatchID = `${MatchPrefix}${number}m${number}`
+export type MatchPrefix = "qm"|"qf"|"sf"|"f"
+
+export type RankingEntry = {
+    team:number,
+    match_stats:TeamMatchStats
 }
-
-
-
-export type MatchID = `${"qm"|"qf"|"sf"|"f"}${number}m${number}`

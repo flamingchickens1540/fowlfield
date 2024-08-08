@@ -1,4 +1,4 @@
-import { PartialTeam, TeamMatchStats } from '~common/types'
+import { PartialTeam, RankingEntry, TeamMatchStats } from '~common/types'
 import { getBlueAlliance, getRedAlliance, getScores } from '~common/utils/scores'
 import { Team } from '@prisma/client'
 import prisma from '~/models/db'
@@ -83,6 +83,15 @@ export async function getMatchStats(): Promise<{ [team: number]: TeamMatchStats 
 }
 
 
+export async function buildRankings(): Promise<RankingEntry[]> {
+    const stats = getMatchStats()
+    return Object.entries(stats).map(([team, stat]) => {
+        return {
+            team: parseInt(team),
+            ...stat
+        }
+    }).sort((a, b) => b.rp - a.rp)
+}
 
 
 

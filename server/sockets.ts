@@ -34,6 +34,15 @@ enum SocketAccess {
     NORMAL = 'normal',
 }
 
+const handleMatchEnd = async () => {
+    const match = await matchmanager.getLoadedMatch()
+    if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == "in_progress") {
+        match.state = "ended"
+        logger.info('Transitioning match', match.id, 'to completed')
+        io.emit('match', match)
+    }
+}
+
 export default function startServer(server: http.Server) {
     io = new Server(server, {
         path: '/ws',
@@ -90,14 +99,7 @@ export default function startServer(server: http.Server) {
     })
 
 
-    setInterval(() => {
-        const match = matchmanager.getLoadedMatch()
-        if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == MatchState.IN_PROGRESS) {
-            match.state = MatchState.COMPLETE
-            logger.info('Transitioning match', match.id, 'to completed')
-            io.to('dashboard').emit('match', match.getData())
-        }
-    }, 50)
+    setInterval(handleMatchEnd, 5000) // just in case
 
 
     return
@@ -193,10 +195,11 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         }
         const match = await prisma.match.update({
             where: { id }, data: {
-                startTime: new Date(),
+                startTime: Date.now(),
                 state: 'in_progress'
             }
         })
+
         io.emit('match', match)
     })
     socket.on('abortMatch', async (id) => {
@@ -206,8 +209,8 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         }
         const match = await prisma.match.update({
             where: { id }, data: {
-                startTime: new Date(),
-                state: 'in_progress'
+                startTime: 0,
+                state: 'not_started'
             }
         })
         io.emit('abortMatch', match)
@@ -242,21 +245,21 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.to('dashboard').emit('match', match)
     })
 
-    socket.on('nextMatch', (type) => {
-        const newmatch = matchmanager.advanceMatches(type as 'elimination' | 'qualification')
+    socket.on('nextMatch', async (type) => {
+        const newmatch = await matchmanager.advanceMatches(type as 'elimination' | 'qualification')
         if (newmatch != null) {
-            io.to('dashboard').emit('match', newmatch.getData())
+            io.emit('match', newmatch)
         }
     })
 
-    socket.on('resetMatch', (id) => {
-        const match = matchmanager.getMatch(id)
+    socket.on('resetMatch', async (id) => {
+        const match = await matchmanager.getMatch(id)
         logger.warn('Resetting match', id)
-        match.state = MatchState.PENDING
+        match.state = "not_started"
         match.startTime = 0
-        match.blueScoreBreakdown = getBlankScoreBreakdown()
-        match.redScoreBreakdown = getBlankScoreBreakdown()
-        io.to('dashboard').emit('match', match.getData())
+        match.blue_scores = getBlankScoreBreakdown()
+        match.red_scores = getBlankScoreBreakdown()
+        io.emit('match', match)
     })
 
 
