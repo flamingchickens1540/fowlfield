@@ -1,33 +1,30 @@
 <script lang="ts">
-    // import Teams from "./components/teams/Teams.svelte";
 
-    import {type MatchData, MatchState} from "~common/types";
     import matchData, {
         abortMatch,
         commitMatch,
-        dsStatuses,
         loadedMatches,
         matchList,
         remainingTimeInPeriod,
         setPreloadingTrack,
         startMatch,
         teamList
-    } from "~/lib/store";
-    import {onMount} from "svelte";
-    import {derived, get, type Readable, type Unsubscriber, writable, type Writable} from "svelte/store";
+    } from '~/lib/store'
+    import { onMount } from 'svelte'
+    import { derived, type Readable, type Unsubscriber, writable } from 'svelte/store'
 
-    import {formatDuration} from "~common/utils/format";
-    import socket from "~//lib/socket";
-    import configureAudio from "~//lib/audio";
-    import {statusColors, statusMessages} from "~//lib/consts";
+    import { formatDuration } from '~common/utils/format'
+    import socket from '~/lib/socket'
+    import configureAudio from '~/lib/audio'
+    import { statusColors, statusMessages } from '~/lib/consts'
 
-    import TeamDatalistEntry from "../../lib/TeamDatalistEntry.svelte";
-    import TeamEntry from "./components/TeamEntry.svelte";
+    import TeamDatalistEntry from '~/lib/TeamDatalistEntry.svelte'
+    import TeamEntry from './components/TeamEntry.svelte'
 
-    import Sortable, {Swap} from 'sortablejs';
-    import AllianceStationMonitor from "./components/AllianceStationMonitor.svelte";
-    import AllianceStationMonitorParent from "./components/AllianceStationMonitorParent.svelte";
-    import ScoreSummary from "../../lib/ScoreSummary.svelte";
+    import Sortable, { Swap } from 'sortablejs'
+    import ScoreSummary from '~/lib/ScoreSummary.svelte'
+    import { Match, Match_State } from '@prisma/client'
+    import { RobotPosition } from '~common/types'
 
     Sortable.mount(new Swap())
 
@@ -35,13 +32,13 @@
 
     configureAudio()
 
-    const {loaded: loadedMatch, preloaded: preloadedMatch} = loadedMatches
+    const { loaded: loadedMatch, preloaded: preloadedMatch } = loadedMatches
 
-    const buttonData: { [key in MatchState]: { text: string, color: string } } = {
-        [MatchState.PENDING]: {text: "Start", color: "#02ae02"},
-        [MatchState.IN_PROGRESS]: {text: "Abort", color: "#b30000"},
-        [MatchState.COMPLETE]: {text: "Commit and Show", color: "#0000b8"},
-        [MatchState.POSTED]: {text: "Recommit", color: "#000000"},
+    const buttonData: { [key in Match_State]: { text: string; color: string; cb: () => void } } = {
+        not_started: { text: 'Start', color: '#02ae02', cb: startMatch },
+        in_progress: { text: 'Abort', color: '#b30000', cb: abortMatch },
+        ended: { text: 'Publish', color: '#0000b8', cb: commitMatch },
+        posted: { text: 'Republish', color: '#000000', cb: commitMatch }
     }
 
     function getColorValue(color: string, alpha: number) {
@@ -49,54 +46,48 @@
     }
 
     function transitionLoadState() {
-        if ($preloadedMatch != $matchid) {
-            socket.emit("preloadMatch", $matchid)
+        if (preloadedMatch != $matchid) {
+            socket.emit('preloadMatch', $matchid)
         } else {
-            socket.emit("preloadMatch", $matchid)
-            socket.emit("loadMatch", $matchid)
-        }
-    }
-
-    function transitionMatchState() {
-        switch ($matchstate) {
-            case MatchState.PENDING:
-                startMatch();
-                break;
-            case MatchState.IN_PROGRESS:
-                abortMatch();
-                break;
-            case MatchState.COMPLETE:
-                commitMatch();
-                break
-            case MatchState.POSTED:
-                commitMatch();
-                break
+            socket.emit('preloadMatch', $matchid)
+            socket.emit('loadMatch', $matchid)
         }
     }
 
     function resetMatch() {
         const resp = prompt("Are you sure you want to reset this match? If so, type 'yes'")
-        if (resp.toLowerCase().trim() == "yes") {
-            console.log("resetting match", $matchid)
-            socket.emit("resetMatch", $matchid)
+        if (resp?.toLowerCase().trim() == 'yes') {
+            console.log('resetting match', $matchid)
+            socket.emit('resetMatch', $matchid)
         }
     }
-
-    function getMatchData(id) {
-        if ($loadedMatch == id) return {text: "Reload", buttoncolor: "#840082", itemstyle: "background-color:#680066"}
-        if ($preloadedMatch == id) return {text: "Load", buttoncolor: "#b400b1", itemstyle: "background-color:#683900"}
-        return {text: "Preload", buttoncolor: "#a56600", itemstyle: ""}
+    function getLoadButtonByMatch(id:string) {
+        if (id == loadedMatches.loaded) return getLoadButton("loaded")
+        if (id == loadedMatches.preloaded) return getLoadButton("preloaded")
+        return getLoadButton("none")
+    }
+    function getLoadButton(state:"loaded"|"preloaded"|"none") {
+        if (state == "loaded") return { text: 'Reload', buttoncolor: '#840082', itemstyle: 'background-color:#680066' }
+        if (state == "preloaded") return { text: 'Load', buttoncolor: '#b400b1', itemstyle: 'background-color:#683900' }
+        return { text: 'Preload', buttoncolor: '#a56600', itemstyle: '' }
     }
 
-    const matchLoadState = writable({text: "Preload", buttoncolor: "#a56600", itemstyle: ""})
-    $: $matchLoadState, console.log("STATE", $matchLoadState)
-    $: $loadedMatch, $matchLoadState = getMatchData($matchid)
-    $: $preloadedMatch, $matchLoadState = getMatchData($matchid)
-
+    const matchLoadState = writable(getLoadButton("none"))
+    $: $matchLoadState, console.log('STATE', $matchLoadState)
+    socket.on("preloadMatch", (match) => {
+        if (match.id == $matchid) {
+            matchLoadState.set(getLoadButton("preloaded"))
+        }
+    })
+    socket.on("loadMatch", (match) => {
+        if (match.id == $matchid) {
+            matchLoadState.set(getLoadButton("loaded"))
+        }
+    })
 
     let showTeams = false
-    let teamlistunsub: Unsubscriber;
-    const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance} = matchData
+    let teamlistunsub: Unsubscriber
+    const { red1, red2, red3, blue1, blue2, blue3, elim_info } = matchData
     teamlistunsub = teamList.subscribe((value) => {
         if (Object.values(value).length > 0) {
             showTeams = true
@@ -104,70 +95,60 @@
         }
     })
     const matchid = matchData.id
-    const matchstate = derived(matchData.state, ($state) => $state ?? MatchState.PENDING)
-    const matches: Readable<MatchData[]> = derived(matchList, Object.values)
+    const matchstate = matchData.state
+    const matchtype = matchData.type
+    const matches: Readable<Match[]> = derived(matchList, Object.values)
 
-    let redTeamParent: HTMLElement;
-    let blueTeamParent: HTMLElement;
+    let redTeamParent: HTMLElement
+    let blueTeamParent: HTMLElement
 
     let setSortingEnabled: (enabled: boolean) => void
 
 
-    $: hasAdjustedSort = (
-        $red1 != $dsStatuses?.R1?.assignedTeam ||
-        $red2 != $dsStatuses?.R2?.assignedTeam ||
-        $red3 != $dsStatuses?.R3?.assignedTeam ||
-        $blue1 != $dsStatuses?.B1?.assignedTeam ||
-        $blue2 != $dsStatuses?.B2?.assignedTeam ||
-        $blue3 != $dsStatuses?.B3?.assignedTeam
-    ) && $loadedMatch == $matchid
-
     onMount(() => {
         function onEnd(event: Sortable.SortableEvent) {
-            const teamA = event.from.children[event.oldIndex].id.replace(/^team-/, "")
-            const teamB = event.item.id.replace(/^team-/, "")
-            const storeA: Writable<number> = matchData[teamA]
-            const storeB: Writable<number> = matchData[teamB]
-            const teamAId = get(storeA)
-            storeA.set(get(storeB))
+            const teamA = event.from.children[event.oldIndex!].id.replace(/^team-/, '')
+            const teamB = event.item.id.replace(/^team-/, '')
+            const storeA = matchData[teamA as RobotPosition]
+            const storeB = matchData[teamB as RobotPosition]
+            const teamAId = storeA.get()
+            storeA.set(storeB.get())
             storeB.set(teamAId)
         }
 
         const redSortable = new Sortable(redTeamParent, {
-            draggable: ".item",
-            group: "teams",
+            draggable: '.item',
+            group: 'teams',
             swap: true,
             onEnd
         })
 
         const blueSortable = new Sortable(blueTeamParent, {
-            draggable: ".item",
-            group: "teams",
+            draggable: '.item',
+            group: 'teams',
             swap: true,
             onEnd
         })
         setSortingEnabled = (enabled) => {
-            redSortable.option("sort", enabled)
-            redSortable.option("group", {
-                name: "teams",
+            redSortable.option('sort', enabled)
+            redSortable.option('group', {
+                name: 'teams',
                 pull: enabled,
                 put: enabled
             })
-            blueSortable.option("sort", enabled)
-            blueSortable.option("group", {
-                name: "teams",
+            blueSortable.option('sort', enabled)
+            blueSortable.option('group', {
+                name: 'teams',
                 pull: enabled,
                 put: enabled
             })
             $isSortingEnabled = enabled
         }
 
-        matchstate.subscribe(() => setSortingEnabled($matchstate == MatchState.PENDING))
+        matchData.state.subscribe((v) => setSortingEnabled(v == "not_started"))
     })
 
     let isSortingEnabled = writable(true)
-
-
 </script>
 
 <datalist id="teams">
@@ -181,292 +162,257 @@
         <h2>Scoring</h2>
         <ScoreSummary></ScoreSummary>
     </div>
-    <div id="monitor">
-        <AllianceStationMonitorParent/>
-        <AllianceStationMonitor station="R1"></AllianceStationMonitor>
-        <AllianceStationMonitor station="R2"></AllianceStationMonitor>
-        <AllianceStationMonitor station="R3"></AllianceStationMonitor>
-        <AllianceStationMonitor station="B1"></AllianceStationMonitor>
-        <AllianceStationMonitor station="B2"></AllianceStationMonitor>
-        <AllianceStationMonitor station="B3"></AllianceStationMonitor>
-    </div>
 
     <div id="sidebar-l">
         <h2>Matches</h2>
-        <div id=matchGrid>
-            {#each $matches as match,i}
-                <div class="matchEntry" style="{getMatchData(match.id).itemstyle}">
+        <div id="matchGrid">
+            {#each $matches as match, i}
+                <div class="matchEntry" style={getLoadButtonByMatch(match.id).itemstyle}>
                     <span>{match.id}</span>
-                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => $matchid = match.id}>
-                        Open
-                    </button>
-                    <div class="statustext"
-                         style="background-color:{statusColors[match.state]}">{statusMessages[match.state]}</div>
+                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => ($matchid = match.id)}> Open </button>
+                    <div class="statustext" style="background-color:{statusColors[match.state]}">{statusMessages[match.state]}</div>
                 </div>
             {/each}
-
         </div>
-        <button on:click={() => socket.emit("nextMatch", "qualification")}>Next Quals</button>
-        <button on:click={() => socket.emit("nextMatch", "elimination")}>Next Elims</button>
+        <button on:click={() => socket.emit('nextMatch', 'qualification')}>Next Quals</button>
+        <button on:click={() => socket.emit('nextMatch', 'elimination')}>Next Elims</button>
     </div>
     <div id="sidebar-r">
-        <h2>Match {($matchid ?? "HELP")}</h2>
-        <div class=row>
-            <button on:click={transitionLoadState} class=match-control
-                    style="background-color:{$matchLoadState.buttoncolor};">{$matchLoadState.text}</button>
-            <button on:click={transitionMatchState} class=match-control
-                    style="background-color:{buttonData[$matchstate].color};">{buttonData[$matchstate].text}</button>
+        <h2>Match {$matchid ?? 'HELP'}</h2>
+        <div class="row">
+            <button on:click={transitionLoadState} class="match-control" style="background-color:{$matchLoadState.buttoncolor};">{$matchLoadState.text}</button>
+            <button on:click={buttonData[$matchstate].cb} class="match-control" style="background-color:{buttonData[$matchstate].color};">{buttonData[$matchstate].text}</button>
         </div>
-        <h3 id=match-time>{$matchstate != MatchState.IN_PROGRESS ? statusMessages[$matchstate] : formatDuration($remainingTimeInPeriod)}</h3>
+        <h3 id="match-time">{$matchstate != "in_progress" ? statusMessages[$matchstate] : formatDuration($remainingTimeInPeriod)}</h3>
         <p id="teams-header">Teams</p>
-        <div id=teamsgrid>
-            {#if $redAlliance == 0}
-                <div class=row>
+        <div id="teamsgrid">
+            {#if $matchtype == "qualification"}
+                <div class="row">
                     <div class="item item-1-1">Red</div>
                     <div class="item item-2-1">Blue</div>
                 </div>
             {:else}
-                <div class=row>
-                    <div class="item item-1-1">Red ({$redAlliance})</div>
-                    <div class="item item-2-1">Blue ({$blueAlliance})</div>
+                <div class="row">
+                    <div class="item item-1-1">Red ({$elim_info?.red_alliance})</div>
+                    <div class="item item-2-1">Blue ({$elim_info?.blue_alliance})</div>
                 </div>
             {/if}
 
-            <div class=col data-alliance="red" bind:this={redTeamParent}>
+            <div class="col" data-alliance="red" bind:this={redTeamParent}>
                 {#if showTeams}
-                    <div id=team-red1 class='item item-1-2'>
-                        <TeamEntry store={red1} station=R1></TeamEntry>
+                    <div id="team-red1" class="item item-1-2">
+                        <TeamEntry store={red1}></TeamEntry>
                     </div>
-                    <div id=team-red2 class='item item-1-3'>
-                        <TeamEntry store={red2} station=R2></TeamEntry>
+                    <div id="team-red2" class="item item-1-3">
+                        <TeamEntry store={red2}></TeamEntry>
                     </div>
-                    <div id=team-red3 class='item item-1-4'>
-                        <TeamEntry store={red3} station=R3></TeamEntry>
+                    <div id="team-red3" class="item item-1-4">
+                        <TeamEntry store={red3}></TeamEntry>
                     </div>
                 {/if}
             </div>
-            <div class=col data-alliance="blue" bind:this={blueTeamParent}>
+            <div class="col" data-alliance="blue" bind:this={blueTeamParent}>
                 {#if showTeams}
-                    <div id=team-blue1 class="item item-2-2">
-                        <TeamEntry store={blue1} station=B1></TeamEntry>
+                    <div id="team-blue1" class="item item-2-2">
+                        <TeamEntry store={blue1}></TeamEntry>
                     </div>
-                    <div id=team-blue2 class="item item-2-3">
-                        <TeamEntry store={blue2} station=B2></TeamEntry>
+                    <div id="team-blue2" class="item item-2-3">
+                        <TeamEntry store={blue2}></TeamEntry>
                     </div>
-                    <div id=team-blue3 class="item item-2-4">
-                        <TeamEntry store={blue3} station=B3></TeamEntry>
+                    <div id="team-blue3" class="item item-2-4">
+                        <TeamEntry store={blue3}></TeamEntry>
                     </div>
                 {/if}
             </div>
-            {#if !hasAdjustedSort}
-                <button class=item id=sorting-toggle on:click={() => setSortingEnabled(!$isSortingEnabled)}><span
-                        id=lock-icon
-                        class="material-symbols-outlined">{$isSortingEnabled ? "lock_open_right" : "lock"}</span>
-                </button>
-            {:else}
-                <button on:click={transitionLoadState} class=item id=sorting-toggle style="background-color:#c3b40bbc;">
-                    Update FMS
-                </button>
-            {/if}
+            <button class="item" id="sorting-toggle" on:click={() => setSortingEnabled(!$isSortingEnabled)}><span id="lock-icon" class="material-symbols-outlined">{$isSortingEnabled ? 'lock_open_right' : 'lock'}</span> </button>
         </div>
         <div class="row">
-            <button on:click={resetMatch} class=match-control style="background-color:#501d1d;">Reset Match</button>
+            <button on:click={resetMatch} class="match-control" style="background-color:#501d1d;">Reset Match</button>
         </div>
     </div>
 </main>
 
 <style lang="scss">
-  #lock-icon {
-    width: 24px;
+    #lock-icon {
+        width: 24px;
 
-    text-align: center;
-    overflow: hidden;
-  }
+        text-align: center;
+        overflow: hidden;
+    }
 
-  @import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0");
-  #monitor {
-    display: grid;
-    grid-template-rows: repeat(7, calc(100% / 7));
-    grid-template-columns: repeat(7, calc(100% / 7));
-    column-gap: 1px;
-  }
+    @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0');
 
-  main {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    display: grid;
-    grid-template-columns:
-			[left] 340px
-			[center] auto
-			[right] 320px;
-    grid-template-rows:
-			[top] 50%
-			[bottom] 50%;
-  }
+    main {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: grid;
+        grid-template-columns:
+            [left] 340px
+            [center] auto
+            [right] 320px;
+        grid-template-rows:
+            [top] 50%
+            [bottom] 50%;
+    }
 
-  :global(body) {
-    margin: 0;
-    overscroll-behavior: none;
-  }
+    :global(body) {
+        margin: 0;
+        overscroll-behavior: none;
+    }
 
-  #teamsgrid {
-    margin-left: auto;
-    margin-right: auto;
-    display: grid;
-    grid-template-columns: auto auto;
-    grid-auto-flow: row;
-    width: 100%;
+    #teamsgrid {
+        margin-left: auto;
+        margin-right: auto;
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-auto-flow: row;
+        width: 100%;
 
-    .col, .row {
-      display: contents;
+        .col,
+        .row {
+            display: contents;
 
-      &:nth-child(1) {
-        .item {
-          border: none;
+            &:nth-child(1) {
+                .item {
+                    border: none;
+                }
+            }
+
+            &:last-child {
+                & > * {
+                    padding-bottom: 5px;
+                }
+
+                .item {
+                    border: none;
+                }
+            }
         }
-      }
+    }
 
-      &:last-child {
+    #sorting-toggle {
+        grid-column: 1 / span 2;
+        margin: 0;
+        border-radius: 0 0 5px 5px;
+        background-color: rgb(99, 99, 99);
+    }
+
+    #matchGrid {
+        display: flex;
+        flex-flow: column nowrap;
+        overflow-y: scroll;
+
+        .matchEntry:first-child {
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .matchEntry:last-child {
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        padding-right: 0;
+        max-height: 82vh;
+        width: 320px;
+        // &::-webkit-scrollbar {display: none;}
+    }
+
+    .matchEntry {
+        background-color: rgba(100, 100, 100, 0.5);
+
+        &:nth-child(odd) {
+            background-color: rgba(100, 100, 100, 0.3);
+        }
+
+        box-sizing: border-box;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+
+        width: 300px;
+        padding: 10px 10px;
+        align-items: center;
+
         & > * {
-          padding-bottom: 5px;
+            margin-left: 5px;
+            margin-right: 5px;
         }
 
-        .item {
-          border: none;
-
+        .statustext {
+            padding: 0.1em 0.2em;
+            width: 100px;
+            border-radius: 7px;
+            font-weight: 700;
         }
-      }
-    }
-  }
 
-  #sorting-toggle {
-    grid-column: 1/span 2;
-    margin: 0;
-    border-radius: 0 0 5px 5px;
-    background-color: rgb(99, 99, 99);
-  }
-
-  #matchGrid {
-    display: flex;
-    flex-flow: column nowrap;
-    overflow-y: scroll;
-
-    .matchEntry:first-child {
-      border-top-left-radius: 15px;
-      border-top-right-radius: 15px;
-    }
-
-    .matchEntry:last-child {
-      border-bottom-left-radius: 15px;
-      border-bottom-right-radius: 15px;
-    }
-
-    padding-right: 0;
-    max-height: 82vh;
-    width: 320px;
-    // &::-webkit-scrollbar {display: none;}
-  }
-
-  .matchEntry {
-    background-color: rgba(100, 100, 100, 0.5);
-
-    &:nth-child(odd) {
-      background-color: rgba(100, 100, 100, 0.3);
-    }
-
-    box-sizing: border-box;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: space-between;
-
-    width: 300px;
-    padding: 10px 10px;
-    align-items: center;
-
-    & > * {
-      margin-left: 5px;
-      margin-right: 5px;
-    }
-
-    .statustext {
-      padding: 0.1em 0.2em;
-      width: 100px;
-      border-radius: 7px;
-      font-weight: 700;
-    }
-
-    span {
-      flex-grow: 2;
-      font-size: 20px;
-    }
-
-    button {
-      padding: 0.2em 0.7em;
-      background-color: #1a1a1af0;
-    }
-  }
-
-  .row {
-    display: grid;
-    grid-auto-flow: row;
-
-  }
-
-  #sidebar-l {
-    grid-column: 1;
-    grid-row: 1/span 2;
-    background-color: #303030;
-    padding: 10px;
-  }
-
-  #sidebar-r {
-    grid-column: 3;
-    grid-row: 1/span 2;
-    background-color: #303030;
-    padding: 40px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: flex-start;
-  }
-
-  .item-1-1 {
-    border-top-left-radius: 5px;
-  }
-
-  .item-2-1 {
-    border-top-right-radius: 5px;
-  }
-
-  @mixin team-grid-position {
-    @for $col from 1 through 2 {
-      @for $row from 1 through 4 {
-        .item-#{$col}-#{$row} {
-          grid-column: $col;
-          grid-row: $row;
-          @if $col == 1 {
-            background-color: var(--red);
-          } @else {
-            background-color: var(--blue);
-          }
+        span {
+            flex-grow: 2;
+            font-size: 20px;
         }
-      }
+
+        button {
+            padding: 0.2em 0.7em;
+            background-color: #1a1a1af0;
+        }
     }
-  }
 
-  #scoring {
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-  }
+    .row {
+        display: grid;
+        grid-auto-flow: row;
+    }
 
-  @include team-grid-position()
+    #sidebar-l {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+        background-color: #303030;
+        padding: 10px;
+    }
 
+    #sidebar-r {
+        grid-column: 3;
+        grid-row: 1 / span 2;
+        background-color: #303030;
+        padding: 40px;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: flex-start;
+    }
 
-  // input {
-  // 	width: 20px;
-  // }
+    .item-1-1 {
+        border-top-left-radius: 5px;
+    }
+
+    .item-2-1 {
+        border-top-right-radius: 5px;
+    }
+
+    @mixin team-grid-position {
+        @for $col from 1 through 2 {
+            @for $row from 1 through 4 {
+                .item-#{$col}-#{$row} {
+                    grid-column: $col;
+                    grid-row: $row;
+                    @if $col == 1 {
+                        background-color: var(--red);
+                    } @else {
+                        background-color: var(--blue);
+                    }
+                }
+            }
+        }
+    }
+
+    #scoring {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    @include team-grid-position(); // input {
+    // 	width: 20px;
+    // }
 </style>
-		

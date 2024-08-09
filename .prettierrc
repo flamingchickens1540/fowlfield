@@ -5,11 +5,20 @@
     "tabWidth": 4,
     "semi": false,
     "singleQuote": true,
+    "plugins": ["prettier-plugin-svelte"],
+
+    "svelteSortOrder": "options-scripts-markup-styles",
+    "svelteStrictMode": false,
+    "svelteBracketNewLine": false,
+    "svelteAllowShorthand": true,
+    "svelteIndentScriptAndStyle": true,
+
     "overrides": [
         {
             "files": ["**/*.svelte"],
             "options": {
-                "printWidth": 1000
+                "printWidth": 1000,
+                "parser": "svelte"
             }
         }
     ]

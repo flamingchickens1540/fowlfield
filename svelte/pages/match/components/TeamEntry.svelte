@@ -1,34 +1,22 @@
 <script lang="ts">
-    import matchData, { dsStatuses, teamList,loadedMatches } from "~/lib/store";
+    import matchData, { teamList,loadedMatches } from "~/lib/store";
     import writableDerived from "svelte-writable-derived";
     import type { Writable } from "svelte/store";
-    import type { DriverStation } from "~common/types";
     
     export let store:Writable<number>;
-    export let station:DriverStation
     
-    export let {id} = matchData
-    export let {loaded} = loadedMatches
-    
-    $: currentMatch = $id == $loaded
-    
-    let dsColor:string
-    let robotColor:string
-    dsStatuses.subscribe((statuses) => {
-        if (statuses == null) {return}
-        const status = statuses[station] 
-        dsColor = status.dsConnected ? "#005700" : status.bypassed ? "#000000" : "#570000"
-        robotColor = status.robotConnected ? "#005700" : status.bypassed ? "#000000" : "#570000"
-    })
-    
-    const prettyteamnum = writableDerived(store, 
+    const {id} = matchData
+
+    $: currentMatch = $id == loadedMatches.loaded
+
+    const prettyteamnum = writableDerived(store,
     (storevalue) => {
-        return $teamList[storevalue]?.displaynum.get()
+        return $teamList[storevalue]?.display_number.get()
     }, 
     (value, storevalue) => {
         if (value == "") {return 0}
-        const team = Object.values($teamList).find((team) => team.displaynum.get() == value)
-        if (team != null) {return team.id}
+        const team = Object.values($teamList).find((team) => team.display_number.get() == value)
+        if (team != null) {return team.id.get()}
         
         return storevalue;
     })
@@ -36,10 +24,6 @@
 
 <div class=row>
     <input bind:value={$prettyteamnum} style="--inputwidth:{currentMatch ? 60 : 100}px" list=teams/>
-    {#if currentMatch}
-    <div class=indicator style="--bgcolor:{dsColor}">D</div>
-    <div class=indicator style="--bgcolor:{robotColor}">R</div>
-    {/if}
 </div>
 
 <style lang=scss>
@@ -50,12 +34,6 @@
         justify-content: space-between;
         align-items:center;
         border: solid $inputcolor 1px;
-    }
-    .indicator {
-        display:block;
-        width:20px;
-        height:26px;
-        background-color: var(--bgcolor);
     }
     input {
         /* width:80%; */

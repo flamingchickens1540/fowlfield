@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
-let pages = ['estop', 'alliance']
+let pages = ['estop', 'alliance', 'match']
 
 // //// Loads all subdirectories of /svelte
 // fs.readdirSync("svelte/pages").forEach(function (filepath) {
