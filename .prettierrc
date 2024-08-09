@@ -1,0 +1,16 @@
+{
+    "trailingComma": "none",
+    "bracketSpacing": true,
+    "quoteProps": "consistent",
+    "tabWidth": 4,
+    "semi": false,
+    "singleQuote": true,
+    "overrides": [
+        {
+            "files": ["**/*.svelte"],
+            "options": {
+                "printWidth": 1000
+            }
+        }
+    ]
+}

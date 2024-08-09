@@ -1,85 +1,104 @@
-import {createLogger} from "~/logger";
-import { Match } from '@prisma/client'
+import { createLogger } from '~/logger'
 import { DoubleEliminationMatch, schedule } from '~common/utils/elims_bracket'
 
-const bracketLogger = createLogger("bracket", {level:"debug"})
-export type DoubleEliminationAlliance = 1|2|3|4
+const bracketLogger = createLogger('bracket', { level: 'debug' })
+export type DoubleEliminationAlliance = 1 | 2 | 3 | 4
 
 type ScheduleItem = {
-    red?:DoubleEliminationAlliance,
-    blue?:DoubleEliminationAlliance
+    red?: DoubleEliminationAlliance
+    blue?: DoubleEliminationAlliance
     details: DoubleEliminationMatch
 }
 
 export class DoubleEliminationBracket {
-    private matches: {[key:number]:ScheduleItem} = {}
-    private alliances: DoubleEliminationAlliance[] = [1,2,3,4];
-    private scheduleIndex = 1;
-    private netFinalWins = 0;
-    
-    constructor(currentmatch:number) {
-        this.scheduleIndex=currentmatch+1
+    private matches: { [key: number]: ScheduleItem } = {}
+    private alliances: DoubleEliminationAlliance[] = [1, 2, 3, 4]
+    private scheduleIndex = 1
+    private netFinalWins = 0
+
+    constructor(currentmatch: number) {
+        this.scheduleIndex = currentmatch + 1
         Object.entries(schedule).forEach(([key, value]) => {
-            this.matches[parseInt(key)] = {details:value}
+            this.matches[parseInt(key)] = { details: value }
         })
 
-        this.matches[1].red = this.alliances[0];
-        this.matches[1].blue = this.alliances[3];
-        this.matches[2].red = this.alliances[1];
-        this.matches[2].blue = this.alliances[2];
+        this.matches[1].red = this.alliances[0]
+        this.matches[1].blue = this.alliances[3]
+        this.matches[2].red = this.alliances[1]
+        this.matches[2].blue = this.alliances[2]
     }
     private recordedMatches = []
 
-    update(matchNumber: number, winner: "red" | "blue"):boolean {
-        bracketLogger.debug("recording match", matchNumber)
+    update(matchNumber: number, winner: 'red' | 'blue'): boolean {
+        bracketLogger.debug('recording match', matchNumber)
         //the logic to make double elimination work
-        if (this.recordedMatches.includes(matchNumber)) {bracketLogger.warn("already recorded", matchNumber); return false}
-        const match:ScheduleItem = this.matches[matchNumber]
-        
-        const winningAlliance = winner === "red" ? match.red : match.blue;
-        const losingAlliance  = winner === "red" ? match.blue : match.red;
-        
-        if (match.details.winnerTo != null) {this.matches[match.details.winnerTo.match][match.details.winnerTo.alliance] = winningAlliance}
-        if (match.details.loserTo != null) {this.matches[match.details.loserTo.match][match.details.loserTo.alliance] = losingAlliance}
+        if (this.recordedMatches.includes(matchNumber)) {
+            bracketLogger.warn('already recorded', matchNumber)
+            return false
+        }
+        const match: ScheduleItem = this.matches[matchNumber]
+
+        const winningAlliance = winner === 'red' ? match.red : match.blue
+        const losingAlliance = winner === 'red' ? match.blue : match.red
+
+        if (match.details.winnerTo != null) {
+            this.matches[match.details.winnerTo.match][
+                match.details.winnerTo.alliance
+            ] = winningAlliance
+        }
+        if (match.details.loserTo != null) {
+            this.matches[match.details.loserTo.match][
+                match.details.loserTo.alliance
+            ] = losingAlliance
+        }
         switch (matchNumber) {
             case 6: {
                 //finals 1
-                this.matches[7].red = match.red;
-                this.matches[7].blue = match.blue;
-                this.netFinalWins += winner === "red" ? 1 : -1;
-                break;
+                this.matches[7].red = match.red
+                this.matches[7].blue = match.blue
+                this.netFinalWins += winner === 'red' ? 1 : -1
+                break
             }
             case 7: {
                 //finals 2
-                this.matches[8].red = match.red;
-                this.matches[8].blue = match.blue;
-                this.netFinalWins += winner === "red" ? 1 : -1;
-                break;
+                this.matches[8].red = match.red
+                this.matches[8].blue = match.blue
+                this.netFinalWins += winner === 'red' ? 1 : -1
+                break
             }
         }
-        
 
         this.recordedMatches.push(matchNumber)
         return true
     }
-    
+
     getNextMatch(): ScheduleItem {
-        
-        if (this.scheduleIndex > 8||(this.scheduleIndex == 7 && this.netFinalWins != 0)) {
-            bracketLogger.error("Cannot get next match, bracket is over")
+        if (
+            this.scheduleIndex > 8 ||
+            (this.scheduleIndex == 7 && this.netFinalWins != 0)
+        ) {
+            bracketLogger.error('Cannot get next match, bracket is over')
             return
         }
-        if (this.matches[this.scheduleIndex].red == null || this.matches[this.scheduleIndex].blue == null) {
-            bracketLogger.warn("Must update before requesting next match");
+        if (
+            this.matches[this.scheduleIndex].red == null ||
+            this.matches[this.scheduleIndex].blue == null
+        ) {
+            bracketLogger.warn('Must update before requesting next match')
             return
         }
-        bracketLogger.debug("CURRENT SCHEDULE", this.scheduleIndex, "SCHED", this.matches[this.scheduleIndex], "DONE")
-        this.scheduleIndex++;
-        return this.matches[this.scheduleIndex-1];
+        bracketLogger.debug(
+            'CURRENT SCHEDULE',
+            this.scheduleIndex,
+            'SCHED',
+            this.matches[this.scheduleIndex],
+            'DONE'
+        )
+        this.scheduleIndex++
+        return this.matches[this.scheduleIndex - 1]
     }
-            
-    getCurrentMatch():ScheduleItem {
-        return this.matches[this.scheduleIndex];
+
+    getCurrentMatch(): ScheduleItem {
+        return this.matches[this.scheduleIndex]
     }
 }
-        

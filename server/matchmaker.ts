@@ -1,16 +1,16 @@
-import {DoubleEliminationBracket} from "./doubleEliminationBracket";
-import {teammanager} from "~/managers";
-import {getWinner} from "~common/utils/scores";
-import {getBlankScoreBreakdown} from '~common/utils/blanks';
-import {createLogger} from "~/logger";
-import {Match} from "@prisma/client";
-import prisma from "~/models/db";
+import { DoubleEliminationBracket } from './doubleEliminationBracket'
+import { teammanager } from '~/managers'
+import { getWinner } from '~common/utils/scores'
+import { getBlankScoreBreakdown } from '~common/utils/blanks'
+import { createLogger } from '~/logger'
+import { Match } from '@prisma/client'
+import prisma from '~/managers/db'
 
-const logger = createLogger("MatchMaker")
+const logger = createLogger('MatchMaker')
 
 export class MatchMaker {
-    private bracket: DoubleEliminationBracket | null = null;
-    private latestQualsMatch = 0;
+    private bracket: DoubleEliminationBracket | null = null
+    private latestQualsMatch = 0
 
     constructor() {
         this.buildBracket()
@@ -20,38 +20,35 @@ export class MatchMaker {
         const matches = await prisma.match.findMany()
         let elimMatches: Match[] = []
         matches.forEach((match) => {
-            if (match.type == "qualification") {
+            if (match.type == 'qualification') {
                 if (match.stage_index > this.latestQualsMatch) {
-                    this.latestQualsMatch = match.stage_index;
+                    this.latestQualsMatch = match.stage_index
                 }
             } else {
                 elimMatches.push(match)
             }
-        });
+        })
 
-        this.initElims(elimMatches.length);
+        this.initElims(elimMatches.length)
 
         elimMatches.forEach((match) => {
-            if (match.state == "ended" || match.state == "posted") {
-                const winner = getWinner(match);
-                if (winner != "tie") {
-                    this.bracket.update(
-                        match.stage_index,
-                        winner
-                    );
+            if (match.state == 'ended' || match.state == 'posted') {
+                const winner = getWinner(match)
+                if (winner != 'tie') {
+                    this.bracket.update(match.stage_index, winner)
                 }
             }
-        });
+        })
     }
 
     async advanceQualsMatch(): Promise<Match> {
-        this.latestQualsMatch++;
+        this.latestQualsMatch++
         return prisma.match.create({
             data: {
                 id: `qm${this.latestQualsMatch}`,
                 stage_index: this.latestQualsMatch,
-                type: "qualification",
-                state: "not_started",
+                type: 'qualification',
+                state: 'not_started',
                 startTime: 0,
                 red1: 0,
                 red2: 0,
@@ -60,23 +57,23 @@ export class MatchMaker {
                 blue2: 0,
                 blue3: 0,
                 red_scores: getBlankScoreBreakdown(),
-                blue_scores: getBlankScoreBreakdown(),
+                blue_scores: getBlankScoreBreakdown()
             }
-        });
+        })
     }
 
     advanceElimMatch(): Promise<Match> {
         if (this.bracket == null) {
-            logger.error("Must initialize elims before advancing");
+            logger.error('Must initialize elims before advancing')
             return
         }
 
-        let match = this.bracket.getNextMatch();
+        let match = this.bracket.getNextMatch()
         if (match == null) {
             return null
         }
         const alliances = teammanager.getAlliances()
-        logger.info("ELIM DATA", match, match.red, match.blue, alliances)
+        logger.info('ELIM DATA', match, match.red, match.blue, alliances)
         return prisma.match.create({
             data: {
                 id: match.details.matchId,
@@ -88,8 +85,8 @@ export class MatchMaker {
                     red_alliance: match.red,
                     blue_alliance: match.blue
                 },
-                type: "elimination",
-                state: "not_started",
+                type: 'elimination',
+                state: 'not_started',
                 red1: alliances[match.red][0] ?? 0,
                 red2: alliances[match.red][1] ?? 0,
                 red3: alliances[match.red][2] ?? 0,
@@ -98,15 +95,13 @@ export class MatchMaker {
                 blue3: alliances[match.blue][2] ?? 0,
                 red_scores: getBlankScoreBreakdown(),
                 blue_scores: getBlankScoreBreakdown(),
-                startTime: 0,
-
+                startTime: 0
             }
-        });
+        })
     }
 
-
     initElims(currentmatch: number) {
-        this.bracket = new DoubleEliminationBracket(currentmatch);
+        this.bracket = new DoubleEliminationBracket(currentmatch)
     }
 
     /**
@@ -115,21 +110,20 @@ export class MatchMaker {
      * @warning MATCH CANNOT END IN A TIE
      */
     async updateBracket(match: Match) {
-        if (match.type == "elimination") {
-            const winner = getWinner(match);
-            if (winner == "tie") {
-                logger.error("Match cannot end in a tie")
+        if (match.type == 'elimination') {
+            const winner = getWinner(match)
+            if (winner == 'tie') {
+                logger.error('Match cannot end in a tie')
                 return
             }
             const didUpdateSucceed = this.bracket?.update(
                 match.stage_index,
                 winner
-            );
+            )
             if (!didUpdateSucceed) {
-                logger.warn("rebuilding bracket")
+                logger.warn('rebuilding bracket')
                 await this.buildBracket()
             }
         }
     }
 }
-    

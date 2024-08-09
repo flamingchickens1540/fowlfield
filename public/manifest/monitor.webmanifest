@@ -4,7 +4,7 @@
     "display": "fullscreen",
     "start_url": "/monitor",
     "name": "FowlField Monitor",
-    "orientation":"landscape",
+    "orientation": "landscape",
     "short_name": "Monitor",
     "icons": [
         {

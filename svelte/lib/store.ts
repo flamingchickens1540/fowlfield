@@ -7,18 +7,23 @@ import {
 import { calculatePointsTotal } from '~common/utils/scores'
 import socket from '~/lib/socket'
 import { derived, type Readable, writable, type Writable } from 'svelte/store'
-import { createFowlMatchStore, createFowlTeamStore, SocketWritable, SocketWritableOf } from './socketStore'
+import {
+    createFowlMatchStore,
+    createFowlTeamStore,
+    SocketWritable,
+    SocketWritableOf
+} from './socketStore'
 import { Match, Team } from '@prisma/client'
 
 let serverTimeOffset: number = 0
 let loadTrack: 'load' | 'preload' = 'load'
 
-
 export function setPreloadingTrack(shouldPreload: boolean) {
     loadTrack = shouldPreload ? 'preload' : 'load'
-    matchDataPrivate.id.set((shouldPreload ? loadedMatches.preloaded : loadedMatches.loaded))
+    matchDataPrivate.id.set(
+        shouldPreload ? loadedMatches.preloaded : loadedMatches.loaded
+    )
 }
-
 
 const matchDataPrivate: SocketWritableOf<Match> = {
     id: createFowlMatchStore('id'),
@@ -37,12 +42,19 @@ const matchDataPrivate: SocketWritableOf<Match> = {
     elim_info: createFowlMatchStore('elim_info')
 }
 
-export const matchTime = derived(matchDataPrivate.startTime, ($time, set) => {
-    const interval = setInterval(() => {
-        set(($time == null ? 0 : Date.now() - serverTimeOffset - $time) / 1000)
-    }, 50) // TODO: tune time if needed
-    return () => clearInterval(interval)
-}, 0)
+export const matchTime = derived(
+    matchDataPrivate.startTime,
+    ($time, set) => {
+        const interval = setInterval(() => {
+            set(
+                ($time == null ? 0 : Date.now() - serverTimeOffset - $time) /
+                    1000
+            )
+        }, 50) // TODO: tune time if needed
+        return () => clearInterval(interval)
+    },
+    0
+)
 
 export const matchPeriod = derived(matchTime, ($time) => getMatchPeriod($time))
 export const remainingTimeInPeriod = derived(matchTime, ($time) => {
@@ -51,8 +63,9 @@ export const remainingTimeInPeriod = derived(matchTime, ($time) => {
 export const remainingTimeInDisplayPeriod = derived(matchTime, ($time) => {
     return getRemainingTimeInDisplayPeriod($time)
 })
-export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time))
-
+export const elapsedTimeInPeriod = derived(matchTime, ($time) =>
+    getElapsedTimeInPeriod($time)
+)
 
 export function isMatchLoaded(match: string) {
     return match == loadedMatches.loaded
@@ -63,7 +76,8 @@ export function isMatchPreloaded(match: string) {
 }
 
 export const matchList: Writable<{ [key: string]: Match }> = writable({})
-export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> = writable({})
+export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> =
+    writable({})
 
 // export const eventData = new SocketDataStore<EventInfo>({
 //     lunchReturnTime: 0,
@@ -92,7 +106,6 @@ export function commitMatch() {
 //     eventData.setQuiet(data)
 // }
 
-
 export function updateLoadedMatch(loadType: 'preload' | 'load', data: Match) {
     if (loadType == 'preload') {
         loadedMatches.preloaded = data.id
@@ -109,7 +122,6 @@ export const loadedMatches = {
     loaded: ''
 }
 
-
 function createTeamStores(team: Team): SocketWritableOf<Team> {
     return {
         id: createFowlTeamStore(team, 'id'),
@@ -123,7 +135,7 @@ function createTeamStores(team: Team): SocketWritableOf<Team> {
 export function updateTeamList(data: { [key: number]: Team }) {
     teamList.update((list) => {
         list = {}
-        Object.values(data).forEach(element => {
+        Object.values(data).forEach((element) => {
             list[element.id] = createTeamStores(element)
         })
         return list
@@ -136,7 +148,9 @@ export function updateStoredTeam(data: Team) {
             list[data.id] = createTeamStores(data)
         } else {
             Object.entries(list[data.id]).forEach(([key, store]) => {
-                (store as SocketWritable<unknown>).setLocal(data[key as keyof Team])
+                ;(store as SocketWritable<unknown>).setLocal(
+                    data[key as keyof Team]
+                )
             })
         }
         return list
@@ -153,12 +167,14 @@ export function updateStoredMatch(data: Match) {
         return list
     })
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
-        (store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
+        ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
     })
 }
 
-
-export const matchData: SocketWritableOf<Match> & { redScore: Readable<number>, blueScore: Readable<number> } = {
+export const matchData: SocketWritableOf<Match> & {
+    redScore: Readable<number>
+    blueScore: Readable<number>
+} = {
     ...matchDataPrivate,
     redScore: derived(matchDataPrivate.red_scores, calculatePointsTotal, 0),
     blueScore: derived(matchDataPrivate.blue_scores, calculatePointsTotal, 0)

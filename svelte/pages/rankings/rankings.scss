@@ -1,11 +1,11 @@
-td, th {
+td,
+th {
     /* border: 1px solid #989898; */
     text-align: left;
 
     padding: 25px;
     font-size: 35px;
 }
-
 
 thead tr {
     background-color: hsl(34, 0%, 50%) !important;
@@ -15,5 +15,5 @@ thead tr {
 }
 
 tr {
-    transition:top 10s;
+    transition: top 10s;
 }

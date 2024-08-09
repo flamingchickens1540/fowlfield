@@ -1,38 +1,38 @@
 name: Node
 
 on:
-  push:
-  pull_request:
-    branches: [ "main" ]
+    push:
+    pull_request:
+        branches: ['main']
 
 jobs:
-  backend:
-    name: "Build Backend"
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: 21
-        cache: "npm"
-    - name: Install Packages
-      run: npm ci
-    - name: Check
-      run: npm run backend:check
-    - name: Build
-      run: npm run backend:build
-  frontend:
-    name: "Build Frontend"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 21
-          cache: "npm"
-      - name: Install Packages
-        run: npm ci
-      - name: Check
-        run: npm run frontend:check
-      - name: Build
-        run: npm run frontend:build
+    backend:
+        name: 'Build Backend'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 21
+                  cache: 'npm'
+            - name: Install Packages
+              run: npm ci
+            - name: Check
+              run: npm run backend:check
+            - name: Build
+              run: npm run backend:build
+    frontend:
+        name: 'Build Frontend'
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 21
+                  cache: 'npm'
+            - name: Install Packages
+              run: npm ci
+            - name: Check
+              run: npm run frontend:check
+            - name: Build
+              run: npm run frontend:build

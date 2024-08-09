@@ -1,18 +1,14 @@
 {
-  "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "~/*": [
-        "./*",
-      ],
-      "~common/*": [
-        "../common/*"
-      ]
-    },
-    "moduleResolution": "bundler",
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "target": "es2022",
-    "module": "es2022"
-  },
+    "compilerOptions": {
+        "baseUrl": ".",
+        "paths": {
+            "~/*": ["./*"],
+            "~common/*": ["../common/*"]
+        },
+        "moduleResolution": "bundler",
+        "esModuleInterop": true,
+        "resolveJsonModule": true,
+        "target": "es2022",
+        "module": "es2022"
+    }
 }

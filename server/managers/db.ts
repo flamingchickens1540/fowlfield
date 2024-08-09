@@ -1,7 +1,7 @@
-import {$Enums, Card, PrismaClient} from '@prisma/client'
-import {createLogger} from '~/logger'
+import { PrismaClient } from '@prisma/client'
+import { createLogger } from '~/logger'
 
-const logger = createLogger("db")
+const logger = createLogger('db')
 export const prisma = new PrismaClient({
     log: [
         {
@@ -26,7 +26,7 @@ export default prisma
 
 if (process.env.NODE_ENV != 'prod') {
     prisma.$on('query', (e) => {
-        logger.trace({name: 'prisma'}, e.query)
+        logger.trace({ name: 'prisma' }, e.query)
     })
 }
 prisma.$on('info', (e) => {
@@ -38,5 +38,3 @@ prisma.$on('warn', (e) => {
 prisma.$on('error', (e) => {
     logger.error({ name: 'prisma' }, e.message)
 })
-
-c

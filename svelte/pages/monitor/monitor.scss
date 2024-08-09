@@ -1,8 +1,8 @@
 .row {
-    display:contents
+    display: contents;
 }
 :global(body) {
-    margin:0;
+    margin: 0;
 }
 
 :global(:root) {
@@ -17,55 +17,57 @@
 }
 .header {
     background-color: black;
-    color:white;
+    color: white;
 }
 $tableheight: 92vh;
 #teammonitorgrid {
     background-color: white;
-    color:black;
-    display:grid;
-    position:absolute;
+    color: black;
+    display: grid;
+    position: absolute;
     top: 50%;
     left: 50%;
     -ms-transform: translate(-50%, -50%);
     transform: translate(-50%, -50%);
-    
-    grid-template-rows: 5vh 3vh repeat(6, min(calc(#{$tableheight}/6), calc(100vw/11)));
-    grid-template-columns: repeat(11, min(calc(#{$tableheight}/6), calc(100vw/11)));
+
+    grid-template-rows: 5vh 3vh repeat(
+            6,
+            min(calc(#{$tableheight}/ 6), calc(100vw / 11))
+        );
+    grid-template-columns: repeat(
+        11,
+        min(calc(#{$tableheight}/ 6), calc(100vw / 11))
+    );
     grid-auto-flow: row;
-    
 
+    .entry[data-bypass] {
+        filter: grayscale(100%);
+    }
 
-        .entry[data-bypass] {
-            filter:grayscale(100%);
-        }
-
-    .row:nth-child(-n+5):nth-child(n+2) {
-        .entry:nth-child(-n+3) {
-            background-color: #60ADFF;
+    .row:nth-child(-n + 5):nth-child(n + 2) {
+        .entry:nth-child(-n + 3) {
+            background-color: #60adff;
         }
     }
-    
-    
-    .row:nth-child(n+6) {
-        .entry:nth-child(-n+3){
-            background-color: #FF6060;
+
+    .row:nth-child(n + 6) {
+        .entry:nth-child(-n + 3) {
+            background-color: #ff6060;
         }
     }
 }
 
-
 .entry {
     &:nth-child(3) {
-        text-shadow:  1px 1px 5px white;
+        text-shadow: 1px 1px 5px white;
     }
-    border:1px solid rgb(220, 220, 220);
-    width:100%;
-    height:100%;
-    text-align:center;
+    border: 1px solid rgb(220, 220, 220);
+    width: 100%;
+    height: 100%;
+    text-align: center;
     display: flex;
     justify-content: center;
     align-items: center;
-    position:relative;
-    font-size:30px;
+    position: relative;
+    font-size: 30px;
 }

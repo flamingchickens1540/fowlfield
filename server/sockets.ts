@@ -15,15 +15,13 @@ import * as teammanager from './managers/teammanager'
 import { getTeams } from './managers/teammanager'
 import { createLogger } from './logger'
 import { instrument } from '@socket.io/admin-ui'
-import { DBSettings } from '~/models/settings'
 
 import * as tba from './tba'
 import { getBlankScoreBreakdown } from '~common/utils/blanks'
 import { isProduction } from '~/index'
 import jwt from 'jsonwebtoken'
-import prisma from '~/models/db'
-import { settings } from '~/managers/settings'
-import { Card } from '@prisma/client'
+import prisma from '~/managers/db'
+import { eventState } from '~/managers/settings'
 import { getAlliances } from '~common/utils/scores'
 
 const logger = createLogger('socket')
@@ -31,13 +29,17 @@ export let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 enum SocketAccess {
     VIEWER = 'viewer',
-    NORMAL = 'normal',
+    NORMAL = 'normal'
 }
 
 const handleMatchEnd = async () => {
     const match = await matchmanager.getLoadedMatch()
-    if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == "in_progress") {
-        match.state = "ended"
+    if (
+        getMatchPeriod((Date.now() - match.startTime) / 1000) ==
+            MatchPeriod.POSTMATCH &&
+        match.state == 'in_progress'
+    ) {
+        match.state = 'ended'
         logger.info('Transitioning match', match.id, 'to completed')
         io.emit('match', match)
     }
@@ -57,7 +59,8 @@ export default function startServer(server: http.Server) {
             auth: {
                 type: 'basic',
                 username: 'admin',
-                password: '$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS' // "changeit" encrypted with bcrypt
+                password:
+                    '$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS' // "changeit" encrypted with bcrypt
             },
             mode: 'development'
         })
@@ -66,7 +69,10 @@ export default function startServer(server: http.Server) {
     io.on('connection', (socket) => {
         if (socket.handshake.auth?.token != null) {
             try {
-                const decoded = jwt.verify(socket.handshake.auth.token, config.socket.signingKey)
+                const decoded = jwt.verify(
+                    socket.handshake.auth.token,
+                    config.socket.signingKey
+                )
                 if (typeof decoded == 'object' && 'access' in decoded) {
                     socket.data.access = decoded.access
                 }
@@ -98,19 +104,20 @@ export default function startServer(server: http.Server) {
         })
     })
 
-
     setInterval(handleMatchEnd, 5000) // just in case
 
-
     return
-
 }
 
-
-async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
-
-    logger.info('new connection from', socket.id, socket.handshake.address, socket.handshake.auth.role ?? 'default')
-
+async function setupSocket(
+    socket: Socket<ClientToServerEvents, ServerToClientEvents>
+) {
+    logger.info(
+        'new connection from',
+        socket.id,
+        socket.handshake.address,
+        socket.handshake.auth.role ?? 'default'
+    )
 
     // Send initial data
     socket.emit('loadMatch', await matchmanager.getLoadedMatch())
@@ -118,14 +125,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.emit('matches', await getMatches())
     socket.emit('teams', await getTeams())
     socket.emit('event', {
-        atLunch: settings.atLunch,
-        lunchReturnTime: settings.lunchReturnTime
+        atLunch: eventState.atLunch,
+        lunchReturnTime: eventState.lunchReturnTime
     })
 
     socket.on('ping', (cb) => {
         cb(Date.now())
     })
-
 
     socket.on('commitAlliances', async (cb) => {
         cb(await tba.updateAlliances())
@@ -140,7 +146,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         logger.info('loading', id)
         matchmanager.updateLoadedMatch(id)
     })
-
 
     socket.on('partialMatch', async (data: PartialMatch) => {
         logger.debug('receiving match', data)
@@ -189,12 +194,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
 
     socket.on('startMatch', async (id) => {
-        if (id != settings.loadedMatch) {
+        if (id != eventState.loadedMatch) {
             alert('Attempted to start a non-loaded match')
             return
         }
         const match = await prisma.match.update({
-            where: { id }, data: {
+            where: { id },
+            data: {
                 startTime: Date.now(),
                 state: 'in_progress'
             }
@@ -203,12 +209,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('match', match)
     })
     socket.on('abortMatch', async (id) => {
-        if (id != settings.loadedMatch) {
+        if (id != eventState.loadedMatch) {
             alert('Attempted to abort a non-loaded match')
             return
         }
         const match = await prisma.match.update({
-            where: { id }, data: {
+            where: { id },
+            data: {
                 startTime: 0,
                 state: 'not_started'
             }
@@ -218,25 +225,26 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
 
     socket.on('commitMatch', async (id) => {
         const match = await prisma.match.update({
-            where: { id }, data: {
+            where: { id },
+            data: {
                 state: 'posted'
             }
         })
 
-        const {red, blue} = getAlliances(match);
-        red.concat(blue).forEach(({ team:team_number, card }) => {
+        const { red, blue } = getAlliances(match)
+        red.concat(blue).forEach(({ team: team_number, card }) => {
             setTimeout(async () => {
-            if (card == "none") {
-                return
-            }
-            const team = await prisma.team.update({
-                where: { id: team_number },
-                data: {
-                    has_card: true
+                if (card == 'none') {
+                    return
                 }
-            })
-            logger.info('Committing', card, 'card for', team)
-            io.emit("team", team)
+                const team = await prisma.team.update({
+                    where: { id: team_number },
+                    data: {
+                        has_card: true
+                    }
+                })
+                logger.info('Committing', card, 'card for', team)
+                io.emit('team', team)
             })
         })
         logger.info('Committing', id)
@@ -246,7 +254,9 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
 
     socket.on('nextMatch', async (type) => {
-        const newmatch = await matchmanager.advanceMatches(type as 'elimination' | 'qualification')
+        const newmatch = await matchmanager.advanceMatches(
+            type as 'elimination' | 'qualification'
+        )
         if (newmatch != null) {
             io.emit('match', newmatch)
         }
@@ -255,26 +265,24 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.on('resetMatch', async (id) => {
         const match = await matchmanager.getMatch(id)
         logger.warn('Resetting match', id)
-        match.state = "not_started"
+        match.state = 'not_started'
         match.startTime = 0
         match.blue_scores = getBlankScoreBreakdown()
         match.red_scores = getBlankScoreBreakdown()
         io.emit('match', match)
     })
 
-
     socket.on('partialEvent', async (data) => {
         console.info('recieved partial event', data)
-        const settings = await DBSettings.getInstance()
         if (data.atLunch != null) {
-            settings.atLunch = data.atLunch
+            eventState.atLunch = data.atLunch
         }
         if (data.lunchReturnTime != null) {
-            settings.lunchReturnTime = data.lunchReturnTime
+            eventState.lunchReturnTime = data.lunchReturnTime
         }
-        io.to('dashboard').emit('event', {
-            atLunch: settings.atLunch,
-            lunchReturnTime: settings.lunchReturnTime
+        io.emit('event', {
+            atLunch: eventState.atLunch,
+            lunchReturnTime: eventState.lunchReturnTime
         })
     })
 
@@ -287,8 +295,3 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         socket.emit('alert', message.join(' '))
     }
 }
-
-
-
-
-

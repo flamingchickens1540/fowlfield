@@ -1,26 +1,27 @@
-.tablerow, .tableheader {
-    display:contents;
+.tablerow,
+.tableheader {
+    display: contents;
     margin-bottom: 5px;
     .tableitem {
-        border:none;
-        border-radius:5px;
-        padding:3px 10px;
+        border: none;
+        border-radius: 5px;
+        padding: 3px 10px;
         font-size: 15px;
     }
     button.tableitem {
-        font-size:20px;
+        font-size: 20px;
     }
 }
 .tablerow .tableitem {
-    margin:5px;
+    margin: 5px;
     &:first-child {
-        font-weight:700;
+        font-weight: 700;
     }
     &.darken {
-        filter:brightness(90%)
+        filter: brightness(90%);
     }
-    
-    background-color: rgb(59,59,59);
+
+    background-color: rgb(59, 59, 59);
 }
 
 .centertext {

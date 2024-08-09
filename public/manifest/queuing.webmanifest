@@ -4,7 +4,7 @@
     "display": "fullscreen",
     "start_url": "/queuing",
     "name": "FowlField Queuing",
-    "orientation":"landscape",
+    "orientation": "landscape",
     "short_name": "Queuing",
     "icons": [
         {

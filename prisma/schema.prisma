@@ -106,8 +106,3 @@ model PlayoffAlliance {
   second_pick Int?
   third_pick  Int?
 }
-
-model Setting {
-  key   String @id @map("_id")
-  value String
-}

@@ -1,18 +1,13 @@
-import { Settings } from '~/models/settings'
-import prisma from '~/models/db'
+import { EventInfo } from '~common/types'
 
-export async function readSettings() {
-    const result: Settings = {
-        loadedMatch: "",
-        preloadedMatch: "",
-        atLunch: false,
-        lunchReturnTime: 0
-    }
-    for await (const setting of await prisma.setting.findMany({})) {
-        result[setting.key] = setting.value
-    }
-    return result
+export interface EventState extends EventInfo {
+    loadedMatch: string
+    preloadedMatch: string
 }
 
-
-export const settings = await readSettings()
+export const eventState: EventState = {
+    loadedMatch: '',
+    preloadedMatch: '',
+    atLunch: false,
+    lunchReturnTime: 0
+}

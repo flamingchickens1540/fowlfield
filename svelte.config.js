@@ -1,5 +1,4 @@
-import {vitePreprocess} from '@sveltejs/vite-plugin-svelte';
-
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte'
 
 // svelte.config.js
 export default {
@@ -14,4 +13,4 @@ export default {
         // experimental options
         experimental: {}
     }
-};
+}

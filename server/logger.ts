@@ -1,5 +1,4 @@
-
-import pino, {ChildLoggerOptions, type Logger} from 'pino'
+import pino, { ChildLoggerOptions, type Logger } from 'pino'
 
 const transport = pino.transport({
     targets: [
@@ -17,6 +16,6 @@ const transport = pino.transport({
 
 const rootLogger = pino({ level: 'trace' }, transport)
 
-export function createLogger(name:string, opts?:ChildLoggerOptions):Logger {
-    return rootLogger.child({name, ...opts})
+export function createLogger(name: string, opts?: ChildLoggerOptions): Logger {
+    return rootLogger.child({ name, ...opts })
 }

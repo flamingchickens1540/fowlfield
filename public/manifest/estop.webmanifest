@@ -4,7 +4,7 @@
     "display": "fullscreen",
     "start_url": "/estop",
     "name": "FowlField Estops",
-    "orientation":"landscape",
+    "orientation": "landscape",
     "short_name": "E-Stops",
     "icons": [
         {

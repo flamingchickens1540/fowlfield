@@ -1,7 +1,7 @@
-import App from "./FieldMonitor.svelte"
+import App from './FieldMonitor.svelte'
 
 const app = new App({
-  target: document.body
+    target: document.body
 })
 
 export default app

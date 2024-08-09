@@ -1,16 +1,16 @@
 {
-  "mongo": {
-    "username":"app",
-    "password": "mymongopassword",
-    "database": "fowlfield"
-  },
-  "socket": {
-    "password": "fowlfield",
-    "view_password": "fowlfield2",
-    "signingKey": "abcdefg"
-  },
-  "tba": {
-    "id": "",
-    "secret": ""
-  }
+    "mongo": {
+        "username": "app",
+        "password": "mymongopassword",
+        "database": "fowlfield"
+    },
+    "socket": {
+        "password": "fowlfield",
+        "view_password": "fowlfield2",
+        "signingKey": "abcdefg"
+    },
+    "tba": {
+        "id": "",
+        "secret": ""
+    }
 }
