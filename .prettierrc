@@ -15,9 +15,14 @@
 
     "overrides": [
         {
-            "files": ["**/*.svelte"],
+            "files": ["**/*.svelte", "**/*.html", "**/*.json"],
             "options": {
-                "printWidth": 1000,
+                "printWidth": 1000
+            }
+        },
+        {
+            "files": "**/*.svelte",
+            "options": {
                 "parser": "svelte"
             }
         }

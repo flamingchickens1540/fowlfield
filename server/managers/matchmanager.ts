@@ -14,6 +14,11 @@ export async function loadMatches() {
     const matchCount = await prisma.match.count()
     if (matchCount == 0) {
         const match = await matchMaker.advanceQualsMatch()
+        console.log(match)
+        eventState.loadedMatch = match.id
+        eventState.preloadedMatch = match.id
+    } else {
+        const match = await prisma.match.findFirst()
         eventState.loadedMatch = match.id
         eventState.preloadedMatch = match.id
     }
@@ -32,11 +37,11 @@ export async function updateMatch(data: PartialMatch) {
     return prisma.match.update({ where: { id: data.id }, data })
 }
 
-export async function getLoadedMatch(): Promise<Match> {
+export async function getLoadedMatch(): Promise<Match | undefined> {
     return prisma.match.findUnique({ where: { id: eventState.loadedMatch } })
 }
 
-export async function getPreloadedMatch(): Promise<Match> {
+export async function getPreloadedMatch(): Promise<Match | undefined> {
     return prisma.match.findUnique({ where: { id: eventState.preloadedMatch } })
 }
 

@@ -10,6 +10,8 @@ import { derived, type Readable, writable, type Writable } from 'svelte/store'
 import {
     createFowlMatchStore,
     createFowlTeamStore,
+    createPropertyStore,
+    gettableStore,
     SocketWritable,
     SocketWritableOf
 } from './socketStore'
@@ -21,7 +23,7 @@ let loadTrack: 'load' | 'preload' = 'load'
 export function setPreloadingTrack(shouldPreload: boolean) {
     loadTrack = shouldPreload ? 'preload' : 'load'
     matchDataPrivate.id.set(
-        shouldPreload ? loadedMatches.preloaded : loadedMatches.loaded
+        shouldPreload ? preloadedMatch.get() : loadedMatch.get()
     )
 }
 
@@ -68,11 +70,11 @@ export const elapsedTimeInPeriod = derived(matchTime, ($time) =>
 )
 
 export function isMatchLoaded(match: string) {
-    return match == loadedMatches.loaded
+    return match == loadedMatch.get()
 }
 
 export function isMatchPreloaded(match: string) {
-    return match == loadedMatches.preloaded
+    return match == preloadedMatch.get()
 }
 
 export const matchList: Writable<{ [key: string]: Match }> = writable({})
@@ -108,19 +110,40 @@ export function commitMatch() {
 
 export function updateLoadedMatch(loadType: 'preload' | 'load', data: Match) {
     if (loadType == 'preload') {
-        loadedMatches.preloaded = data.id
+        loadedMatches.update((v) => {
+            v.preloaded = data.id
+            return v
+        })
     } else {
-        loadedMatches.loaded = data.id
+        loadedMatches.update((v) => {
+            v.loaded = data.id
+            return v
+        })
     }
     if (loadTrack == loadType) {
         updateStoredMatch(data)
     }
 }
 
-export const loadedMatches = {
+export function fetchMatch(id: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+        socket.emit('getMatch', id, (data: Match) => {
+            if (data) {
+                resolve()
+                updateStoredMatch(data)
+            } else {
+                reject()
+            }
+        })
+    })
+}
+
+export const loadedMatches = gettableStore({
     preloaded: '',
     loaded: ''
-}
+})
+export const preloadedMatch = createPropertyStore(loadedMatches, 'preloaded')
+export const loadedMatch = createPropertyStore(loadedMatches, 'loaded')
 
 function createTeamStores(team: Team): SocketWritableOf<Team> {
     return {

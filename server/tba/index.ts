@@ -1,7 +1,7 @@
 import { MatchID } from '~common/types'
 import { getMatchTitle } from '~common/utils'
 import {
-    calculateScoreBreakdown,
+    calculateBreakdownPoints,
     getScores,
     sumBreakdownPoints
 } from '~common/utils/scores'
@@ -195,7 +195,7 @@ function matchToTBAMatch(match: Match): TbaMatch {
         score_breakdown: Match_AllianceResults
         rp: number
     }): Partial<TbaScoreBreakdown> => {
-        const pointsBreakdown = calculateScoreBreakdown(score_breakdown)
+        const pointsBreakdown = calculateBreakdownPoints(score_breakdown)
         const totalPoints = sumBreakdownPoints(pointsBreakdown)
         return {
             rp,

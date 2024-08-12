@@ -34,6 +34,9 @@ enum SocketAccess {
 
 const handleMatchEnd = async () => {
     const match = await matchmanager.getLoadedMatch()
+    if (match == null) {
+        return
+    }
     if (
         getMatchPeriod((Date.now() - match.startTime) / 1000) ==
             MatchPeriod.POSTMATCH &&
@@ -113,11 +116,17 @@ async function setupSocket(
     socket: Socket<ClientToServerEvents, ServerToClientEvents>
 ) {
     logger.info(
-        'new connection from',
-        socket.id,
-        socket.handshake.address,
-        socket.handshake.auth.role ?? 'default'
+        'new connection from ' +
+            socket.id +
+            ' ' +
+            socket.handshake.address +
+            ' ' +
+            socket.handshake.auth.role ?? 'default'
     )
+
+    socket.onAny((event, ...args) => {
+        logger.debug(['received', event, ...args].join(' '))
+    })
 
     // Send initial data
     socket.emit('loadMatch', await matchmanager.getLoadedMatch())
@@ -283,6 +292,12 @@ async function setupSocket(
         io.emit('event', {
             atLunch: eventState.atLunch,
             lunchReturnTime: eventState.lunchReturnTime
+        })
+    })
+
+    socket.on('getMatch', (id, cb) => {
+        prisma.match.findUnique({ where: { id } }).then((match) => {
+            cb(match)
         })
     })
 

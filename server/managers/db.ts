@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { createLogger } from '~/logger'
 
-const logger = createLogger('db')
+const logger = createLogger('db', { level: 'info' })
 export const prisma = new PrismaClient({
     log: [
         {
@@ -26,7 +26,7 @@ export default prisma
 
 if (process.env.NODE_ENV != 'prod') {
     prisma.$on('query', (e) => {
-        logger.trace({ name: 'prisma' }, e.query)
+        // logger.trace({ name: 'prisma' }, e.query)
     })
 }
 prisma.$on('info', (e) => {

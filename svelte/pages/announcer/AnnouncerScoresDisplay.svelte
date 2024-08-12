@@ -1,5 +1,5 @@
 <script>
-    import ScoreSummary from "../../lib/ScoreSummary.svelte";
+    import ScoreSummary from "../../lib/components/ScoreSummary.svelte";
     import matchData from "~/lib/store"
     import {MatchState} from "~common/types/index.js";
 

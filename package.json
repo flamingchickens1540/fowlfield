@@ -7,8 +7,7 @@
         "frontend:check": "tsc --noEmit --skipLibCheck --project svelte/tsconfig.json",
         "backend:build": "tsx ./build-server.ts",
         "backend:dev": "tsx --tsconfig server/tsconfig.json ./server/index.ts",
-        "backend:check": "tsc --noEmit --skipLibCheck --project server/tsconfig.json",
-        "backend:checkfull": "tsc --noEmit --project server/tsconfig.json"
+        "backend:check": "tsc --noEmit --skipLibCheck --project server/tsconfig.json"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^3.1.1",

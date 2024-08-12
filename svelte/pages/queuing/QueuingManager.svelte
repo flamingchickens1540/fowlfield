@@ -3,7 +3,7 @@
     import {derived, type Readable} from "svelte/store";
     import type {MatchData} from "~common/types";
     import QueueItem from "./components/QueueItem.svelte";
-    import TeamDatalistEntry from "../../lib/TeamDatalistEntry.svelte";
+    import TeamDatalistEntry from "../../lib/components/TeamDatalistEntry.svelte";
     import socket from "~//lib/socket";
 
     const {loaded: loadedMatch, preloaded: preloadedMatch} = loadedMatches

@@ -9,7 +9,7 @@ export type PointsBreakdown = {
     foulPoints: number
 }
 
-export function calculateScoreBreakdown(
+export function calculateBreakdownPoints(
     breakdown: Match_AllianceResults
 ): PointsBreakdown {
     if (breakdown == null) {
@@ -71,7 +71,7 @@ export function sumBreakdownPoints(c: PointsBreakdown) {
 }
 
 export function calculatePointsTotal(c: Match_AllianceResults) {
-    return sumBreakdownPoints(calculateScoreBreakdown(c))
+    return sumBreakdownPoints(calculateBreakdownPoints(c))
 }
 
 export function getWinner(match: Match): 'red' | 'blue' | 'tie' {
@@ -85,8 +85,8 @@ export function getWinner(match: Match): 'red' | 'blue' | 'tie' {
 }
 
 export function getScores(match: Match) {
-    const redBreakdown = calculateScoreBreakdown(match.red_scores)
-    const blueBreakdown = calculateScoreBreakdown(match.blue_scores)
+    const redBreakdown = calculateBreakdownPoints(match.red_scores)
+    const blueBreakdown = calculateBreakdownPoints(match.blue_scores)
     const redScore = sumBreakdownPoints(redBreakdown)
     const blueScore = sumBreakdownPoints(blueBreakdown)
     const winner = getWinner(match)

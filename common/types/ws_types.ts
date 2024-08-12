@@ -48,4 +48,6 @@ export interface ClientToServerEvents {
 
     nextMatch(type: string): void
     commitAlliances(cb: (ok: boolean) => void): void
+
+    getMatch(id: string, cb: (match: Match) => void): void
 }

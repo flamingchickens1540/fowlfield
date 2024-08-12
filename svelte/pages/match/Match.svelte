@@ -2,9 +2,9 @@
 
     import matchData, {
         abortMatch,
-        commitMatch,
+        commitMatch, fetchMatch, loadedMatch,
         loadedMatches,
-        matchList,
+        matchList, preloadedMatch,
         remainingTimeInPeriod,
         setPreloadingTrack,
         startMatch,
@@ -18,13 +18,13 @@
     import configureAudio from '~/lib/audio'
     import { statusColors, statusMessages } from '~/lib/consts'
 
-    import TeamDatalistEntry from '~/lib/TeamDatalistEntry.svelte'
+    import TeamDatalistEntry from '~/lib/components/TeamDatalistEntry.svelte'
     import TeamEntry from './components/TeamEntry.svelte'
 
     import Sortable, { Swap } from 'sortablejs'
-    import ScoreSummary from '~/lib/ScoreSummary.svelte'
-    import { Match, Match_State } from '@prisma/client'
-    import { RobotPosition } from '~common/types'
+    import ScoreSummary from '~/lib/components/ScoreSummary.svelte'
+    import type { Match, Match_State } from '@prisma/client'
+    import type { RobotPosition } from '~common/types'
 
     Sortable.mount(new Swap())
 
@@ -32,7 +32,6 @@
 
     configureAudio()
 
-    const { loaded: loadedMatch, preloaded: preloadedMatch } = loadedMatches
 
     const buttonData: { [key in Match_State]: { text: string; color: string; cb: () => void } } = {
         not_started: { text: 'Start', color: '#02ae02', cb: startMatch },
@@ -46,7 +45,7 @@
     }
 
     function transitionLoadState() {
-        if (preloadedMatch != $matchid) {
+        if ($preloadedMatch != $matchid) {
             socket.emit('preloadMatch', $matchid)
         } else {
             socket.emit('preloadMatch', $matchid)
@@ -62,8 +61,8 @@
         }
     }
     function getLoadButtonByMatch(id:string) {
-        if (id == loadedMatches.loaded) return getLoadButton("loaded")
-        if (id == loadedMatches.preloaded) return getLoadButton("preloaded")
+        if (id == $loadedMatch) return getLoadButton("loaded")
+        if (id == $preloadedMatch) return getLoadButton("preloaded")
         return getLoadButton("none")
     }
     function getLoadButton(state:"loaded"|"preloaded"|"none") {
@@ -71,19 +70,20 @@
         if (state == "preloaded") return { text: 'Load', buttoncolor: '#b400b1', itemstyle: 'background-color:#683900' }
         return { text: 'Preload', buttoncolor: '#a56600', itemstyle: '' }
     }
-
+    $: $preloadedMatch, console.log('PRELOADED', $preloadedMatch)
+    $: $loadedMatch, console.log('LOADED', $loadedMatch)
     const matchLoadState = writable(getLoadButton("none"))
     $: $matchLoadState, console.log('STATE', $matchLoadState)
-    socket.on("preloadMatch", (match) => {
-        if (match.id == $matchid) {
+    $: {
+        console.log('MATCHID', $matchid)
+        if ($preloadedMatch == $matchid) {
             matchLoadState.set(getLoadButton("preloaded"))
-        }
-    })
-    socket.on("loadMatch", (match) => {
-        if (match.id == $matchid) {
+        } else if ($loadedMatch == $matchid) {
             matchLoadState.set(getLoadButton("loaded"))
+        } else {
+            matchLoadState.set(getLoadButton("none"))
         }
-    })
+    }
 
     let showTeams = false
     let teamlistunsub: Unsubscriber
@@ -167,9 +167,9 @@
         <h2>Matches</h2>
         <div id="matchGrid">
             {#each $matches as match, i}
-                <div class="matchEntry" style={getLoadButtonByMatch(match.id).itemstyle}>
+                <div class="matchEntry" style={getLoadButton(match.id == $loadedMatch ? "loaded" : match.id == $preloadedMatch ? "preloaded" : match.id == $loadedMatch ? "loaded" : "none").itemstyle}>
                     <span>{match.id}</span>
-                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => ($matchid = match.id)}> Open </button>
+                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => (fetchMatch(match.id))}> Open </button>
                     <div class="statustext" style="background-color:{statusColors[match.state]}">{statusMessages[match.state]}</div>
                 </div>
             {/each}

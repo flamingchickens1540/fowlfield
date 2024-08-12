@@ -2,6 +2,7 @@ import * as http from 'http'
 import { createLogger } from '~/logger'
 import startSockets from './sockets'
 import express from 'express'
+import { loadMatches } from '~/managers/matchmanager'
 
 const rootLogger = createLogger('root')
 
@@ -13,7 +14,7 @@ export const isProduction = process.env.NODE_ENV === 'production'
 // await DBSettings.getInstance()
 // await matchmanager.loadMatches()
 // await teammanager.loadTeams()
-
+await loadMatches()
 startSockets(server)
 // await tba.reset("match") // TODO: Remove this when teams are finalized
 // await tba.updateEventTeams()

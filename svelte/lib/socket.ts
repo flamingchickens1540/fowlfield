@@ -31,7 +31,9 @@ socket.on('login', ({ success, token }) => {
         socket.emit('login', prompt('Enter password')!)
     }
 })
-
+socket.onAny((event, ...args) => {
+    console.debug('received', event, ...args)
+})
 socket.on('match', updateStoredMatch)
 socket.on('matches', updateMatchList)
 socket.on('team', updateStoredTeam)
@@ -39,6 +41,7 @@ socket.on('teams', updateTeamList)
 socket.on('abortMatch', updateStoredMatch)
 socket.on('preloadMatch', (match) => updateLoadedMatch('preload', match))
 socket.on('loadMatch', (match) => updateLoadedMatch('load', match))
+
 // socket.on("event", updateEventInfo)
 // socket.on("matchData", (data) => {
 //     updateMatchData(data)
