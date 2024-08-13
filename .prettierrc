@@ -12,7 +12,7 @@
     "svelteBracketNewLine": false,
     "svelteAllowShorthand": true,
     "svelteIndentScriptAndStyle": true,
-
+    "printWidth": 180,
     "overrides": [
         {
             "files": ["**/*.svelte", "**/*.html", "**/*.json"],

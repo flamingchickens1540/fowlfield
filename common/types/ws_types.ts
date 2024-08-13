@@ -1,4 +1,4 @@
-import { EventInfo, PartialMatch, PartialTeam } from '.'
+import { EventInfo, MatchSound, PartialMatch, PartialTeam } from '.'
 import { Match, Team } from '@prisma/client'
 
 export interface ServerToClientEvents {
@@ -16,9 +16,10 @@ export interface ServerToClientEvents {
      * Update displays that are used during and after the match
      */
     loadMatch(data: Match): void
-    abortMatch(data: Match): void
+    abortMatch(): void
 
     alert(message: string): void
+    playSound(sound: MatchSound): void
 
     login(payload: { success: boolean; token?: string }): void
 }

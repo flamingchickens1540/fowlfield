@@ -229,7 +229,8 @@ async function setupSocket(
                 state: 'not_started'
             }
         })
-        io.emit('abortMatch', match)
+        io.emit('abortMatch')
+        io.emit('match', match)
     })
 
     socket.on('commitMatch', async (id) => {

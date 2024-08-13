@@ -39,14 +39,6 @@ enum Card {
   red
 }
 
-type Match_Cards {
-  red1  Card
-  red2  Card
-  red3  Card
-  blue1 Card
-  blue2 Card
-  blue3 Card
-}
 
 model Match {
   id          String                @id @map("_id")

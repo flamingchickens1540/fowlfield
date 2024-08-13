@@ -97,8 +97,10 @@ export async function buildRankings(): Promise<RankingEntry[]> {
 }
 
 export async function updateTeam(team: PartialTeam) {
-    return await prisma.team.update({
-        where: { id: team.id },
+    const id = team.id
+    delete team.id
+    return prisma.team.update({
+        where: { id },
         data: team
     })
 }

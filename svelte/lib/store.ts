@@ -1,30 +1,27 @@
-import {
-    getElapsedTimeInPeriod,
-    getMatchPeriod,
-    getRemainingTimeInDisplayPeriod,
-    getRemainingTimeInPeriod
-} from '~common/utils/match_timer'
+import { getElapsedTimeInPeriod, getMatchPeriod, getRemainingTimeInDisplayPeriod, getRemainingTimeInPeriod } from '~common/utils/match_timer'
 import { calculatePointsTotal } from '~common/utils/scores'
 import socket from '~/lib/socket'
 import { derived, type Readable, writable, type Writable } from 'svelte/store'
 import {
+    createFowlEventStore,
     createFowlMatchStore,
     createFowlTeamStore,
     createPropertyStore,
+    createSocketStore,
     gettableStore,
     SocketWritable,
     SocketWritableOf
 } from './socketStore'
 import { Match, Team } from '@prisma/client'
+import { getBlankEvent } from '~common/utils/blanks'
+import { EventInfo } from '~common/types'
 
 let serverTimeOffset: number = 0
 let loadTrack: 'load' | 'preload' = 'load'
 
 export function setPreloadingTrack(shouldPreload: boolean) {
     loadTrack = shouldPreload ? 'preload' : 'load'
-    matchDataPrivate.id.set(
-        shouldPreload ? preloadedMatch.get() : loadedMatch.get()
-    )
+    matchDataPrivate.id.set(shouldPreload ? preloadedMatch.get() : loadedMatch.get())
 }
 
 const matchDataPrivate: SocketWritableOf<Match> = {
@@ -48,10 +45,7 @@ export const matchTime = derived(
     matchDataPrivate.startTime,
     ($time, set) => {
         const interval = setInterval(() => {
-            set(
-                ($time == null ? 0 : Date.now() - serverTimeOffset - $time) /
-                    1000
-            )
+            set(($time == null ? 0 : Date.now() - serverTimeOffset - $time) / 1000)
         }, 50) // TODO: tune time if needed
         return () => clearInterval(interval)
     },
@@ -65,9 +59,7 @@ export const remainingTimeInPeriod = derived(matchTime, ($time) => {
 export const remainingTimeInDisplayPeriod = derived(matchTime, ($time) => {
     return getRemainingTimeInDisplayPeriod($time)
 })
-export const elapsedTimeInPeriod = derived(matchTime, ($time) =>
-    getElapsedTimeInPeriod($time)
-)
+export const elapsedTimeInPeriod = derived(matchTime, ($time) => getElapsedTimeInPeriod($time))
 
 export function isMatchLoaded(match: string) {
     return match == loadedMatch.get()
@@ -78,15 +70,12 @@ export function isMatchPreloaded(match: string) {
 }
 
 export const matchList: Writable<{ [key: string]: Match }> = writable({})
-export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> =
-    writable({})
+export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> = writable({})
 
-// export const eventData = new SocketDataStore<EventInfo>({
-//     lunchReturnTime: 0,
-//     atLunch: false
-// }, (data) => {
-//     socket.emit("partialEvent", data)
-// })
+export const eventData = {
+    atLunch: createFowlEventStore('atLunch'),
+    lunchReturnTime: createFowlEventStore('lunchReturnTime')
+}
 
 export function updateTimeOffset(serverTime: number) {
     serverTimeOffset = Date.now() - serverTime
@@ -171,9 +160,7 @@ export function updateStoredTeam(data: Team) {
             list[data.id] = createTeamStores(data)
         } else {
             Object.entries(list[data.id]).forEach(([key, store]) => {
-                ;(store as SocketWritable<unknown>).setLocal(
-                    data[key as keyof Team]
-                )
+                ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Team])
             })
         }
         return list
@@ -191,6 +178,12 @@ export function updateStoredMatch(data: Match) {
     })
     Object.entries(matchDataPrivate).forEach(([key, store]) => {
         ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
+    })
+}
+
+export function updateStoredEventinfo(data: EventInfo) {
+    Object.entries(eventData).forEach(([key, store]) => {
+        ;(store as SocketWritable<unknown>).setLocal(data[key as keyof EventInfo])
     })
 }
 

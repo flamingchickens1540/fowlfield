@@ -43,3 +43,10 @@ export type RankingEntry = {
     team: number
     match_stats: TeamMatchStats
 }
+
+export enum MatchSound {
+    START = 'start',
+    TELEOP = 'teleop',
+    END = 'end',
+    ABORT = 'abort'
+}

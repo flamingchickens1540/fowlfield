@@ -4,12 +4,16 @@ import { setCookie } from 'typescript-cookie'
 import {
     updateLoadedMatch,
     updateMatchList,
+    updateStoredEventinfo,
     updateStoredMatch,
     updateStoredTeam,
     updateTeamList,
     updateTimeOffset
 } from '~/lib/store'
 import type { ClientToServerEvents, ServerToClientEvents } from '~common/types'
+
+const disconnectedBackgroundColor = '#463500'
+let isConnected = true
 
 const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(
     window.location.protocol + '//' + window.location.hostname + ':3000',
@@ -28,45 +32,42 @@ socket.on('login', ({ success, token }) => {
         localStorage.setItem('auth', token)
     }
     if (!success) {
-        socket.emit('login', prompt('Enter password')!)
+        socket.emit('login', prompt('Enter FowlField password')!)
     }
 })
+
 socket.onAny((event, ...args) => {
+    if (!isConnected) {
+        isConnected = true
+        document.body.style.backgroundColor = ''
+    }
     console.debug('received', event, ...args)
 })
 socket.on('match', updateStoredMatch)
 socket.on('matches', updateMatchList)
 socket.on('team', updateStoredTeam)
 socket.on('teams', updateTeamList)
-socket.on('abortMatch', updateStoredMatch)
 socket.on('preloadMatch', (match) => updateLoadedMatch('preload', match))
 socket.on('loadMatch', (match) => updateLoadedMatch('load', match))
 
-// socket.on("event", updateEventInfo)
-// socket.on("matchData", (data) => {
-//     updateMatchData(data)
-// })
+socket.on('event', updateStoredEventinfo)
 
-// socket.on("matchStart", (data) => {
-//     timer.startWithTime(data.matchStartTime)
-// })
-// socket.on("matchEnd", updateMatchData)
-
-socket.on('connect_error', (err) =>
-    alert('Could not connect to socket server. ' + err)
-)
+socket.on('connect_error', (err) => {
+    if (isConnected) {
+        isConnected = false
+        document.body.style.backgroundColor = disconnectedBackgroundColor
+    }
+})
 socket.on('disconnect', (reason) => {
-    if (reason == 'io server disconnect') {
-        setCookie('auth', prompt('Input your key'), {
-            expires: 365
-        })
-        window.location.reload()
-    } else {
-        alert('Disconnected from socket server')
+    console.warn("Disconnected from socket server. Reason: '" + reason + "'")
+    if (isConnected) {
+        isConnected = false
+        document.body.style.backgroundColor = disconnectedBackgroundColor
     }
 })
 
 socket.on('alert', (msg) => {
+    console.warn(msg)
     window.alert(msg)
 })
 

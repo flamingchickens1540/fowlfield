@@ -9,8 +9,21 @@ const match_start = new Audio('/assets/audio/match_start.wav')
 const match_teleop = new Audio('/assets/audio/match_teleop.wav')
 const match_endgame = new Audio('/assets/audio/match_endgame.wav')
 export default function configureAudio() {
-    socket.on('abortMatch', () => {
-        match_end.play()
+    socket.on('playSound', async (sound) => {
+        switch (sound) {
+            case 'start':
+                await match_start.play()
+                break
+            case 'teleop':
+                await match_teleop.play()
+                break
+            case 'end':
+                await match_end.play()
+                break
+            case 'abort':
+                await match_end.play()
+                break
+        }
     })
     matchPeriod.subscribe((period) => {
         const match_time = get(matchTime)
@@ -33,8 +46,10 @@ export default function configureAudio() {
             case MatchPeriod.TELEOP:
                 match_teleop.play()
                 setTimeout(() => {
-                    console.log('Playing endgame sound')
-                    match_endgame.play()
+                    if (get(matchPeriod) == MatchPeriod.TELEOP) {
+                        console.log('Playing endgame sound')
+                        match_endgame.play()
+                    }
                 }, 120 * 1000)
                 break
             case MatchPeriod.POSTMATCH:

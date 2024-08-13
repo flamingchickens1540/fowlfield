@@ -1,4 +1,5 @@
 import { Match, Match_AllianceResults, Team } from '@prisma/client'
+import { EventInfo } from '../types'
 
 export function getBlankScoreBreakdown(): Match_AllianceResults {
     return {
@@ -26,6 +27,13 @@ export function getBlankTeam(): Required<Team> {
         team_name: '',
         robot_name: '',
         has_card: false
+    }
+}
+
+export function getBlankEvent(): Required<EventInfo> {
+    return {
+        lunchReturnTime: 0,
+        atLunch: false
     }
 }
 export function getBlankMatch(): Required<Match> {
