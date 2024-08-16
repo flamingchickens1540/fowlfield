@@ -8,3 +8,4 @@
 /dist
 /build
 prisma/*.db
+.env

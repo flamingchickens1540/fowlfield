@@ -10,7 +10,7 @@ generator client {
 
 datasource db {
   provider = "mongodb"
-  url      = "mongodb://127.0.0.1:27017/fowlfield?directConnection=true"
+  url      = env("DATABASE_URL")
 }
 
 enum Match_State {
@@ -38,7 +38,6 @@ enum Card {
   yellow
   red
 }
-
 
 model Match {
   id          String                @id @map("_id")

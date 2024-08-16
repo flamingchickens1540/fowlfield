@@ -1,11 +1,10 @@
 import { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { context } from 'esbuild'
-import { spawn } from 'child_process'
+import { build } from 'esbuild'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-const ctx = await context({
+await build({
     entryPoints: ['server/index.ts'],
     outfile: 'build/server.js',
     bundle: true,
@@ -18,18 +17,3 @@ const ctx = await context({
 
     absWorkingDir: __dirname
 })
-
-const mode = process.argv[2]
-
-if (mode == 'watch') {
-    let childProccess = spawn('./node_modules/.bin/nodemon', ['index.cjs'], {
-        stdio: 'inherit',
-        cwd: __dirname,
-        shell: true
-    })
-    await ctx.watch()
-    console.log('watching')
-} else {
-    await ctx.rebuild()
-    await ctx.dispose()
-}
