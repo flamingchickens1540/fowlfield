@@ -1,13 +1,16 @@
 <script lang="ts">
-    import matchData, { teamList,loadedMatches } from "~/lib/store";
+    import matchData, { teamList,loadedMatch } from "~/lib/store";
     import writableDerived from "svelte-writable-derived";
     import type { Writable } from "svelte/store";
+    import type { SocketWritable } from '~/lib/socketStore'
     
-    export let store:Writable<number>;
-    
+    export let store:SocketWritable<number>;
+
+    store.setWritable()
+
     const {id} = matchData
 
-    $: currentMatch = $id == loadedMatches.loaded
+    $: currentMatch = $id == $loadedMatch
 
     const prettyteamnum = writableDerived(store,
     (storevalue) => {

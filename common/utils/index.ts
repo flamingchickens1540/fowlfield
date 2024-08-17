@@ -55,3 +55,16 @@ export function getMatchTitleLong(match: Match): string {
     }
     return `${elimInfo.isUpper ? 'Upper' : 'Lower'} Bracket Round ${elimInfo.elimRound} - Match ${elimInfo.elimInstance}`
 }
+
+export function safeParseInt(value: number): number
+export function safeParseInt(value: string | null | undefined): number | undefined
+export function safeParseInt(value: number | string | null | undefined): number | undefined {
+    if (value == null) {
+        return
+    }
+    if (typeof value == 'string') {
+        const parsed = parseInt(value)
+        return isNaN(parsed) ? undefined : parsed
+    }
+    return value
+}

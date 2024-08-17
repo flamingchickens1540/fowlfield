@@ -2,7 +2,9 @@
     import matchData, {teamList} from "~/lib/store";
     import writableDerived from "svelte-writable-derived";
     import {derived, writable, type Writable} from "svelte/store";
-    import {MatchState} from "~common/types";
+    import { onMount } from 'svelte'
+    import Sortable from 'sortablejs'
+    import type { RobotPosition } from '~common/types'
 
 
     export let store:Writable<number>;
@@ -10,17 +12,17 @@
 
     let hasInitialized = false
     let prettyteamnum = writable("")
-    const disableButton = derived(matchData.state, state => state !== MatchState.PENDING)
+    const disableButton = derived(matchData.state, state => state !== "not_started")
     teamList.subscribe((v) => {
         if (!hasInitialized && Object.keys(v).length > 0) {
             prettyteamnum = writableDerived(store,
                 (storevalue) => {
-                    return $teamList[storevalue]?.displaynum.get()
+                    return $teamList[storevalue]?.display_number.get()
                 },
                 (value, storevalue) => {
                     if (value == "") {return 0}
-                    const team = Object.values($teamList).find((team) => team.displaynum.get() == value)
-                    if (team != null) {return team.id}
+                    const team = Object.values($teamList).find((team) => team.display_number.get() == value)
+                    if (team) {return team.id.get()}
 
                     return storevalue;
                 })

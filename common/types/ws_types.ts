@@ -20,7 +20,6 @@ export interface ServerToClientEvents {
 
     alert(message: string): void
     playSound(sound: MatchSound): void
-
     login(payload: { success: boolean; token?: string }): void
 }
 

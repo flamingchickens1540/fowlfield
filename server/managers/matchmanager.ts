@@ -34,7 +34,9 @@ export function getMatch(id: string) {
 }
 
 export async function updateMatch(data: PartialMatch) {
-    return prisma.match.update({ where: { id: data.id }, data })
+    const { id } = data
+    delete data.id
+    return prisma.match.update({ where: { id }, data })
 }
 
 export async function getLoadedMatch(): Promise<Match | undefined> {
