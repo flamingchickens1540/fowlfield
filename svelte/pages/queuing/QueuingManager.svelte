@@ -1,24 +1,17 @@
 <script lang=ts>
-    import matchData, { loadedMatch, matchList, preloadedMatch, teamList } from '~/lib/store'
+    import matchData, { fetchMatch, loadedMatch, matchList, preloadedMatch, teamList } from '~/lib/store'
     import { derived, type Readable } from 'svelte/store'
-
-    import TeamDatalistEntry from '../../lib/components/TeamDatalistEntry.svelte'
-    import socket, { onLoaded } from '~//lib/socket'
-    import type { Match, Team } from '@prisma/client'
-    import { onMount } from 'svelte'
-    import Sortable, { Swap } from 'sortablejs'
-    import type { RobotPosition } from '~common/types'
-    import { safeParseInt } from '~common/utils'
-    import type { SocketWritable, SocketWritableOf } from '~/lib/socketStore'
+    import socket from '~//lib/socket'
+    import type { Match } from '@prisma/client'
+    import { prettyMatchID, safeParseInt } from '~common/utils'
 
 
     const matchid = matchData.id
     const matchstate = matchData.state
     const { red1, red2, red3, blue1, blue2, blue3 } = matchData
-    const assigned = [red1, red2, red3, blue1, blue2, blue3]
     const matches: Readable<Match[]> = derived(matchList, Object.values)
     const teams = derived([teamList], ([$teamList]) => {
-        return Object.values($teamList)
+        return Object.values($teamList).sort((a, b) => a.display_number.get().localeCompare( b.display_number.get()))
     })
     function getMatchColor(id: string) {
         if ($loadedMatch == id) return 'background-color:#680066'
@@ -27,133 +20,50 @@
         return ''
     }
 
-    function setAssigned(team:number) {
-
-        const isAssigned = assigned.some((id) => id.get() == team)
-        console.log("setting assigned", team, isAssigned)
-        const elem = unsortedParent.querySelector(`[data-team="${team}"`)!
-        if (isAssigned) {
-            elem!.classList.add("assigned")
-        } else {
-            elem?.classList.remove("assigned")
-        }
-    }
-
-    function configureTeamStore(store:SocketWritable<number>, parent:HTMLElement, index:0|1|2) {
-        store.setWritable()
-        let isFirst = true
-        store.subscribe((value) => {
-            if (isFirst) setTimeout(() => document.getElementById(`team-${value}`)?.classList.add("assigned"), 50)
-            isFirst = false
-            const item = parent.children.item(index)!
-            item.setAttribute("data-team", value.toString())
-            item.innerHTML = $teamList[value]?.display_number.get() ?? "Empty"
-            parent.children.item(3)?.remove()
-        })
-    }
-
-
-
-    let setSortingEnabled: (enabled: boolean) => void = () => {}
-    onMount(() => {
-        onLoaded(() => {
-            configureTeamStore(red1, redTeamParent, 0)
-            configureTeamStore(red2, redTeamParent, 1)
-            configureTeamStore(red3, redTeamParent, 2)
-            configureTeamStore(blue1, blueTeamParent, 0)
-            configureTeamStore(blue2, blueTeamParent, 1)
-            configureTeamStore(blue3, blueTeamParent, 2)
-        })
-        Sortable.mount(new Swap());
-        function onEnd(event: Sortable.SortableEvent) {
-            console.log(event)
-            const destTeam = safeParseInt(event.swapItem?.getAttribute("data-team"))
-            const fromTeam = safeParseInt(event.item.getAttribute("data-team"))
-            const destIsAlliance = event.to.classList.contains("alliance")
-            const fromIsAlliance = event.from.classList.contains("alliance")
-            if (destIsAlliance && !fromIsAlliance) {
-                event.item.remove()
-            }
-            if (event.from.classList.contains("alliance")) {
-                const pos = event.from.getAttribute("data-alliance")!+(event.oldIndex!+1) as RobotPosition
-                matchData[pos].set(destTeam??0)
-                console.log("setting", pos, destTeam)
-            }
-
-            if (event.to.classList.contains("alliance")) {
-                const pos = event.to.getAttribute("data-alliance")!+(event.newIndex!+1) as RobotPosition
-                matchData[pos].set(fromTeam??0)
-                console.log("setting", pos, fromTeam)
-            }
-            if (fromTeam != null) setAssigned(fromTeam)
-            if (destTeam != null) setAssigned(destTeam)
-
-        }
-
-        const unassignedSortable = new Sortable(unsortedParent, {
-            draggable: '.item',
-            group: {
-                name:'teams',
-                pull: "clone",
-                put: false
-            },
-            filter: ".assigned",
-            sort: false,
-            swap: false,
-            onEnd
-        })
-        const redSortable = new Sortable(redTeamParent, {
-            draggable: '.item',
-            group: {
-                name:'teams',
-                put: (to, from) => to.el.children.length < 3 || from.el.classList.contains("alliance")
-            },
-            swap: true,
-            sort: true,
-            onEnd
-        })
-
-        const blueSortable = new Sortable(blueTeamParent, {
-            draggable: '.item',
-            group: {
-                name:'teams',
-                put: (to, from) => to.el.children.length < 3 || from.el.classList.contains("alliance")
-            },
-            swap: true,
-            sort: true,
-            onEnd
-        })
-        setSortingEnabled = (enabled) => {
-            redSortable.option('sort', enabled)
-            redSortable.option('group', {
-                name: 'teams',
-                pull: enabled,
-                put: enabled
-            })
-            blueSortable.option('sort', enabled)
-            blueSortable.option('group', {
-                name: 'teams',
-                pull: enabled,
-                put: enabled
-            })
-        }
-
+    matchData.state.subscribe((state) => {
+        red1.setWritable(state == "not_started")
+        red2.setWritable(state == "not_started")
+        red3.setWritable(state == "not_started")
+        blue1.setWritable(state == "not_started")
+        blue2.setWritable(state == "not_started")
+        blue3.setWritable(state == "not_started")
     })
 
-    $: setSortingEnabled($loadedMatch != $matchid || $matchstate == "not_started")
 
-    let redTeamParent: HTMLElement
-    let blueTeamParent: HTMLElement
-    let unsortedParent: HTMLElement
-
+    function onTeamClick(e: MouseEvent & {     currentTarget: (EventTarget & HTMLButtonElement) }) {
+        if (matchData.state.get() != "not_started") {
+            return
+        }
+        const state = e.currentTarget.getAttribute("data-state")
+        const team = safeParseInt(e.currentTarget.getAttribute("data-team"))
+        if (!team) {
+            console.warn(e.currentTarget)
+            return
+        }
+        if (state != "none") {
+            const [a, b, c] = state == "red" ? [red1, red2, red3] : [blue1, blue2, blue3]
+            if (a.get() == team) {
+                a.set(0)
+            } else if (b.get() == team) {
+                b.set(0)
+            } else if (c.get() == team) {
+                c.set(0)
+            }
+        } else {
+            const [a, b, c] = currentlyEditing == "red" ? [red1, red2, red3] : [blue1, blue2, blue3]
+            if (a.get() == 0) {
+                a.set(team)
+            } else if (b.get() == 0) {
+                b.set(team)
+            } else if (c.get() == 0) {
+                c.set(team)
+            } else {
+                return
+            }
+        }
+    }
+    let currentlyEditing:"red"|"blue" = "red"
 </script>
-
-
-<datalist id="teams">
-    {#each Object.values($teamList) as team}
-        <TeamDatalistEntry {team}></TeamDatalistEntry>
-    {/each}
-</datalist>
 
 <main>
     <div id="sidebar-l">
@@ -162,7 +72,7 @@
             {#each $matches as match,i}
                 <div class="matchEntry" style="{getMatchColor(match.id)}">
                     <span>{match.id}</span>
-                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => $matchid = match.id}>
+                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => (fetchMatch(match.id))}>
                         Open
                     </button>
                 </div>
@@ -172,29 +82,26 @@
             Match
         </button>
     </div>
-    <div id="maincontainer">
-        <h1>{$matchid}</h1>
+    <div id="maincontainer" style="{$matchstate != 'not_started' ? 'filter:brightness(60%); cursor:not-allowed' : ''}">
+        <h1>{prettyMatchID($matchid)}</h1>
         <div id="teamcontainer">
-            <div class="col alliance" style="background-color:var(--red)" data-alliance="red" bind:this={redTeamParent}>
-                <div class="item"></div>
-                <div class="item"></div>
-                <div class="item"></div>
+            <div on:click={() => currentlyEditing = "red"} class="col alliance {currentlyEditing == 'blue'?'inactive':'active'}" style="background-color:var(--red)">
+                <button disabled={currentlyEditing == "red"}>Edit Red</button>
+                <div on:click={() => $red1 = 0} class="item">{$teamList[$red1]?.display_number?.get() ?? "*"}</div>
+                <div on:click={() => $red2 = 0} class="item">{$teamList[$red2]?.display_number?.get() ?? "*"}</div>
+                <div on:click={() => $red3 = 0} class="item">{$teamList[$red3]?.display_number?.get() ?? "*"}</div>
             </div>
-            <div class="col alliance" style="background-color:var(--blue)" data-alliance="blue" bind:this={blueTeamParent}>
-                <div class="item"></div>
-                <div class="item"></div>
-                <div class="item"></div>
+            <div on:click={() => currentlyEditing = "blue"} class="col alliance {currentlyEditing == 'red'?'inactive':'active'}" style="background-color:var(--blue)">
+                <button disabled={currentlyEditing == "blue"}>Edit Blue</button>
+                <div on:click={() => $blue1 = 0} class="item">{$teamList[$blue1]?.display_number?.get() ?? "*"}</div>
+                <div on:click={() => $blue2 = 0} class="item">{$teamList[$blue2]?.display_number?.get() ?? "*"}</div>
+                <div on:click={() => $blue3 = 0} class="item">{$teamList[$blue3]?.display_number?.get() ?? "*"}</div>
             </div>
-            <div class="col" style="background-color:#afafaf" bind:this={unsortedParent}>
-                <div class="item" style="background-color:#afafafa0">
-                    Empty
-                </div>
+            <div class="unsorted" style="grid-column: auto/span 2;background-color:#afafaf">
                 {#each $teams as team}
-                    <!--{#if !assigned.some((id) => id.get() == team.id.get())}-->
-                        <div class="item" id="team-{team.id.get()}" data-team="{team.id.get()}" style="background-color:#afafaf60">
-                            {team.display_number.get()}
-                        </div>
-                    <!--{/if}-->
+                    <button class="item" on:click={onTeamClick} data-team="{team.id.get()}" data-state="{($red1==team.id.get() || $red2==team.id.get() || $red3==team.id.get()) ? 'red' : ($blue1==team.id.get() || $blue2==team.id.get() || $blue3==team.id.get()) ? 'blue' : 'none'}">
+                        {team.display_number.get()}
+                    </button>
                 {/each}
             </div>
         </div>
@@ -202,11 +109,53 @@
 </main>
 
 <style lang=scss>
-  .item {
-    background-color:#afafaf60
+  .unsorted {
+    display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-rows: repeat(auto-fill, 70px);
+    padding:10px;
+    margin-top: 20px;
+    .item {
+      font-size: 25px;
+    }
   }
-  :global(.item.assigned) {
-    background-color: #b9b202a0 !important;
+  .col {
+    display:flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    > * {
+      width:50%
+    }
+    &:not(.inactive) {
+      border:5px solid #ffffffa0;
+      box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+      z-index:10;
+    }
+    &.inactive {
+      border: 5px solid #00000000;
+      filter: brightness(0.9);
+    }
+    .item {
+      cursor: pointer;
+    }
+  }
+
+  .item[data-state="red"] {
+    background-color: #ff0000a0;
+  }
+  .item[data-state="blue"] {
+    background-color: #0000ffa0;
+  }
+  .item[data-state="none"] {
+    background-color: rgba(134, 134, 134, 0.63);
+  }
+  .item {
+    font-size: 25px;
+    padding:10px;
+    margin:5px;
+    border-radius: 10px;
+    background-color: #90909060;
   }
   #maincontainer {
     display: flex;
@@ -221,9 +170,9 @@
     display: grid;
     margin: 5px;
     width: 90%;
-    height: 70%;
-    grid-template-rows: 1fr 1fr;
-    grid-template-columns: 1fr 1fr 1fr;
+    height: 80%;
+    grid-template-rows: 1fr 3fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   main {

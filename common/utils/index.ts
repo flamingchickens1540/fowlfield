@@ -27,6 +27,20 @@ export function getCompLevel(match: Match): MatchPrefix {
     console.warn('Unknown match type!')
     return 'qm'
 }
+export function prettyMatchID(id: string) {
+    const match = id.match(/(\w{1,2})(\d+)(?:m(\d+))?/)
+    if (!match) {
+        return id
+    }
+    const [_, prefix, num] = match
+    if (prefix == 'qm') {
+        return `Quals ${num}`
+    }
+    if (prefix == 'f') {
+        return `Finals ${match[3] ?? 0}`
+    }
+    return `Playoff Match ${num}`
+}
 
 export function getMatchTitle(match: Match): string {
     const compLevel = getCompLevel(match)
