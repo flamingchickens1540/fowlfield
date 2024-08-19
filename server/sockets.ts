@@ -1,10 +1,4 @@
-import {
-    type ClientToServerEvents,
-    MatchPeriod,
-    type PartialMatch,
-    PartialTeam,
-    type ServerToClientEvents
-} from '~common/types'
+import { type ClientToServerEvents, MatchPeriod, type PartialMatch, PartialTeam, type ServerToClientEvents } from '~common/types'
 import * as http from 'http'
 import { Server, Socket } from 'socket.io'
 import config from '~common/config'
@@ -12,7 +6,7 @@ import * as matchmanager from './managers/matchmanager'
 import { getMatches } from './managers/matchmanager'
 import { getMatchPeriod } from '~common/utils/match_timer'
 import * as teammanager from './managers/teammanager'
-import { getTeams } from './managers/teammanager'
+import { buildRankings, getTeams } from './managers/teammanager'
 import { createLogger } from './logger'
 import { instrument } from '@socket.io/admin-ui'
 
@@ -37,12 +31,8 @@ const handleMatchEnd = async () => {
     if (match == null) {
         return
     }
-    if (
-        getMatchPeriod((Date.now() - match.startTime) / 1000) ==
-            MatchPeriod.POSTMATCH &&
-        match.state == 'in_progress'
-    ) {
-        match.state = 'ended'
+    if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == 'in_progress') {
+        const match = await prisma.match.update({ where: { id: eventState.loadedMatch }, data: { state: 'ended' } })
         logger.info('Transitioning match', match.id, 'to completed')
         io.emit('match', match)
     }
@@ -62,8 +52,7 @@ export default function startServer(server: http.Server) {
             auth: {
                 type: 'basic',
                 username: 'admin',
-                password:
-                    '$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS' // "changeit" encrypted with bcrypt
+                password: '$2b$10$heqvAkYMez.Va6Et2uXInOnkCT6/uQj1brkrbyG3LpopDklcq7ZOS' // "changeit" encrypted with bcrypt
             },
             mode: 'development'
         })
@@ -72,10 +61,7 @@ export default function startServer(server: http.Server) {
     io.on('connection', (socket) => {
         if (socket.handshake.auth?.token != null) {
             try {
-                const decoded = jwt.verify(
-                    socket.handshake.auth.token,
-                    config.socket.signingKey
-                )
+                const decoded = jwt.verify(socket.handshake.auth.token, config.socket.signingKey)
                 if (typeof decoded == 'object' && 'access' in decoded) {
                     socket.data.access = decoded.access
                 }
@@ -112,17 +98,8 @@ export default function startServer(server: http.Server) {
     return
 }
 
-async function setupSocket(
-    socket: Socket<ClientToServerEvents, ServerToClientEvents>
-) {
-    logger.info(
-        'new connection from ' +
-            socket.id +
-            ' ' +
-            socket.handshake.address +
-            ' ' +
-            socket.handshake.auth.role ?? 'default'
-    )
+async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
+    logger.info('new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role ?? 'default')
 
     socket.onAny((event, ...args) => {
         logger.debug(['received', event, ...args].join(' '))
@@ -137,6 +114,7 @@ async function setupSocket(
         atLunch: eventState.atLunch,
         lunchReturnTime: eventState.lunchReturnTime
     })
+    socket.emit('rankings', await buildRankings())
 
     socket.on('ping', (cb) => {
         cb(Date.now())
@@ -264,9 +242,7 @@ async function setupSocket(
     })
 
     socket.on('nextMatch', async (type) => {
-        const newmatch = await matchmanager.advanceMatches(
-            type as 'elimination' | 'qualification'
-        )
+        const newmatch = await matchmanager.advanceMatches(type as 'elimination' | 'qualification')
         if (newmatch != null) {
             io.emit('match', newmatch)
         }
@@ -275,10 +251,15 @@ async function setupSocket(
     socket.on('resetMatch', async (id) => {
         const match = await matchmanager.getMatch(id)
         logger.warn('Resetting match', id)
-        match.state = 'not_started'
-        match.startTime = 0
-        match.blue_scores = getBlankScoreBreakdown()
-        match.red_scores = getBlankScoreBreakdown()
+        await prisma.match.update({
+            where: { id: match.id },
+            data: {
+                state: 'not_started',
+                startTime: 0,
+                red_scores: getBlankScoreBreakdown(),
+                blue_scores: getBlankScoreBreakdown()
+            }
+        })
         io.emit('match', match)
     })
 

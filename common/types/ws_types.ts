@@ -1,4 +1,4 @@
-import { EventInfo, MatchSound, PartialMatch, PartialTeam } from '.'
+import { EventInfo, MatchSound, PartialMatch, PartialTeam, RankingEntry } from '.'
 import { Match, Team } from '@prisma/client'
 
 export interface ServerToClientEvents {
@@ -6,6 +6,7 @@ export interface ServerToClientEvents {
     matches(data: Record<string, Match>): void
     team(data: Team): void
     teams(data: Record<string, Team>): void
+    rankings(data: RankingEntry[]): void
     event(data: EventInfo): void
 
     /**

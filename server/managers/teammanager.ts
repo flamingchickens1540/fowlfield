@@ -1,11 +1,10 @@
 import { PartialTeam, RankingEntry, TeamMatchStats } from '~common/types'
-import {
-    getBlueAlliance,
-    getRedAlliance,
-    getScores
-} from '~common/utils/scores'
+import { getBlueAlliance, getRedAlliance, getScores } from '~common/utils/scores'
 import { Team } from '@prisma/client'
 import prisma from '~/managers/db'
+import { createLogger } from '~/logger'
+
+const logger = createLogger('teammanager')
 
 export function getTeam(id: number) {
     return prisma.team.findUnique({ where: { id } })
@@ -40,6 +39,7 @@ export async function getMatchStats(): Promise<{
     matches.forEach((match) => {
         const scores = getScores(match)
         getRedAlliance(match).forEach(({ team, card }) => {
+            if (team == 0) return
             stats[team].count++
             switch (scores.winner) {
                 case 'red':
@@ -58,6 +58,7 @@ export async function getMatchStats(): Promise<{
             stats[team].avg_score += scores.redScore
         })
         getBlueAlliance(match).forEach(({ team, card }) => {
+            if (team == 0) return
             stats[team].count++
             switch (scores.winner) {
                 case 'blue':
@@ -78,7 +79,9 @@ export async function getMatchStats(): Promise<{
     })
 
     Object.entries(stats).forEach(([team, stat]) => {
-        stat.avg_score /= stat.count
+        if (stat.count != 0) {
+            stat.avg_score /= stat.count
+        }
     })
 
     return stats
@@ -87,13 +90,14 @@ export async function getMatchStats(): Promise<{
 export async function buildRankings(): Promise<RankingEntry[]> {
     const stats = getMatchStats()
     return Object.entries(stats)
-        .map(([team, stat]) => {
+        .sort((a, b) => b[1].rp - a[1].rp)
+        .map(([team, stat], i) => {
             return {
+                rank: i + 1,
                 team: parseInt(team),
                 ...stat
             }
         })
-        .sort((a, b) => b.rp - a.rp)
 }
 
 export async function updateTeam(team: PartialTeam) {

@@ -1,18 +1,19 @@
 <script lang="ts">
-	import type { WritableTeamData } from "~//lib/socketStore";
+    import { teamList } from '~/lib/store'
+    import type { RankingEntry } from '~common/types'
 
     export let rank:number
-    export let teamData:WritableTeamData
-
-    const {displaynum,name, matchStats} = teamData
+    export let ranking:RankingEntry
+    const team = $teamList[ranking.team]
+    const {rp, win, loss, tie} = ranking.match_stats
 </script>
 
 <tr>
     <td>#{rank}</td>
-    <td>{$displaynum}</td>
-    <td>{$name}</td>
-    <td>{$matchStats.rp}</td>
-    <td>{$matchStats.win}-{$matchStats.loss}-{$matchStats.tie}</td>
+    <td>{team.display_number.get()}</td>
+    <td>{team.team_name.get()}</td>
+    <td>{rp}</td>
+    <td>{win}-{loss}-{tie}</td>
 </tr>
 
 <style lang=scss>

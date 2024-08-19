@@ -1,17 +1,17 @@
 <script lang="ts">
-	import {MatchState} from "~common/types";
-	import {matchList, teamsSorted} from "~/lib/store";
-	import {onMount} from "svelte";
-	import {derived, type Readable} from "svelte/store";
-	import TeamRanking from "./components/TeamRanking.svelte";
+	import { matchList, rankings } from '~/lib/store'
+	import { onMount } from 'svelte'
+	import { derived, type Readable } from 'svelte/store'
+	import TeamRanking from './components/TeamRanking.svelte'
 
-	let lastUpdated:Readable<string> = derived(matchList, ($matches) => {
+
+	const lastUpdated:Readable<string> = derived(matchList, ($matches) => {
 		let mostRecent = {id:"never",time:0};
 		
 		for (let match of Object.values($matches)) {
-			if (match.state == MatchState.POSTED && match.startTime > mostRecent.time) {
+			if (match.state == "posted" && (match.startTime ?? 0) > mostRecent.time) {
 				mostRecent.id = match.id;
-				mostRecent.time = match.startTime
+				mostRecent.time = match.startTime!
 			}
 		}
 		return mostRecent.id
@@ -53,8 +53,8 @@
 				</tr>
 			</thead>
 			<tbody id="tablebody" on:mouseenter={() => isHovering = true} on:mouseleave={() => isHovering = false}>
-				{#each $teamsSorted as team, i}
-					<TeamRanking rank={i + 1} teamData={team} />
+				{#each $rankings as ranking, i}
+					<TeamRanking {ranking} rank={i+1} />
 				{/each}
 				<tr id=bottom></tr>
 			</tbody>

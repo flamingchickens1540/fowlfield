@@ -20,46 +20,58 @@ export interface TbaMatch {
 }
 
 export type TbaScoreBreakdown = {
-    activationBonusAchieved: boolean
     adjustPoints: number
-    autoBridgeState: 'Level' | 'NotLevel'
-    autoChargeStationPoints: number
-    autoChargeStationRobot1: 'Docked' | 'None'
-    autoChargeStationRobot2: 'Docked' | 'None'
-    autoChargeStationRobot3: 'Docked' | 'None'
-    autoCommunity: { [key in 'B' | 'M' | 'T']: 'Cone' | 'None' | 'Cube' }
-    autoDocked: boolean
-    autoGamePieceCount: number
-    autoGamePiecePoints: number
-    autoMobilityPoints: number
+    autoAmpNoteCount: number
+    autoAmpNotePoints: number
+    autoLeavePoints: number
+    autoLineRobot1: 'Yes' | 'No'
+    autoLineRobot2: 'Yes' | 'No'
+    autoLineRobot3: 'Yes' | 'No'
     autoPoints: number
+    autoSpeakerNoteCount: number
+    autoSpeakerNotePoints: number
+    autoTotalNotePoints: number
+    coopNotePlayed: boolean
+    coopertitionBonusAchieved: boolean
     coopertitionCriteriaMet: boolean
-    coopGamePieceCount: number
-    endGameBridgeState: 'Level' | 'NotLevel'
-    endGameChargeStationPoints: number
-    endGameChargeStationRobot1: 'Docked' | 'Park' | 'None'
-    endGameChargeStationRobot2: 'Docked' | 'Park' | 'None'
-    endGameChargeStationRobot3: 'Docked' | 'Park' | 'None'
+    endGameHarmonyPoints: number
+    endGameNoteInTrapPoints: number
+    endGameOnStagePoints: number
     endGameParkPoints: number
-    extraGamePieceCount: number
+    endGameRobot1: never //I don't know what the valid values are here and I don't to look
+    endGameRobot2: never
+    endGameRobot3: never
+    endGameSpotLightBonusPoints: number
+    endGameTotalStagePoints: number
+    ensembleBonusAchieved: boolean
+    ensembleBonusOnStageRobotsThreshold: number
+    ensembleBonusStagePointsThreshold: number
     foulCount: number
     foulPoints: number
-    g405Penalty: never
-    h111Penalty: never
-    linkPoints: number
-    links: { nodes: [number, number, number]; row: 'Mid' | 'Top' | 'Bottom' }[]
-    mobilityRobot1: 'Yes' | 'No'
-    mobilityRobot2: 'Yes' | 'No'
-    mobilityRobot3: 'Yes' | 'No'
+    g206Penalty: boolean
+    g408Penalty: boolean
+    g424Penalty: boolean
+    melodyBonusAchieved: boolean
+    melodyBonusThreshold: number
+    melodyBonusThresholdCoop: number
+    melodyBonusThresholdNonCoop: number
+    micCenterStage: boolean
+    micStageLeft: boolean
+    micStageRight: boolean
     rp: number
-    sustainabilityBonusAchieved: boolean
     techFoulCount: number
-    teleopCommunity: { [key in 'B' | 'M' | 'T']: 'Cone' | 'None' | 'Cube' }
-    teleopGamePieceCount: number
-    teleopGamePiecePoints: number
+    teleopAmpNoteCount: number
+    teleopAmpNotePoints: number
     teleopPoints: number
-    totalChargeStationPoints: number
+    teleopSpeakerNoteAmplifiedCount: number
+    teleopSpeakerNoteAmplifiedPoints: number
+    teleopSpeakerNoteCount: number
+    teleopSpeakerNotePoints: number
+    teleopTotalNotePoints: number
     totalPoints: number
+    trapCenterStage: boolean
+    trapStageLeft: boolean
+    trapStageRight: boolean
 }
 
 export class TbaAlliance {

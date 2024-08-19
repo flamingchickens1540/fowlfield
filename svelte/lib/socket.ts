@@ -1,7 +1,6 @@
 import { io, type Socket } from 'socket.io-client'
-import { setCookie } from 'typescript-cookie'
 
-import { updateLoadedMatch, updateMatchList, updateStoredEventinfo, updateStoredMatch, updateStoredTeam, updateTeamList, updateTimeOffset } from '~/lib/store'
+import { updateLoadedMatch, updateMatchList, updateRankings, updateStoredEventinfo, updateStoredMatch, updateStoredTeam, updateTeamList, updateTimeOffset } from '~/lib/store'
 import type { ClientToServerEvents, ServerToClientEvents } from '~common/types'
 
 const disconnectedBackgroundColor = '#463500'
@@ -49,6 +48,8 @@ socket.on('preloadMatch', (match) => {
 socket.on('loadMatch', (match) => {
     updateLoadedMatch('load', match)
 })
+
+socket.on('rankings', updateRankings)
 
 socket.on('event', updateStoredEventinfo)
 

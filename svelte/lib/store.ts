@@ -2,19 +2,9 @@ import { getElapsedTimeInPeriod, getMatchPeriod, getRemainingTimeInDisplayPeriod
 import { calculatePointsTotal } from '~common/utils/scores'
 import socket from '~/lib/socket'
 import { derived, type Readable, writable, type Writable } from 'svelte/store'
-import {
-    createFowlEventStore,
-    createFowlMatchStore,
-    createFowlTeamStore,
-    createPropertyStore,
-    createSocketStore,
-    gettableStore,
-    SocketWritable,
-    SocketWritableOf
-} from './socketStore'
+import { createFowlEventStore, createFowlMatchStore, createFowlTeamStore, createPropertyStore, gettableStore, SocketWritable, SocketWritableOf } from './socketStore'
 import { Match, Team } from '@prisma/client'
-import { getBlankEvent } from '~common/utils/blanks'
-import { EventInfo } from '~common/types'
+import { EventInfo, RankingEntry } from '~common/types'
 
 let serverTimeOffset: number = 0
 let loadTrack: 'load' | 'preload' = 'load'
@@ -185,6 +175,11 @@ export function updateStoredEventinfo(data: EventInfo) {
     Object.entries(eventData).forEach(([key, store]) => {
         ;(store as SocketWritable<unknown>).setLocal(data[key as keyof EventInfo])
     })
+}
+
+export const rankings = writable<RankingEntry[]>([])
+export function updateRankings(data: RankingEntry[]) {
+    rankings.set(data)
 }
 
 export const matchData: SocketWritableOf<Match> & {
