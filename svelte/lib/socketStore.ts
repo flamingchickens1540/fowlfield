@@ -1,9 +1,9 @@
 import type { Invalidator, Readable, Subscriber, Unsubscriber, Updater, Writable } from 'svelte/store'
-import { get, writable } from 'svelte/store'
+import { writable } from 'svelte/store'
 
 import type { ClientToServerEvents, EventInfo } from '~common/types'
 import socket from '~/lib/socket'
-import matchData, { eventData } from '~/lib/store'
+import matchData from '~/lib/store'
 import { Match, Team } from '@prisma/client'
 import writableDerived from 'svelte-writable-derived'
 import { getBlankEvent, getBlankMatch } from '~common/utils/blanks'
@@ -45,7 +45,7 @@ export function gettableStore<T>(initialValue: T): WritableGettableStore<T> {
 export type SocketWritable<V> = WritableGettableStore<V> & {
     setLocal(value: V): void
     subscribeLocal(run: Subscriber<V>, invalidate?: ((value?: V | undefined) => void) | undefined): Unsubscriber
-    setWritable(isWritable?: boolean): void
+    setWritable(isWritable?: boolean): SocketWritable<V>
     getProperty<K extends keyof V>(key: K): WritableGettableStore<V[K]>
 }
 export type SocketWritableOf<T> = { [key in keyof T]: SocketWritable<T[key]> }
@@ -130,6 +130,7 @@ export function createSocketStore<Event extends keyof ClientToServerEvents, P ex
 
         setWritable(isWritable: boolean = true) {
             isStoreWritable = isWritable
+            return this
         },
 
         set(value: V) {
