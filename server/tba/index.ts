@@ -117,6 +117,14 @@ export async function reset(...fields: ('alliance' | 'team' | 'match' | 'ranking
         )
     if (fields.includes('ranking')) await post('rankings/update', { breakdowns: [], rankings: [] })
 }
+
+export async function removeMatches(...ids: MatchID[]) {
+    await post(
+        'matches/delete',
+        ids
+    )
+}
+
 export async function updateRankings() {
     const rankings = await buildRankings()
     const tba_rankings: TbaRanking[] = rankings.map((ranking, index) => ({

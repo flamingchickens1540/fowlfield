@@ -12,7 +12,6 @@ import { instrument } from '@socket.io/admin-ui'
 
 import * as tba from './tba'
 import { getBlankScoreBreakdown } from '~common/utils/blanks'
-import { isProduction } from '~/index'
 import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
@@ -46,7 +45,7 @@ export default function startServer(server: http.Server) {
         }
     })
 
-    if (!isProduction) {
+    if (process.env.NODE_ENV !== 'production') {
         logger.info('starting admin server')
         instrument(io, {
             auth: {

@@ -8,7 +8,6 @@ const rootLogger = createLogger('root')
 
 const app = express()
 const server = http.createServer(app)
-export const isProduction = process.env.NODE_ENV === 'production'
 
 // await db.connect()
 // await DBSettings.getInstance()

@@ -30,7 +30,7 @@ export interface ExtendedTeam extends Team {
     matchStats: TeamMatchStats
 }
 
-export type MatchID = `${MatchPrefix}${number}m${number}`
+export type MatchID = `qm${number}`|`${MatchPrefix}${number}m${number}`
 export type MatchPrefix = 'qm' | 'qf' | 'sf' | 'f'
 
 export type RankingEntry = {
