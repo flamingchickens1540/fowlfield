@@ -40,7 +40,7 @@ enum Card {
 }
 
 model Match {
-  id          String                @id @map("_id")
+  id          String          @id @map("_id")
   stage_index Int
   type        Match_Type
   elim_info   Match_ElimInfo?
@@ -52,34 +52,38 @@ model Match {
   blue1       Int
   blue2       Int
   blue3       Int
-  red_scores  Match_AllianceResults
-  blue_scores Match_AllianceResults
+  scores      Match_Results
 
   @@unique([stage_index, type])
 }
 
+type Tote {
+  red_balloons  Int // The number of red balloons in the tote
+  blue_balloons Int // The number of blue balloons in the tote
+  bunnies       Int // The number of bunnies in the tote at the end of auto
+}
+
+type Match_Results {
+  red          Match_AllianceResults
+  blue         Match_AllianceResults
+  totes        Tote[]
+  fouls        Foul[]
+  corral_empty Boolean
+}
+
 type Match_AllianceResults {
-  card_robot1               Card
-  card_robot2               Card
-  card_robot3               Card
-  auto_bunnies              Int
-  final_bunnies             Int
-  auto_taxi_bonus_robot1    Boolean
-  auto_taxi_bonus_robot2    Boolean
-  auto_taxi_bonus_robot3    Boolean
-  target_hits_robot1        Int
-  target_hits_robot2        Int
-  target_hits_robot3        Int
-  endgame_park_bonus_robot1 Boolean
-  endgame_park_bonus_robot2 Boolean
-  endgame_park_bonus_robot3 Boolean
-  fouls                     Foul[]
+  card_robot1   Card // The card for the first robot on the alliance
+  card_robot2   Card // The card for the second robot on the alliance
+  card_robot3   Card // The card for the third robot on the alliance
+  zone_bunnies  Int // The number of bunnies in the alliance's low zone at the end of the match
+  zone_balloons Int // The number of balloons in the alliance's low zone at the end of the match
 }
 
 type Foul {
-  timestamp   DateTime
-  team_number Int
-  foul_points Int
+  isAgainstRed Boolean // Whether the foul is against the red alliance
+  timestamp    DateTime // The time the foul was committed
+  team_number  Int // The team that committed the foul
+  foul_points  Int // The number of points the foul is worth
 }
 
 model Team {

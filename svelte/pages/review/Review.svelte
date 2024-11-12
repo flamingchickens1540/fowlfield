@@ -1,11 +1,11 @@
 <script lang="ts">
-	import matchData from "~/lib/store";
-	import Foul from "./components/Foul.svelte";
-	import CustomFoul from "./components/CustomFoul.svelte";
-	import {calculatePointsTotal, calculateBreakdownPoints} from "~common/utils/scores";
-	import Card from "./components/Card.svelte";
+    import matchData from '~/lib/store'
+    import Foul from './components/Foul.svelte'
+    import CustomFoul from './components/CustomFoul.svelte'
+    import { calculatePointsBreakdown, calculatePointsTotal } from '~common/utils/scores'
+    import Card from './components/Card.svelte'
 
-	const { redScoreBreakdown, blueScoreBreakdown } = matchData;
+    const { redScoreBreakdown, blueScoreBreakdown } = matchData;
 </script>
 
 <main>
@@ -52,7 +52,7 @@
 	</div>
 	<div class="reviewcontainer">
 		<div>
-			<h2>Fouls from Red ({calculateBreakdownPoints($blueScoreBreakdown).foulPoints}pts)</h2>
+			<h2>Fouls from Red ({calculatePointsBreakdown($blueScoreBreakdown).foulPoints}pts)</h2>
 			{#each $blueScoreBreakdown.fouls as foul, i}
 			<!-- Fouls giving points to the red alliance-->
 			<Foul {foul} color="#662a2a" />
@@ -60,7 +60,7 @@
 			<CustomFoul breakdown={blueScoreBreakdown} />
 		</div>
 		<div>
-			<h2>Fouls from Blue ({calculateBreakdownPoints($redScoreBreakdown).foulPoints}pts)</h2>
+			<h2>Fouls from Blue ({calculatePointsBreakdown($redScoreBreakdown).foulPoints}pts)</h2>
 			{#each $redScoreBreakdown.fouls as foul, i}
 			<!-- Fouls giving points to the blue alliance-->
 			

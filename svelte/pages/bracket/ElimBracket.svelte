@@ -1,3 +1,7 @@
+<script lang="ts" context="module">
+        export type LineData = {line:LeaderLine, startElement:HTMLElement, endElement:HTMLElement}|null
+</script>
+
 <script lang=ts>
         import {onMount} from "svelte";
         import Match from "./components/BracketMatch.svelte";
@@ -5,9 +9,9 @@
         import {type Writable, writable} from "svelte/store";
 
 
-        function drawLine(a, b, dash:boolean=false, start:LeaderLine.SocketType="right"):LineData {
-        const startElement = document.getElementById(a);
-        const endElement = document.getElementById(b);
+        function drawLine(a:string, b:string, dash:boolean=false, start:LeaderLine.SocketType="right"):LineData {
+        const startElement = document.getElementById(a)!;
+        const endElement = document.getElementById(b)!;
         const line = new LeaderLine(
             LeaderLine.pointAnchor(startElement, {x:"100%", y:dash?40: 20}), 
             LeaderLine.pointAnchor(endElement, {x:0, y:30}), 
@@ -23,7 +27,7 @@
         return {line, startElement, endElement}
     }
 
-    function createLines(start:string, win:string, lose:string=null) {
+    function createLines(start:string, win:string, lose?:string) {
         lines.update((data) => {
             data[start] ??= [null, null]
             data[start][0] = drawLine(start, win, false)
@@ -34,7 +38,7 @@
         })
         
     }
-    type LineData = {line:LeaderLine, startElement:HTMLElement, endElement:HTMLElement}
+
     let lines:Writable<{[key:string]:[LineData,LineData]}> =writable({})
     onMount(() => {
         createLines("sf1m1", "sf3m1", "sf4m1")

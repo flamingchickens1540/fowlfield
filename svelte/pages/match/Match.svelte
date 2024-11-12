@@ -2,9 +2,11 @@
 
     import matchData, {
         abortMatch,
-        commitMatch, fetchMatch, loadedMatch,
-        loadedMatches,
-        matchList, preloadedMatch,
+        commitMatch,
+        fetchMatch,
+        loadedMatch,
+        matchList,
+        preloadedMatch,
         remainingTimeInPeriod,
         setPreloadingTrack,
         startMatch,
@@ -66,24 +68,12 @@
         return getLoadButton("none")
     }
     function getLoadButton(state:"loaded"|"preloaded"|"none") {
-        if (state == "loaded") return { text: 'Reload', buttoncolor: '#840082', itemstyle: 'background-color:#680066' }
+        if (state == "loaded") return { text: 'Reload', buttoncolor: '#650064', itemstyle: 'background-color:#680066' }
         if (state == "preloaded") return { text: 'Load', buttoncolor: '#b400b1', itemstyle: 'background-color:#683900' }
         return { text: 'Preload', buttoncolor: '#a56600', itemstyle: '' }
     }
-    $: $preloadedMatch, console.log('PRELOADED', $preloadedMatch)
-    $: $loadedMatch, console.log('LOADED', $loadedMatch)
-    const matchLoadState = writable(getLoadButton("none"))
-    $: $matchLoadState, console.log('STATE', $matchLoadState)
-    $: {
-        console.log('MATCHID', $matchid)
-        if ($preloadedMatch == $matchid) {
-            matchLoadState.set(getLoadButton("preloaded"))
-        } else if ($loadedMatch == $matchid) {
-            matchLoadState.set(getLoadButton("loaded"))
-        } else {
-            matchLoadState.set(getLoadButton("none"))
-        }
-    }
+    const matchLoadState = derived([preloadedMatch, loadedMatch, matchData.id], ([preloaded, loaded, current]) => getLoadButton(loaded == current ? "loaded" : preloaded == current ? "preloaded" : "none"))
+
 
     let showTeams = false
     let teamlistunsub: Unsubscriber

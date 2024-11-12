@@ -1,5 +1,5 @@
 import { getElapsedTimeInPeriod, getMatchPeriod, getRemainingTimeInDisplayPeriod, getRemainingTimeInPeriod } from '~common/utils/match_timer'
-import { calculatePointsTotal } from '~common/utils/scores'
+import { calculateTotalPoints } from '~common/utils/scores'
 import socket from '~/lib/socket'
 import { derived, type Readable, writable, type Writable } from 'svelte/store'
 import { createFowlEventStore, createFowlMatchStore, createFowlTeamStore, createPropertyStore, gettableStore, SocketWritable, SocketWritableOf } from './socketStore'
@@ -18,8 +18,7 @@ const matchDataPrivate: SocketWritableOf<Match> = {
     id: createFowlMatchStore('id'),
     startTime: createFowlMatchStore('startTime'),
     state: createFowlMatchStore('state'),
-    red_scores: createFowlMatchStore('red_scores'),
-    blue_scores: createFowlMatchStore('blue_scores'),
+    scores: createFowlMatchStore('scores'),
     red1: createFowlMatchStore('red1'),
     red2: createFowlMatchStore('red2'),
     red3: createFowlMatchStore('red3'),
@@ -182,12 +181,13 @@ export function updateRankings(data: RankingEntry[]) {
     rankings.set(data)
 }
 
+const points = derived(matchDataPrivate.scores, calculateTotalPoints, { red: 0, blue: 0 })
 export const matchData: SocketWritableOf<Match> & {
     redScore: Readable<number>
     blueScore: Readable<number>
 } = {
     ...matchDataPrivate,
-    redScore: derived(matchDataPrivate.red_scores, calculatePointsTotal, 0),
-    blueScore: derived(matchDataPrivate.blue_scores, calculatePointsTotal, 0)
+    redScore: derived(points, (points) => points.red, 0),
+    blueScore: derived(points, (points) => points.blue, 0)
 }
 export default matchData

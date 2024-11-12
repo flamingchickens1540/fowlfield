@@ -110,5 +110,5 @@ export async function updateTeam(team: PartialTeam) {
 }
 
 export async function deleteTeam(id: number) {
-    return await prisma.team.delete({ where: { id } })
+    return prisma.team.delete({ where: { id } })
 }

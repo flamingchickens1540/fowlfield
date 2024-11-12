@@ -1,25 +1,26 @@
-import { Match, Match_AllianceResults, Team } from '@prisma/client'
+import { Match, Match_AllianceResults, Match_Results, Team } from '@prisma/client'
 import { EventInfo } from '../types'
 
-export function getBlankScoreBreakdown(): Match_AllianceResults {
+export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
     return {
         card_robot1: 'none',
         card_robot2: 'none',
         card_robot3: 'none',
-        auto_bunnies: 0,
-        final_bunnies: 0,
-        auto_taxi_bonus_robot1: false,
-        auto_taxi_bonus_robot2: false,
-        auto_taxi_bonus_robot3: false,
-        endgame_park_bonus_robot1: false,
-        endgame_park_bonus_robot2: false,
-        endgame_park_bonus_robot3: false,
-        target_hits_robot1: 0,
-        target_hits_robot2: 0,
-        target_hits_robot3: 0,
-        fouls: []
+        zone_bunnies: 0,
+        zone_balloons: 0
     }
 }
+
+export function getBlankMatchScoreBreakdown(): Match_Results {
+    return {
+        corral_empty: false,
+        totes: [],
+        fouls: [],
+        red: getBlankAllianceScoreBreakdown(),
+        blue: getBlankAllianceScoreBreakdown()
+    }
+}
+
 export function getBlankTeam(): Required<Team> {
     return {
         id: 0,
@@ -49,8 +50,7 @@ export function getBlankMatch(): Required<Match> {
         },
         startTime: 0,
         state: 'not_started',
-        red_scores: getBlankScoreBreakdown(),
-        blue_scores: getBlankScoreBreakdown(),
+        scores: getBlankMatchScoreBreakdown(),
         type: 'qualification',
         red1: 0,
         red2: 0,

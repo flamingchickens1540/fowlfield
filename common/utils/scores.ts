@@ -1,56 +1,57 @@
-import { Match, Match_AllianceResults } from '@prisma/client'
+import { Match, Match_Results } from '@prisma/client'
 
 export type PointsBreakdown = {
-    autoBunny: number
-    finalBunny: number
-    autoTaxi: number
-    endgamePark: number
-    targetHits: number
-    foulPoints: number
+    tote_balloons: number
+    empty_corral: number
+    low_zone_bunny: number
+    low_zone_balloon: number
+    foul: number
 }
 
-export function calculateBreakdownPoints(
-    breakdown: Match_AllianceResults
-): PointsBreakdown {
+function getBlankPointsBreakdown(): PointsBreakdown {
+    return {
+        tote_balloons: 0,
+        empty_corral: 0,
+        low_zone_bunny: 0,
+        low_zone_balloon: 0,
+        foul: 0
+    }
+}
+// 1 point per balloon in low zone
+// 6 points per bunny in low zone
+// 3x2^B points per balloon in tote with B bunnies
+// Foul points
+// 20 point coopertition bonus
+export function calculatePointsBreakdown(breakdown: Match_Results): { red: PointsBreakdown; blue: PointsBreakdown } {
+    const points = { red: getBlankPointsBreakdown(), blue: getBlankPointsBreakdown() }
     if (breakdown == null) {
-        return {
-            autoBunny: 0,
-            finalBunny: 0,
-            autoTaxi: 0,
-            endgamePark: 0,
-            targetHits: 0,
-            foulPoints: 0
+        return points
+    }
+    points.red.low_zone_balloon = 1 * breakdown.red.zone_balloons // 1 point per balloon in low zone
+    points.blue.low_zone_balloon = 1 * breakdown.blue.zone_balloons // 1 point per balloon in low zone
+
+    points.red.low_zone_bunny = 6 * breakdown.red.zone_bunnies // 6 points per bunny in low zone
+    points.blue.low_zone_bunny += 6 * breakdown.blue.zone_bunnies // 6 points per bunny in low zone
+
+    for (const tote of breakdown.totes) {
+        const multiplier = 3 * 2 ** tote.bunnies // 3x2^B points per balloon in tote with B bunnies
+        points.red.tote_balloons += tote.red_balloons * multiplier
+        points.blue.tote_balloons += tote.blue_balloons * multiplier
+    }
+    for (const foul of breakdown.fouls) {
+        if (foul.isAgainstRed) {
+            points.blue.foul += foul.foul_points
+        } else {
+            points.red.foul += foul.foul_points
         }
     }
-    return {
-        autoBunny: 5 * breakdown.auto_bunnies,
-        finalBunny: 5 * breakdown.final_bunnies,
-        autoTaxi:
-            3 *
-            countTrue(
-                breakdown.auto_taxi_bonus_robot1,
-                breakdown.auto_taxi_bonus_robot2,
-                breakdown.auto_taxi_bonus_robot3
-            ),
-        endgamePark:
-            5 *
-            countTrue(
-                breakdown.endgame_park_bonus_robot1,
-                breakdown.endgame_park_bonus_robot2,
-                breakdown.endgame_park_bonus_robot3
-            ),
-        targetHits:
-            2 *
-            sum(
-                (v) => v,
-                breakdown.target_hits_robot1,
-                breakdown.target_hits_robot2,
-                breakdown.target_hits_robot3
-            ),
-        foulPoints: breakdown.fouls
-            .map((v) => v.foul_points)
-            .reduce((a, b) => a + b, 0)
+    if (breakdown.corral_empty) {
+        // 20 point coopertition bonus
+        points.red.empty_corral = 20
+        points.blue.empty_corral = 20
     }
+
+    return points
 }
 
 function countTrue(...bools: boolean[]) {
@@ -70,36 +71,38 @@ export function sumBreakdownPoints(c: PointsBreakdown) {
     return Object.values(c).reduce((a, b) => a + b, 0)
 }
 
-export function calculatePointsTotal(c: Match_AllianceResults) {
-    return sumBreakdownPoints(calculateBreakdownPoints(c))
+export function calculateTotalPoints(c: Match_Results) {
+    const breakdown = calculatePointsBreakdown(c)
+    return {
+        red: sumBreakdownPoints(breakdown.red),
+        blue: sumBreakdownPoints(breakdown.blue)
+    }
 }
-
+const getResult = ({ red, blue }: { red: number; blue: number }) => {
+    return red == blue ? 'tie' : red > blue ? 'red' : 'blue'
+}
 export function getWinner(match: Match): 'red' | 'blue' | 'tie' {
-    const redPoints = calculatePointsTotal(match.red_scores)
-    const bluePoints = calculatePointsTotal(match.blue_scores)
-    return redPoints == bluePoints
-        ? 'tie'
-        : redPoints > bluePoints
-          ? 'red'
-          : 'blue'
+    const { red, blue } = calculateTotalPoints(match.scores)
+    return getResult({ red, blue })
 }
 
 export function getScores(match: Match) {
-    const redBreakdown = calculateBreakdownPoints(match.red_scores)
-    const blueBreakdown = calculateBreakdownPoints(match.blue_scores)
-    const redScore = sumBreakdownPoints(redBreakdown)
-    const blueScore = sumBreakdownPoints(blueBreakdown)
-    const winner = getWinner(match)
+    const breakdown = calculatePointsBreakdown(match.scores)
+    const redScore = sumBreakdownPoints(breakdown.red)
+    const blueScore = sumBreakdownPoints(breakdown.blue)
+    const winner = getResult({ red: redScore, blue: blueScore })
     let redRP = redScore
     let blueRP = blueScore
     if (winner == 'red') {
-        redRP += blueScore / 2
+        // If red wins, redRp = redScore, blueRp = blueScore/2
+        blueRP /= 2
     } else if (winner == 'blue') {
-        blueRP += redScore / 2
+        // If blue wins, blueRp = blueScore, redRp = redScore/2
+        redRP /= 2
     }
     return {
-        redBreakdown,
-        blueBreakdown,
+        redBreakdown: breakdown.red,
+        blueBreakdown: breakdown.blue,
         redScore,
         blueScore,
         redRP,
@@ -110,31 +113,23 @@ export function getScores(match: Match) {
 
 export function getAlliances(match: Match) {
     return {
-        red: [
-            { team: match.red1, card: match.red_scores.card_robot1 },
-            { team: match.red2, card: match.red_scores.card_robot2 },
-            { team: match.red3, card: match.red_scores.card_robot3 }
-        ],
-        blue: [
-            { team: match.blue1, card: match.blue_scores.card_robot1 },
-            { team: match.blue2, card: match.blue_scores.card_robot2 },
-            { team: match.blue3, card: match.blue_scores.card_robot3 }
-        ]
+        red: getRedAlliance(match),
+        blue: getBlueAlliance(match)
     }
 }
 
 export function getRedAlliance(match: Match) {
     return [
-        { team: match.red1, card: match.red_scores.card_robot1 },
-        { team: match.red2, card: match.red_scores.card_robot2 },
-        { team: match.red3, card: match.red_scores.card_robot3 }
+        { team: match.red1, card: match.scores.red.card_robot1 },
+        { team: match.red2, card: match.scores.red.card_robot2 },
+        { team: match.red3, card: match.scores.red.card_robot3 }
     ]
 }
 
 export function getBlueAlliance(match: Match) {
     return [
-        { team: match.blue1, card: match.blue_scores.card_robot1 },
-        { team: match.blue2, card: match.blue_scores.card_robot2 },
-        { team: match.blue3, card: match.blue_scores.card_robot3 }
+        { team: match.blue1, card: match.scores.blue.card_robot1 },
+        { team: match.blue2, card: match.scores.blue.card_robot2 },
+        { team: match.blue3, card: match.scores.blue.card_robot3 }
     ]
 }

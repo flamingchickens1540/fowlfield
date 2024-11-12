@@ -1,6 +1,6 @@
 import { MatchID } from '~common/types'
 import { getMatchTitle } from '~common/utils'
-import { calculateBreakdownPoints, getScores, sumBreakdownPoints } from '~common/utils/scores'
+import { calculatePointsBreakdown, getScores, sumBreakdownPoints } from '~common/utils/scores'
 import axios from 'axios'
 import crypto from 'crypto'
 import { createLogger } from '~/logger'
@@ -9,7 +9,7 @@ import { buildRankings, getTeams } from '~/managers/teammanager'
 import config from '~common/config'
 import { DisplayNumber, TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaScoreBreakdown, TbaTeamNumber } from './types'
 import prisma from '~/managers/db'
-import { Match, Match_AllianceResults, Team } from '@prisma/client'
+import { Match, Match_Results, Team } from '@prisma/client'
 
 const logger = createLogger('tba')
 
@@ -119,10 +119,7 @@ export async function reset(...fields: ('alliance' | 'team' | 'match' | 'ranking
 }
 
 export async function removeMatches(...ids: MatchID[]) {
-    await post(
-        'matches/delete',
-        ids
-    )
+    await post('matches/delete', ids)
 }
 
 export async function updateRankings() {
@@ -137,9 +134,9 @@ export async function updateRankings() {
         'qual_average': 0,
         'dqs': 0,
         'Ranking Score': ranking.match_stats.rp,
-        'Avg Match': ranking.match_stats.avg_score,
-        'Avg Charge Station': -1,
-        'Avg Auto': 0
+        'Avg Match': ranking.match_stats.avg_score
+        // 'Avg Charge Station': -1,
+        // 'Avg Auto': 0
     }))
 
     const body: TbaRankings = {
@@ -151,22 +148,17 @@ export async function updateRankings() {
 function matchToTBAMatch(match: Match): TbaMatch {
     const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
     const { redScore, redRP, blueScore, blueRP } = getScores(match)
-    const getTBAScoreBreakdown = ({ score_breakdown, rp }: { score_breakdown: Match_AllianceResults; rp: number }): Partial<TbaScoreBreakdown> => {
-        const pointsBreakdown = calculateBreakdownPoints(score_breakdown)
-        const totalPoints = sumBreakdownPoints(pointsBreakdown)
+    const getTBAScoreBreakdown = ({ results, alliance, rp }: { results: Match_Results; alliance: 'red' | 'blue'; rp: number }): Partial<TbaScoreBreakdown> => {
+        const points = calculatePointsBreakdown(results)[alliance]
+        const totalPoints = sumBreakdownPoints(points)
         return {
             rp,
-            teleopPoints: pointsBreakdown.targetHits + pointsBreakdown.finalBunny,
+            teleopPoints: points.low_zone_balloon + points.low_zone_bunny + points.tote_balloons,
+            coopertitionBonusAchieved: results.corral_empty,
             totalPoints: totalPoints,
-            foulCount: score_breakdown.fouls.length,
-            foulPoints: pointsBreakdown.foulPoints,
-            adjustPoints: 0,
-            autoLineRobot1: score_breakdown.auto_taxi_bonus_robot1 ? 'Yes' : 'No',
-            autoLineRobot2: score_breakdown.auto_taxi_bonus_robot2 ? 'Yes' : 'No',
-            autoLineRobot3: score_breakdown.auto_taxi_bonus_robot3 ? 'Yes' : 'No',
-            autoLeavePoints: pointsBreakdown.autoTaxi,
-            endGameParkPoints: pointsBreakdown.endgamePark,
-            autoPoints: pointsBreakdown.autoTaxi + pointsBreakdown.autoBunny
+            foulCount: results.fouls.filter((foul) => foul.isAgainstRed == (alliance == 'blue')).length,
+            foulPoints: points.foul,
+            adjustPoints: 0
         }
     }
     return {
@@ -175,11 +167,13 @@ function matchToTBAMatch(match: Match): TbaMatch {
         match_number: match.type == 'qualification' ? match.stage_index : parseInt(decodedMatchId[3]),
         score_breakdown: {
             red: getTBAScoreBreakdown({
-                score_breakdown: match.red_scores,
+                results: match.scores,
+                alliance: 'red',
                 rp: redRP
             }),
             blue: getTBAScoreBreakdown({
-                score_breakdown: match.blue_scores,
+                results: match.scores,
+                alliance: 'blue',
                 rp: blueRP
             })
         },

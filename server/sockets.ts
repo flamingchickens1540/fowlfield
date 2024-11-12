@@ -11,7 +11,7 @@ import { createLogger } from './logger'
 import { instrument } from '@socket.io/admin-ui'
 
 import * as tba from './tba'
-import { getBlankScoreBreakdown } from '~common/utils/blanks'
+import { getBlankMatchScoreBreakdown } from '~common/utils/blanks'
 import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
@@ -255,8 +255,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
             data: {
                 state: 'not_started',
                 startTime: 0,
-                red_scores: getBlankScoreBreakdown(),
-                blue_scores: getBlankScoreBreakdown()
+                scores: getBlankMatchScoreBreakdown()
             }
         })
         io.emit('match', match)

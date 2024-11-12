@@ -3,6 +3,10 @@
     import matchData from '~/lib/store'
     import StoreMonitor from '~/pages/test/components/StoreMonitor.svelte'
     import { createPropertyStore } from '~/lib/socketStore'
+
+    matchData.scores.setWritable()
+    const redScores = createPropertyStore(matchData.scores, "red")
+    const blueScores = createPropertyStore(matchData.scores, "blue")
 </script>
 
 
@@ -24,25 +28,20 @@
             <StoreMonitor label="red2" type="number" store={matchData.red2.setWritable()}/>
             <StoreMonitor label="red3" type="number" store={matchData.red3.setWritable()}/>
 
+            <StoreMonitor label="corral_empty" type="checkbox" store={createPropertyStore(matchData.scores, "corral_empty")}/>
+
             <StoreMonitor pad label="Blue Score" type="number" store={matchData.blueScore}/>
             <StoreMonitor label="Red Score" type="number" store={matchData.redScore}/>
+
+
         </div>
-        {#each [{scores:matchData.red_scores.setWritable(), color:"var(--bgred)"}, {scores:matchData.blue_scores.setWritable(), color:"var(--bgblue)"}] as {scores, color}}
+        {#each [{scores:redScores, color:"var(--bgred)"}, {scores:blueScores, color:"var(--bgblue)"}] as {scores, color}}
             <div class="col" style="--bgcolor:{color}">
                 <StoreMonitor label="Robot 1 Card" type="text" store={createPropertyStore(scores, "card_robot1")}/>
                 <StoreMonitor label="Robot 2 Card" type="text" store={createPropertyStore(scores, "card_robot2")}/>
                 <StoreMonitor label="Robot 3 Card" type="text" store={createPropertyStore(scores, "card_robot3")}/>
-                <StoreMonitor label="Auto Bunnies" type="number" store={createPropertyStore(scores, "auto_bunnies")}/>
-                <StoreMonitor label="Final Bunnies" type="number" store={createPropertyStore(scores, "final_bunnies")}/>
-                <StoreMonitor label="Robot 1 Hits" type="number" store={createPropertyStore(scores, "target_hits_robot1")}/>
-                <StoreMonitor label="Robot 2 Hits" type="number" store={createPropertyStore(scores, "target_hits_robot2")}/>
-                <StoreMonitor label="Robot 3 Hits" type="number" store={createPropertyStore(scores, "target_hits_robot3")}/>
-                <StoreMonitor label="Robot 1 Taxi" type="checkbox" store={createPropertyStore(scores, "auto_taxi_bonus_robot1")}/>
-                <StoreMonitor label="Robot 2 Taxi" type="checkbox" store={createPropertyStore(scores, "auto_taxi_bonus_robot2")}/>
-                <StoreMonitor label="Robot 3 Taxi" type="checkbox" store={createPropertyStore(scores, "auto_taxi_bonus_robot3")}/>
-                <StoreMonitor label="Robot 1 Park" type="checkbox" store={createPropertyStore(scores, "endgame_park_bonus_robot1")}/>
-                <StoreMonitor label="Robot 2 Park" type="checkbox" store={createPropertyStore(scores, "endgame_park_bonus_robot2")}/>
-                <StoreMonitor label="Robot 3 Park" type="checkbox" store={createPropertyStore(scores, "endgame_park_bonus_robot3")}/>
+                <StoreMonitor label="Zone Balloons" type="number" store={createPropertyStore(scores, "zone_balloons")}/>
+                <StoreMonitor label="Zone Bunnies" type="number" store={createPropertyStore(scores, "zone_bunnies")}/>
             </div>
         {/each}
     </div>

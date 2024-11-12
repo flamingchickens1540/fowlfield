@@ -1,19 +1,26 @@
 <script lang="ts">
-	import {Card} from "~common/types";
-	import {calculateBreakdownPoints} from "~common/utils/scores";
-	import matchData, {teamsSorted} from "~/lib/store";
-	import {derived} from "svelte/store";
+	import { calculatePointsBreakdown } from '~common/utils/scores'
+	import matchData, { rankings, teamList } from '~/lib/store'
+	import { derived } from 'svelte/store'
 
-	const { red1, red2, red3, blue1, blue2, blue3, matchNumber, type, redCards, blueCards, redScoreBreakdown, blueScoreBreakdown, redScore, blueScore, redAlliance, blueAlliance } = matchData;
+	const { red1, red2, red3, blue1, blue2, blue3, stage_index, elim_info, scores, redScore, blueScore} = matchData;
+
 	const teamMap: { [key: number]: { num: string; rank: number; card: string } } = {};
 
-	const colors = {
-		[Card.RED]: "#ff0000",
-		[Card.YELLOW]: "#ffff00",
-		[Card.NONE]: "#00000000",
+	const colors:Record<string, string> = {
+		["red"]: "#ff0000",
+		["yellow"]: "#ffff00",
+		["none"]: "#00000000",
 	};
 
-	const schedule = { // Makes thinking about the matches easier to avoid the index offset
+	type ScheduleItem = {
+		title: string;
+		winnerTo?: { match: number; alliance: string };
+		loserTo?: { match: number; alliance: string };
+	};
+
+
+	const schedule: {[key:number]:ScheduleItem} = { // Makes thinking about the matches easier to avoid the index offset
         1:{
             title:"Match 1",
             winnerTo:{match:3, alliance:"red"},
@@ -43,61 +50,54 @@
     };
 
 	$: {
-		Object.values($teamsSorted).forEach((team, i) => {
-			let matchCard = Card.NONE;
-			if (team.id == $red1) {
-				matchCard = $redCards[0];
-			}
-			if (team.id == $red2) {
-				matchCard = $redCards[1];
-			}
-			if (team.id == $red3) {
-				matchCard = $redCards[2];
-			}
-			if (team.id == $blue1) {
-				matchCard = $blueCards[0];
-			}
-			if (team.id == $blue2) {
-				matchCard = $blueCards[1];
-			}
-			if (team.id == $blue3) {
-				matchCard = $blueCards[2];
+		Object.values($rankings).forEach((ranking, i) => {
+			let card = "none";
+			switch (ranking.team) {
+				case $red1: card = $scores.red.card_robot1; break;
+				case $red2: card = $scores.red.card_robot2; break;
+				case $red3: card = $scores.red.card_robot3; break;
+				case $blue1: card = $scores.blue.card_robot1; break;
+				case $blue2: card = $scores.blue.card_robot2; break;
+				case $blue3: card = $scores.blue.card_robot3; break;
 			}
 
-			teamMap[team.id] = {
-				num: team.displaynum.get(),
+			if (card == "none" && $teamList[ranking.team].has_card.get()) {
+				card = "yellow";
+			}
+
+			teamMap[ranking.team] = {
+				num: $teamList[ranking.team].display_number.get(),
 				rank: i + 1,
-				card: matchCard == Card.NONE ? colors[team.card.get()] : colors[matchCard],
+				card: colors[card],
 			};
 		});
 	}
 
 	
-	const calculatedRed = derived(redScoreBreakdown, ($redScoreBreakdown) => calculateBreakdownPoints($redScoreBreakdown));
-	const calculatedBlue = derived(blueScoreBreakdown, ($blueScoreBreakdown) => calculateBreakdownPoints($blueScoreBreakdown));
+	const breakdown = derived(scores, ($scores) => calculatePointsBreakdown($scores));
 	$: blueWon = $blueScore > $redScore;
 	$: tie = $blueScore == $redScore;
-	let redAllianceTo, blueAllianceTo;
+	let redAllianceTo:string, blueAllianceTo:string;
 	$: {
 		if (tie) {
 			redAllianceTo = "Replay";
 			blueAllianceTo = "Replay";
 		} else if (blueWon) {
-			if (schedule[$matchNumber]?.loserTo != null) {
-				redAllianceTo = "Advances to "+schedule[schedule[$matchNumber]?.loserTo!.match]?.title ?? "Unknown"
+			if (schedule[$stage_index]?.loserTo != null) {
+				redAllianceTo = "Advances to "+schedule[schedule[$stage_index].loserTo!.match]?.title ?? "Unknown"
 			} else {
 				redAllianceTo = "Eliminated";
 			}
-			blueAllianceTo = "Advances to "+ schedule[schedule[$matchNumber]?.winnerTo?.match]?.title ?? "Unknown"
+			blueAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title ?? "Unknown"
 		} else {
-			redAllianceTo = "Advances to "+ schedule[schedule[$matchNumber]?.winnerTo?.match]?.title ?? "Unknown"
-			if (schedule[$matchNumber]?.loserTo != null) {
-				blueAllianceTo = "Advances to "+schedule[schedule[$matchNumber]?.loserTo!.match]?.title ?? "Unknown"
+			redAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title ?? "Unknown"
+			if (schedule[$stage_index]?.loserTo != null) {
+				blueAllianceTo = "Advances to "+schedule[schedule[$stage_index]?.loserTo!.match]?.title ?? "Unknown"
 			} else {
 				blueAllianceTo = "Eliminated";
 			}
 		}
-		console.log("Winner", blueWon, $matchNumber)
+		console.log("Winner", blueWon, $stage_index)
 	}
 </script>
 
@@ -187,30 +187,30 @@
 	<!-- Red Score Breakdown -->
 	<div class="_200">{$redScore}</div>
 	<div class="total">TOTAL</div>
-	<div class="_100">{$calculatedRed.autoTaxi + $calculatedRed.autoBunny}</div>
-	<div class="hybrid">HYBRID</div>
-	<div class="_95">{$calculatedRed.endgamePark + $calculatedRed.finalBunny + $calculatedRed.targetHits}</div>
-	<div class="teleop">TELEOP</div>
-	<div class="_5">{$calculatedRed.foulPoints}</div>
+	<div class="_100">{$breakdown.red.tote_balloons}</div>
+	<div class="hybrid">TOTE</div>
+	<div class="_95">{$breakdown.red.low_zone_balloon+$breakdown.red.low_zone_bunny}</div>
+	<div class="teleop">LOWZONE</div>
+	<div class="_5">{$breakdown.red.foul}</div>
 	<div class="fouls">FOULS</div>
 
 	<!-- Blue Score Breakdown -->
 	<div class="_190">{$blueScore}</div>
 	<div class="total2">TOTAL</div>
-	<div class="_952">{$calculatedBlue.autoTaxi + $calculatedBlue.autoBunny}</div>
-	<div class="hybrid2">HYBRID</div>
-	<div class="_52">{$calculatedBlue.endgamePark + $calculatedBlue.finalBunny + $calculatedBlue.targetHits}</div>
-	<div class="teleop2">TELEOP</div>
-	<div class="_90">{$calculatedBlue.foulPoints}</div>
+	<div class="_952">{$breakdown.blue.tote_balloons}</div>
+	<div class="hybrid2">TOTE</div>
+	<div class="_52">{$breakdown.blue.low_zone_balloon+$breakdown.blue.low_zone_bunny}</div>
+	<div class="teleop2">LOWZONE</div>
+	<div class="_90">{$breakdown.blue.foul}</div>
 	<div class="fouls2">FOULS</div>
 
 	<!-- Red Alliance -->
-	<div class="alliance red">Alliance {$redAlliance}</div>
+	<div class="alliance red">Alliance {$elim_info?.red_alliance}</div>
 	<svg class="rectangle-73" width="700" height="150" viewBox="0 0 700 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path d="M657 0H40C21.1438 0 11.7157 0 5.85785 5.85786C0 11.7157 0 21.1438 0 40V74.1481V108.296C0 127.152 0 136.58 5.85785 142.438C11.7157 148.296 21.1438 148.296 40 148.296H657V74.1481V0Z" fill="#920006" />
 	</svg>
 
-	{#if $matchNumber < 6}
+	{#if $stage_index < 6}
 	<svg class="advancement red" width="1500" height="190" viewBox="0 0 1500 190" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path d="M1500 0H40C21.1438 0 11.7157 0 5.85791 5.85786C0 11.7157 0 21.1438 0 40V95V150C0 168.856 0 178.284 5.85791 184.142C11.7157 190 21.1438 190 40 190H1500V95V0Z" fill="#920006" />
 	</svg>
@@ -218,12 +218,12 @@
 	{/if}
 
 	<!-- Blue alliance -->
-	<div class="alliance blue">Alliance {$blueAlliance}</div>
+	<div class="alliance blue">Alliance {$elim_info?.blue_alliance}</div>
 	<svg class="rectangle-83" width="700" height="150" viewBox="0 0 700 150" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path d="M0 0H654C672.856 0 682.284 0 688.142 5.85786C694 11.7157 694 21.1438 694 40V74.1481V108.296C694 127.152 694 136.58 688.142 142.438C682.284 148.296 672.856 148.296 654 148.296H0V74.1481V0Z" fill="#00477D" />
 	</svg>
 
-	{#if $matchNumber < 6}
+	{#if $stage_index < 6}
 	<svg class="advancement blue" width="1500" height="190" viewBox="0 0 1500 190" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path d="M0 190H1460C1478.86 190 1488.28 190 1494.14 184.142C1500 178.284 1500 168.856 1500 150V95V40C1500 21.1438 1500 11.7157 1494.14 5.85786C1488.28 0 1478.86 0 1460 0H0V95V190Z" fill="#00477D" />
 	</svg>
@@ -282,8 +282,8 @@
 
 	<!-- Footer -->
 	<div class="rectangle-72" />
-	<div class="qualification-match-13">Elimination Match {$matchNumber}</div>
-	<div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2023</div>
+	<div class="qualification-match-13">Elimination Match {$stage_index}</div>
+	<div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2024</div>
 </div>
 
 <style lang="scss">

@@ -1,10 +1,9 @@
 <script lang="ts">
-    import matchData from "~/lib/store"
-    import {calculateBreakdownPoints} from "~common/utils/scores";
-    import {derived} from "svelte/store";
+    import matchData from '~/lib/store'
+    import { calculatePointsBreakdown } from '~common/utils/scores'
+    import { derived } from 'svelte/store'
 
-    const redBreakdown = derived(matchData.red_scores, (breakdown) => calculateBreakdownPoints(breakdown))
-    const blueBreakdown = derived(matchData.blue_scores, (breakdown) => calculateBreakdownPoints(breakdown))
+    const breakdown = derived(matchData.scores, (breakdown) => calculatePointsBreakdown(breakdown))
     const {redScore, blueScore} = matchData
 </script>
 
@@ -19,29 +18,29 @@
     <tbody>
     <tr></tr>
     <tr>
-        <th>Hybrid Bunny</th>
-        <td>{$redBreakdown.autoBunny}</td>
-        <td>{$blueBreakdown.autoBunny}</td>
+        <th>Low-Zone Bunny</th>
+        <td>{$breakdown.red.low_zone_bunny}</td>
+        <td>{$breakdown.blue.low_zone_bunny}</td>
     </tr>
     <tr>
-        <th>Hybrid Taxi</th>
-        <td>{$redBreakdown.autoTaxi}</td>
-        <td>{$blueBreakdown.autoTaxi}</td>
+        <th>Low-Zone Balloon</th>
+        <td>{$breakdown.red.low_zone_balloon}</td>
+        <td>{$breakdown.blue.low_zone_balloon}</td>
     </tr>
     <tr>
-        <th>Hits</th>
-        <td>{$redBreakdown.targetHits}</td>
-        <td>{$blueBreakdown.targetHits}</td>
+        <th>Tote Balloons</th>
+        <td>{$breakdown.red.tote_balloons}</td>
+        <td>{$breakdown.blue.tote_balloons}</td>
     </tr>
     <tr>
-        <th>Final Bunnies</th>
-        <td>{$redBreakdown.finalBunny}</td>
-        <td>{$blueBreakdown.finalBunny}</td>
+        <th>Fouls</th>
+        <td>{$breakdown.red.foul}</td>
+        <td>{$breakdown.blue.foul}</td>
     </tr>
     <tr>
-        <th>Park</th>
-        <td>{$redBreakdown.endgamePark}</td>
-        <td>{$blueBreakdown.endgamePark}</td>
+        <th>Coopertition</th>
+        <td>{$breakdown.red.empty_corral}</td>
+        <td>{$breakdown.blue.empty_corral}</td>
     </tr>
     <tr>
         <th>Total</th>

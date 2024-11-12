@@ -1,8 +1,8 @@
 <script lang="ts">
-	import {Card} from "~common/types";
-	import {calculateBreakdownPoints} from "~common/utils/scores";
-	import matchData, {teamsSorted} from "~/lib/store";
-	import {derived} from "svelte/store";
+	import { Card } from '~common/types'
+	import { calculatePointsBreakdown } from '~common/utils/scores'
+	import matchData, { teamsSorted } from '~/lib/store'
+	import { derived } from 'svelte/store'
 
 	const { red1, red2, red3, blue1, blue2, blue3, matchNumber, type, redCards, blueCards, redScoreBreakdown, blueScoreBreakdown, redScore, blueScore } = matchData;
 	const teamMap: { [key: number]: { num: string; rank: number; card: string } } = {};
@@ -43,8 +43,8 @@
 		});
 	}
 
-	const calculatedRed = derived(redScoreBreakdown, ($redScoreBreakdown) => calculateBreakdownPoints($redScoreBreakdown));
-	const calculatedBlue = derived(blueScoreBreakdown, ($blueScoreBreakdown) => calculateBreakdownPoints($blueScoreBreakdown));
+	const calculatedRed = derived(redScoreBreakdown, ($redScoreBreakdown) => calculatePointsBreakdown($redScoreBreakdown));
+	const calculatedBlue = derived(blueScoreBreakdown, ($blueScoreBreakdown) => calculatePointsBreakdown($blueScoreBreakdown));
 	$: blueWon = $blueScore > $redScore;
 	$: tie = $blueScore == $redScore;
 </script>

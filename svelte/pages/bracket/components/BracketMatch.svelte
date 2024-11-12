@@ -1,22 +1,22 @@
 <script lang="ts">
-	import {MatchState} from "~common/types";
-	import {calculatePointsTotal} from "~common/utils/scores";
-	import {matchList, teamList} from "~/lib/store";
-	import LeaderLine from "leader-line-new";
-	import type {Writable} from "svelte/store";
+	import { calculateTotalPoints } from '~common/utils/scores'
+	import { matchList, teamList } from '~/lib/store'
+	import LeaderLine from 'leader-line-new'
+	import type { Writable } from 'svelte/store'
+	import { LineData } from '~/pages/bracket/ElimBracket.svelte'
 
 	export let title: string;
 	export let id: string;
-	type LineData = { line: LeaderLine; startElement: HTMLElement; endElement: HTMLElement };
 	export let lines: Writable<{ [key: string]: [LineData, LineData] }>;
 
 	$: winline = $lines[id]?.[0];
 	$: lossline = $lines[id]?.[1];
 	$: match = $matchList[id];
 
-	$: redscore = calculatePointsTotal(match?.redScoreBreakdown);
-	$: bluescore = calculatePointsTotal(match?.blueScoreBreakdown);
-	$: winner = match?.state != MatchState.POSTED || redscore == bluescore ? "none" : redscore > bluescore ? "red" : "blue"; //TODO: check ties
+	$: total = calculateTotalPoints(match?.scores)
+	$: redscore = total.red
+	$: bluescore = total.blue
+	$: winner = (match?.state != "posted" || redscore == bluescore) ? "none" : redscore > bluescore ? "red" : "blue"; //TODO: check ties
 
 	$: {
 		if (winner == "red") {
@@ -33,17 +33,17 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div {id} class="fullsize" style="--redweight:{winner == 'red' ? 700 : 'unset'};--blueweight:{winner == 'blue' ? 700 : 'unset'}">
 	<span class="title">{title}</span>
-	<div class="red alliance">{match?.redAlliance ?? ""}</div>
-	<div class="blue alliance">{match?.blueAlliance ?? ""}</div>
+	<div class="red alliance">{match?.elim_info?.red_alliance ?? ""}</div>
+	<div class="blue alliance">{match?.elim_info?.blue_alliance ?? ""}</div>
 	<div class="red teams">
-		<span>{$teamList[match?.red1]?.displaynum.get() ?? ""}</span>
-		<span>{$teamList[match?.red2]?.displaynum.get() ?? ""}</span>
-		<span>{$teamList[match?.red3]?.displaynum.get() ?? ""}</span>
+		<span>{$teamList[match?.red1]?.display_number.get() ?? ""}</span>
+		<span>{$teamList[match?.red2]?.display_number.get() ?? ""}</span>
+		<span>{$teamList[match?.red3]?.display_number.get() ?? ""}</span>
 	</div>
 	<div class="blue teams">
-		<span>{$teamList[match?.blue1]?.displaynum.get() ?? ""}</span>
-		<span>{$teamList[match?.blue2]?.displaynum.get() ?? ""}</span>
-		<span>{$teamList[match?.blue3]?.displaynum.get() ?? ""}</span>
+		<span>{$teamList[match?.blue1]?.display_number.get() ?? ""}</span>
+		<span>{$teamList[match?.blue2]?.display_number.get() ?? ""}</span>
+		<span>{$teamList[match?.blue3]?.display_number.get() ?? ""}</span>
 	</div>
 </div>
 

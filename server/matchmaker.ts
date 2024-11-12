@@ -1,7 +1,7 @@
 import { DoubleEliminationBracket } from './doubleEliminationBracket'
 import { teammanager } from '~/managers'
 import { getWinner } from '~common/utils/scores'
-import { getBlankScoreBreakdown } from '~common/utils/blanks'
+import { getBlankMatchScoreBreakdown } from '~common/utils/blanks'
 import { createLogger } from '~/logger'
 import { Match } from '@prisma/client'
 import prisma from '~/managers/db'
@@ -56,8 +56,7 @@ export class MatchMaker {
                 blue1: 0,
                 blue2: 0,
                 blue3: 0,
-                red_scores: getBlankScoreBreakdown(),
-                blue_scores: getBlankScoreBreakdown()
+                scores: getBlankMatchScoreBreakdown()
             }
         })
     }
@@ -93,8 +92,7 @@ export class MatchMaker {
                 blue1: alliances[match.blue][0] ?? 0,
                 blue2: alliances[match.blue][1] ?? 0,
                 blue3: alliances[match.blue][2] ?? 0,
-                red_scores: getBlankScoreBreakdown(),
-                blue_scores: getBlankScoreBreakdown(),
+                scores: getBlankMatchScoreBreakdown(),
                 startTime: 0
             }
         })
@@ -116,10 +114,7 @@ export class MatchMaker {
                 logger.error('Match cannot end in a tie')
                 return
             }
-            const didUpdateSucceed = this.bracket?.update(
-                match.stage_index,
-                winner
-            )
+            const didUpdateSucceed = this.bracket?.update(match.stage_index, winner)
             if (!didUpdateSucceed) {
                 logger.warn('rebuilding bracket')
                 await this.buildBracket()
