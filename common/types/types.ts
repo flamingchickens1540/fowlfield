@@ -1,11 +1,12 @@
-import { Match, Team } from '@prisma/client'
+import { Match, PlayoffAlliance, Team } from '@prisma/client'
 
 export type RobotPosition = 'red1' | 'red2' | 'red3' | 'blue1' | 'blue2' | 'blue3'
 type PartialWithFields<T, F extends keyof T> = Pick<T, F> & Partial<T>
 
 export type PartialMatch = PartialWithFields<Match, 'id'>
 export type PartialTeam = PartialWithFields<Team, 'id'>
-
+export type PartialAlliance = PartialWithFields<PlayoffAlliance, 'seed'>
+export type AlliancePosition = Exclude<keyof PlayoffAlliance, 'seed'>
 export interface EventInfo {
     atLunch: boolean
     lunchReturnTime: number
@@ -30,7 +31,7 @@ export interface ExtendedTeam extends Team {
     matchStats: TeamMatchStats
 }
 
-export type MatchID = `qm${number}`|`${MatchPrefix}${number}m${number}`
+export type MatchID = `qm${number}` | `${MatchPrefix}${number}m${number}`
 export type MatchPrefix = 'qm' | 'qf' | 'sf' | 'f'
 
 export type RankingEntry = {

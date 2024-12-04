@@ -1,6 +1,17 @@
 import { io, type Socket } from 'socket.io-client'
 
-import { updateLoadedMatch, updateMatchList, updateRankings, updateStoredEventinfo, updateStoredMatch, updateStoredTeam, updateTeamList, updateTimeOffset } from '~/lib/store'
+import {
+    updateAlliance,
+    updateAlliances,
+    updateLoadedMatch,
+    updateMatchList,
+    updateRankings,
+    updateStoredEventinfo,
+    updateStoredMatch,
+    updateStoredTeam,
+    updateTeamList,
+    updateTimeOffset
+} from '~/lib/store'
 import type { ClientToServerEvents, ServerToClientEvents } from '~common/types'
 
 const disconnectedBackgroundColor = '#463500'
@@ -51,6 +62,12 @@ socket.on('loadMatch', (match) => {
 
 socket.on('rankings', updateRankings)
 
+socket.on('alliance', updateAlliance)
+socket.on('alliances', (v) => {
+    updateAlliances(v)
+    setLoaded('alliances')
+})
+
 socket.on('event', updateStoredEventinfo)
 
 socket.on('connect_error', (err) => {
@@ -82,7 +99,7 @@ function setTimeOffset() {
     })
 }
 
-const hasLoaded = { teams: false, matches: false }
+const hasLoaded = { teams: false, matches: false, alliances: false }
 const isLoaded = () => Object.values(hasLoaded).every((v) => v)
 let loadCBs: (() => void)[] | null = []
 function setLoaded(field: keyof typeof hasLoaded) {
@@ -101,6 +118,11 @@ export function onLoaded(cb: () => void) {
         console.error(hasLoaded)
         loadCBs?.push(cb)
     }
+}
+export function awaitLoaded() {
+    return new Promise((resolve) => {
+        onLoaded(() => resolve(true))
+    })
 }
 
 setTimeOffset()

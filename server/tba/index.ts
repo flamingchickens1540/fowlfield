@@ -86,7 +86,7 @@ export async function updateEventInfo(teams: Team[] = Object.values(getTeams()))
 }
 
 export async function updateEventTeams() {
-    const teams = Object.values(getTeams())
+    const teams = Object.values(await getTeams())
     const body: TbaTeamNumber[] = teams.map(({ id }) => getTBATeamNumber(id))
     await post('team_list/update', body)
     await updateEventInfo(teams)

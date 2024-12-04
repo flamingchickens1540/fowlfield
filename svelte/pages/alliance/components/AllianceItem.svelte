@@ -1,34 +1,38 @@
 <script lang=ts>
-    import {teamList} from "~/lib/store";
-    import {alliances} from "../AllianceManager.svelte";
-    import {derived} from "svelte/store";
+    import { alliances, getTeamNumber, teamList } from '~/lib/store'
+    import { derived } from 'svelte/store'
+    import { type AlliancePosition } from '~common/types'
 
-    export let index: 0|1|2|3
-    const alliance = derived(alliances, ($alliances) => $alliances[index])
+    export let seed: 1|2|3|4
+    const alliance = derived(alliances, ($alliances) => $alliances[seed])
+    console.error($alliances)
+    Object.values($alliance).forEach((position) => position.setWritable(true))
 
-    function setTeamAlliance(pos:number, team:string) {
-        const oldteam = $teamList[$alliance[pos-1]]
-        oldteam?.alliancePosition.set(0);
-        oldteam?.alliance.set(0);
+    function setTeamAlliance(position:AlliancePosition, team:string) {
         if (team == "" || team == "0") {
+            $alliance[position].set(null)
+            return null
+        }
+        const teamNum = getTeamNumber(team)
+        if (teamNum == null) {
             return
         }
-        teamList.update((list) => {
-            const teamstore = Object.values(list).find((t) => t.displaynum.get() == team)
-            if (teamstore == null) {return list}
-            teamstore.alliancePosition.set(pos as 0|1|2|3|4);
-            teamstore.alliance.set(index+1 as 1|2|3|4);
-            return list
-        })
+        $alliance[position].set(teamNum)
     }
+    const captain = derived($alliance.captain, (member) => $teamList[member ?? 0]?.display_number.get() ?? "")
+    captain.subscribe(console.warn)
+    const pick1 = derived($alliance.first_pick, (member) => $teamList[member ?? 0]?.display_number.get() ?? "")
+    const pick2 = derived($alliance.second_pick, (member) => $teamList[member ?? 0]?.display_number.get() ?? "")
+    const pick3 = derived($alliance.third_pick, (member) => $teamList[member ?? 0]?.display_number.get() ?? "")
+
 </script>
 
 <div class=container>
-    <div>Alliance {index+1}</div>
-    <input value={$teamList[$alliance[0]]?.displaynum?.get() ?? ""} on:input={(e) => {setTeamAlliance(1, e.target["value"])}} list=teams/>
-    <input value={$teamList[$alliance[1]]?.displaynum?.get() ?? ""} on:input={(e) => {setTeamAlliance(2, e.target["value"])}} list=teams/>
-    <input value={$teamList[$alliance[2]]?.displaynum?.get() ?? ""} on:input={(e) => {setTeamAlliance(3, e.target["value"])}} list=teams/>
-    <input value={$teamList[$alliance[3]]?.displaynum?.get() ?? ""} on:input={(e) => {setTeamAlliance(4, e.target["value"])}} list=teams/>
+    <div>Alliance {seed}</div>
+    <input value={$captain} on:input={(e) => {setTeamAlliance("captain", e.currentTarget.value.trim())}} list=teams/>
+    <input value={$pick1} on:input={(e) => {setTeamAlliance("first_pick", e.currentTarget.value.trim())}} list=teams/>
+    <input value={$pick2} on:input={(e) => {setTeamAlliance("second_pick", e.currentTarget.value.trim())}} list=teams/>
+    <input value={$pick3} on:input={(e) => {setTeamAlliance("third_pick", e.currentTarget.value.trim())}} list=teams/>
 </div>
 
 

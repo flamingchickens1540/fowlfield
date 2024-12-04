@@ -109,6 +109,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.emit('preloadMatch', await matchmanager.getPreloadedMatch())
     socket.emit('matches', await getMatches())
     socket.emit('teams', await getTeams())
+    socket.emit('alliances', await prisma.playoffAlliance.findMany({}))
     socket.emit('event', {
         atLunch: eventState.atLunch,
         lunchReturnTime: eventState.lunchReturnTime
@@ -118,7 +119,17 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.on('ping', (cb) => {
         cb(Date.now())
     })
+    socket.on('partialAlliance', async (data) => {
+        const seed = data.seed
+        delete data.seed
 
+        const alliance = await prisma.playoffAlliance.upsert({
+            where: { seed },
+            update: data,
+            create: { seed, ...data }
+        })
+        io.emit('alliance', alliance)
+    })
     socket.on('commitAlliances', async (cb) => {
         cb(await tba.updateAlliances())
     })

@@ -2,8 +2,17 @@ import { getElapsedTimeInPeriod, getMatchPeriod, getRemainingTimeInDisplayPeriod
 import { calculateTotalPoints } from '~common/utils/scores'
 import socket from '~/lib/socket'
 import { derived, type Readable, writable, type Writable } from 'svelte/store'
-import { createFowlEventStore, createFowlMatchStore, createFowlTeamStore, createPropertyStore, gettableStore, SocketWritable, SocketWritableOf } from './socketStore'
-import { Match, Team } from '@prisma/client'
+import {
+    createFowlAllianceStore,
+    createFowlEventStore,
+    createFowlMatchStore,
+    createFowlTeamStore,
+    createPropertyStore,
+    gettableStore,
+    SocketWritable,
+    SocketWritableOf
+} from './socketStore'
+import { Match, PlayoffAlliance, Team } from '@prisma/client'
 import { EventInfo, RankingEntry } from '~common/types'
 
 let serverTimeOffset: number = 0
@@ -60,6 +69,15 @@ export function isMatchPreloaded(match: string) {
 
 export const matchList: Writable<{ [key: string]: Match }> = writable({})
 export const teamList: Writable<{ [key: number]: SocketWritableOf<Team> }> = writable({})
+const teamLookup: Record<string, number> = {}
+teamList.subscribe((list) => {
+    Object.entries(list).forEach(([key, team]) => {
+        teamLookup[team.display_number.get()] = parseInt(key)
+    })
+})
+export function getTeamNumber(displayNumber: string): number | null {
+    return teamLookup[displayNumber] ?? null
+}
 
 export const eventData = {
     atLunch: createFowlEventStore('atLunch'),
@@ -133,6 +151,16 @@ function createTeamStores(team: Team): SocketWritableOf<Team> {
     }
 }
 
+function createAllianceStores(alliance: PlayoffAlliance): SocketWritableOf<PlayoffAlliance> {
+    return {
+        seed: createFowlAllianceStore(alliance, 'seed'),
+        captain: createFowlAllianceStore(alliance, 'captain'),
+        first_pick: createFowlAllianceStore(alliance, 'first_pick'),
+        second_pick: createFowlAllianceStore(alliance, 'second_pick'),
+        third_pick: createFowlAllianceStore(alliance, 'third_pick')
+    }
+}
+
 export function updateTeamList(data: { [key: number]: Team }) {
     teamList.update((list) => {
         list = {}
@@ -179,6 +207,29 @@ export function updateStoredEventinfo(data: EventInfo) {
 export const rankings = writable<RankingEntry[]>([])
 export function updateRankings(data: RankingEntry[]) {
     rankings.set(data)
+}
+
+export const alliances = writable<Record<number, SocketWritableOf<PlayoffAlliance>>>({})
+export function updateAlliances(data: PlayoffAlliance[]) {
+    alliances.update((list) => {
+        list = {}
+        data.forEach((alliance) => {
+            list[alliance.seed] = createAllianceStores(alliance)
+        })
+        return list
+    })
+}
+export function updateAlliance(data: PlayoffAlliance) {
+    alliances.update((list) => {
+        if (list[data.seed] == null) {
+            list[data.seed] = createAllianceStores(data)
+        } else {
+            Object.entries(list[data.seed]).forEach(([key, store]) => {
+                ;(store as SocketWritable<unknown>).setLocal(data[key as keyof PlayoffAlliance])
+            })
+        }
+        return list
+    })
 }
 
 const points = derived(matchDataPrivate.scores, calculateTotalPoints, { red: 0, blue: 0 })

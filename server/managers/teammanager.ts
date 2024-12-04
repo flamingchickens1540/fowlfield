@@ -11,8 +11,12 @@ export function getTeam(id: number) {
 }
 
 export async function getTeams(): Promise<Record<string, Team>> {
-    const teams = await prisma.team.findMany()
+    const teams = await getTeamList()
     return Object.fromEntries(teams.map((team) => [team.id.toString(), team]))
+}
+
+export async function getTeamList(): Promise<Team[]> {
+    return await prisma.team.findMany({})
 }
 
 export async function getAlliances() {
@@ -103,7 +107,7 @@ export async function buildRankings(): Promise<RankingEntry[]> {
 export async function updateTeam(team: PartialTeam) {
     const id = team.id
     delete team.id
-    return prisma.team.update({
+    return await prisma.team.update({
         where: { id },
         data: team
     })

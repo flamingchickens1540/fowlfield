@@ -1,10 +1,9 @@
 <script lang="ts">
-	import socket from "~//lib/socket";
-	import type { SocketWritableOf } from '~/lib/socketStore'
-	import type { Team } from '@prisma/client'
-	import writableDerived from 'svelte-writable-derived'
+    import socket from '~//lib/socket'
+    import type { SocketWritableOf } from '~/lib/socketStore'
+    import type { Team } from '@prisma/client'
 
-	export let team: SocketWritableOf<Team>;
+    export let team: SocketWritableOf<Team>;
 	const {id, display_number, team_name, robot_name, has_card} = team
 	display_number.setWritable()
 	team_name.setWritable()
@@ -17,7 +16,7 @@
 	<input class="tableitem centertext" type="text" bind:value={$display_number} />
 	<input class="tableitem" type="text" bind:value={$team_name} />
 	<input class="tableitem" type="text" bind:value={$robot_name} />
-	<input class="tableitem" type="checkbox" style="background-color:{$has_card ? '#6c6c00' : '#383838'}" bind:value={$has_card} />
+	<input class="tableitem" type="checkbox" style="background-color:{$has_card ? '#6c6c00' : '#383838'}" bind:checked={$has_card} />
 	<button class="tableitem" on:click={() => socket.emit("deleteTeam", $id)}>-</button>
 </div>
 

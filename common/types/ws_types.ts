@@ -1,5 +1,5 @@
-import { EventInfo, MatchSound, PartialMatch, PartialTeam, RankingEntry } from '.'
-import { Match, Team } from '@prisma/client'
+import { EventInfo, MatchSound, PartialAlliance, PartialMatch, PartialTeam, RankingEntry } from '.'
+import { Match, PlayoffAlliance, Team } from '@prisma/client'
 
 export interface ServerToClientEvents {
     match(data: Match): void
@@ -8,6 +8,8 @@ export interface ServerToClientEvents {
     teams(data: Record<string, Team>): void
     rankings(data: RankingEntry[]): void
     event(data: EventInfo): void
+    alliances(data: PlayoffAlliance[]): void
+    alliance(data: PlayoffAlliance): void
 
     /**
      * Update displays that are used before the match
@@ -31,6 +33,7 @@ export interface ClientToServerEvents {
     partialMatch(data: PartialMatch): void
     partialTeam(data: PartialTeam): void
     partialEvent(data: Partial<EventInfo>): void
+    partialAlliance(data: PartialAlliance): void
 
     newTeam(data: Team): void
     deleteTeam(id: number): void

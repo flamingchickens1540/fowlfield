@@ -4,7 +4,7 @@ import { writable } from 'svelte/store'
 import type { ClientToServerEvents, EventInfo } from '~common/types'
 import socket from '~/lib/socket'
 import matchData from '~/lib/store'
-import { Match, Team } from '@prisma/client'
+import { Match, PlayoffAlliance, Team } from '@prisma/client'
 import writableDerived from 'svelte-writable-derived'
 import { getBlankEvent, getBlankMatch } from '~common/utils/blanks'
 
@@ -74,6 +74,10 @@ export function createFowlTeamStore<K extends keyof Team, V extends Team[K]>(tea
 const blankEvent = getBlankEvent()
 export function createFowlEventStore<K extends keyof EventInfo, V extends EventInfo[K]>(key: K): SocketWritable<V> {
     return createSocketStore('partialEvent', blankEvent, key, () => ({}))
+}
+
+export function createFowlAllianceStore<K extends keyof PlayoffAlliance, V extends PlayoffAlliance[K]>(alliance: PlayoffAlliance, key: K): SocketWritable<V> {
+    return createSocketStore('partialAlliance', alliance, key, () => ({ seed: alliance.seed }))
 }
 
 export function createSocketStore<Event extends keyof ClientToServerEvents, P extends Parameters<ClientToServerEvents[Event]>[0], K extends keyof P, V extends P[K]>(

@@ -1,29 +1,15 @@
-<script lang=ts context=module>
-	import {teamList} from "~/lib/store";
-	import {derived} from "svelte/store";
-
-	export const alliances = derived(teamList, ($teamList) => {
-		const list = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-		Object.values($teamList).forEach((team) => {
-			if (team.alliance.get() == 0 || team.alliancePosition.get() == 0) {return}
-			list[team.alliance.get()-1][team.alliancePosition.get()-1] = team.id
-		})
-		return list
-	})
-</script>
-
 <script lang=ts>
-	import AllianceItem from "./components/AllianceItem.svelte";
-	import socket from "~//lib/socket";
-	import { onMount } from "svelte";
+	import AllianceItem from './components/AllianceItem.svelte'
+	import socket, { awaitLoaded } from '~//lib/socket'
+	import { onMount } from 'svelte'
+	import { teamList } from '~/lib/store'
 
 	let tbabutton:HTMLButtonElement;
-	
+
 	onMount(() => {
-		alliances.subscribe(() => tbabutton.disabled = false)
 		tbabutton.addEventListener("click", () => {
 			socket.emit("commitAlliances", (success) => {
-				tbabutton.disabled = success;
+				console.log(success)
 			})
 		})
 	})
@@ -31,9 +17,7 @@
 
 <datalist id="teams">
 	{#each Object.values($teamList) as team}
-		{#if team.alliance.get() === 0}
-			<option value={team.displaynum.get()}></option>
-		{/if}
+			<option value={team.display_number.get()}></option>
 	{/each}
 </datalist>
 
@@ -46,10 +30,12 @@
 		<div>2nd Pick</div>
 		<div>3rd Pick</div>
 	</div>
-	<AllianceItem index={0}></AllianceItem>
-	<AllianceItem index={1}></AllianceItem>
-	<AllianceItem index={2}></AllianceItem>
-	<AllianceItem index={3}></AllianceItem>
+	{#await awaitLoaded() then _}
+	<AllianceItem seed={1}></AllianceItem>
+	<AllianceItem seed={2}></AllianceItem>
+	<AllianceItem seed={3}></AllianceItem>
+	<AllianceItem seed={4}></AllianceItem>
+		{/await}
 </div>
 
 <button bind:this={tbabutton}>Publish to TBA</button>
