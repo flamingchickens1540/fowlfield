@@ -61,7 +61,7 @@ export class MatchMaker {
         })
     }
 
-    advanceElimMatch(): Promise<Match> {
+    async advanceElimMatch(): Promise<Match> {
         if (this.bracket == null) {
             logger.error('Must initialize elims before advancing')
             return
@@ -71,8 +71,10 @@ export class MatchMaker {
         if (match == null) {
             return null
         }
-        const alliances = teammanager.getAlliances()
-        logger.info('ELIM DATA', match, match.red, match.blue, alliances)
+        const alliances = await teammanager.getAlliances()
+        logger.info({ match, alliances }, 'ELIM DATA')
+        const red = alliances.get(match.red)
+        const blue = alliances.get(match.blue)
         return prisma.match.create({
             data: {
                 id: match.details.matchId,
@@ -86,12 +88,12 @@ export class MatchMaker {
                 },
                 type: 'elimination',
                 state: 'not_started',
-                red1: alliances[match.red][0] ?? 0,
-                red2: alliances[match.red][1] ?? 0,
-                red3: alliances[match.red][2] ?? 0,
-                blue1: alliances[match.blue][0] ?? 0,
-                blue2: alliances[match.blue][1] ?? 0,
-                blue3: alliances[match.blue][2] ?? 0,
+                red1: red.captain ?? 0,
+                red2: red.first_pick ?? 0,
+                red3: red.second_pick ?? 0,
+                blue1: blue.captain ?? 0,
+                blue2: blue.first_pick ?? 0,
+                blue3: blue.second_pick ?? 0,
                 scores: getBlankMatchScoreBreakdown(),
                 startTime: 0
             }

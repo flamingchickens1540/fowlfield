@@ -21,6 +21,7 @@ export async function getTeamList(): Promise<Team[]> {
 
 export async function getAlliances() {
     const alliances = await prisma.playoffAlliance.findMany({})
+    console.log(alliances)
     return new Map(alliances.map((alliance) => [alliance.seed, alliance]))
 }
 

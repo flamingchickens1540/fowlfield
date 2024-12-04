@@ -12,7 +12,6 @@ type ScheduleItem = {
 
 export class DoubleEliminationBracket {
     private matches: { [key: number]: ScheduleItem } = {}
-    private alliances: DoubleEliminationAlliance[] = [1, 2, 3, 4]
     private scheduleIndex = 1
     private netFinalWins = 0
 
@@ -22,10 +21,10 @@ export class DoubleEliminationBracket {
             this.matches[parseInt(key)] = { details: value }
         })
 
-        this.matches[1].red = this.alliances[0]
-        this.matches[1].blue = this.alliances[3]
-        this.matches[2].red = this.alliances[1]
-        this.matches[2].blue = this.alliances[2]
+        this.matches[1].red = 1
+        this.matches[1].blue = 4
+        this.matches[2].red = 2
+        this.matches[2].blue = 3
     }
     private recordedMatches = []
 
@@ -42,14 +41,10 @@ export class DoubleEliminationBracket {
         const losingAlliance = winner === 'red' ? match.blue : match.red
 
         if (match.details.winnerTo != null) {
-            this.matches[match.details.winnerTo.match][
-                match.details.winnerTo.alliance
-            ] = winningAlliance
+            this.matches[match.details.winnerTo.match][match.details.winnerTo.alliance] = winningAlliance
         }
         if (match.details.loserTo != null) {
-            this.matches[match.details.loserTo.match][
-                match.details.loserTo.alliance
-            ] = losingAlliance
+            this.matches[match.details.loserTo.match][match.details.loserTo.alliance] = losingAlliance
         }
         switch (matchNumber) {
             case 6: {
@@ -73,27 +68,15 @@ export class DoubleEliminationBracket {
     }
 
     getNextMatch(): ScheduleItem {
-        if (
-            this.scheduleIndex > 8 ||
-            (this.scheduleIndex == 7 && this.netFinalWins != 0)
-        ) {
+        if (this.scheduleIndex > 8 || (this.scheduleIndex == 7 && this.netFinalWins != 0)) {
             bracketLogger.error('Cannot get next match, bracket is over')
             return
         }
-        if (
-            this.matches[this.scheduleIndex].red == null ||
-            this.matches[this.scheduleIndex].blue == null
-        ) {
+        if (this.matches[this.scheduleIndex].red == null || this.matches[this.scheduleIndex].blue == null) {
             bracketLogger.warn('Must update before requesting next match')
             return
         }
-        bracketLogger.debug(
-            'CURRENT SCHEDULE',
-            this.scheduleIndex,
-            'SCHED',
-            this.matches[this.scheduleIndex],
-            'DONE'
-        )
+        bracketLogger.debug('CURRENT SCHEDULE', this.scheduleIndex, 'SCHED', this.matches[this.scheduleIndex], 'DONE')
         this.scheduleIndex++
         return this.matches[this.scheduleIndex - 1]
     }
