@@ -16,6 +16,7 @@ import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
 import { getAlliances } from '~common/utils/scores'
+import { Tote } from '@prisma/client'
 
 const logger = createLogger('socket')
 export let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -151,6 +152,25 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
             return
         }
         const match = await matchmanager.updateMatch(data)
+        io.emit('match', match)
+    })
+
+    socket.on('toteData', async (matchid: string, index: number, data: Partial<Tote>) => {
+        const match = await prisma.match.findUnique({ where: { id: matchid } })
+        console.log(match.scores.totes, data)
+        match.scores.totes[index] = { ...match.scores.totes[index], ...data }
+        await prisma.match.update({
+            where: {
+                id: matchid
+            },
+            data: {
+                scores: {
+                    update: {
+                        totes: match.scores.totes
+                    }
+                }
+            }
+        })
         io.emit('match', match)
     })
 

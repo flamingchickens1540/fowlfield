@@ -1,39 +1,27 @@
 <script context=module lang=ts>
-    import type {DriverStation} from "~common/types";
-    import MatchScoring from "./components/MatchScoring.svelte";
 
-    export const driverstations: { [key in `${"red" | "blue"}${1 | 2 | 3}`]: DriverStation } = {
-        red1: "R1",
-        red2: "R2",
-        red3: "R3",
-        blue1: "B1",
-        blue2: "B2",
-        blue3: "B3"
-    }
 </script>
 <script lang=ts>
-    import {getCookie, setCookie} from "typescript-cookie";
-    import {onMount} from "svelte/internal";
-
-    let station = window.location.pathname.match(/\/scoring\/([\w\d]+)$/)?.[1] ?? getCookie("refpanel_station")
-
-    if (station == null || driverstations[station] == null) {
-        station = 'red1'
-        window.history.replaceState(null, '', '/scoring/' + station);
-    }
-
-    const parsed = station.match(/^(\w+)(\d)$/)
-    const stationnum = parseInt(parsed[2]) as 1 | 2 | 3
-    const alliance = parsed[1] as "red" | "blue"
-    setCookie("refpanel_station", station, {expires: 365, path: "/scoring"})
+    import { onMount } from 'svelte'
+    import matchData from "~/lib/store"
+    import type { Writable } from 'svelte/store'
+    import type { Tote } from '@prisma/client'
+    import writableDerived from 'svelte-writable-derived'
+    import MatchScoring from '~/pages/scoring/components/MatchScoring.svelte'
+    const {scores} = matchData
     onMount(() => {
         document.addEventListener('dblclick', function (event) {
             event.preventDefault();
         }, {passive: false});
     })
+    scores.setWritable()
+    const toteStores:Writable<Tote>[] = []
+    for (let i = 0; i < 4; i++) {
+        toteStores.push(writableDerived(scores, ($scores) => $scores.totes[i], (value, scores) => {scores.totes[i] = value; return scores}))
+    }
 </script>
 
-<MatchScoring {alliance} station={stationnum}></MatchScoring>
+<MatchScoring index={0} tote={toteStores[0]}/>
 
 
 <style lang=scss>

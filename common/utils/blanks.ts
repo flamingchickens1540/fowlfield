@@ -14,7 +14,20 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
 export function getBlankMatchScoreBreakdown(): Match_Results {
     return {
         corral_empty: false,
-        totes: [],
+        totes: [
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
+        ],
         fouls: [],
         red: getBlankAllianceScoreBreakdown(),
         blue: getBlankAllianceScoreBreakdown()
