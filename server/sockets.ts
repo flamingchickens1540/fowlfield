@@ -1,4 +1,4 @@
-import { type ClientToServerEvents, MatchPeriod, type PartialMatch, PartialTeam, type ServerToClientEvents } from '~common/types'
+import { type ClientToServerEvents, MatchPeriod, type PartialMatch, PartialTeam, type ServerToClientEvents, ToteKey } from '~common/types'
 import * as http from 'http'
 import { Server, Socket } from 'socket.io'
 import config from '~common/config'
@@ -155,18 +155,15 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('match', match)
     })
 
-    socket.on('toteData', async (matchid: string, index: number, data: Partial<Tote>) => {
-        const match = await prisma.match.findUnique({ where: { id: matchid } })
-        console.log(match.scores.totes, data)
-        match.scores.totes[index] = { ...match.scores.totes[index], ...data }
-        await prisma.match.update({
+    socket.on('toteData', async (matchid: string, key: ToteKey, data: Partial<Tote>) => {
+        const match = await prisma.match.update({
             where: {
                 id: matchid
             },
             data: {
                 scores: {
                     update: {
-                        totes: match.scores.totes
+                        totes: { update: { [key]: { update: data } } }
                     }
                 }
             }

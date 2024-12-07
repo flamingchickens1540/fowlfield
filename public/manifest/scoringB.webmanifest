@@ -2,13 +2,13 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/review/",
-    "name": "FowlField Match Review",
+    "start_url": "/scoring/?sideB",
+    "name": "FowlField Scoring",
     "orientation": "landscape",
-    "short_name": "Review",
+    "short_name": "Scoring B",
     "icons": [
         {
-            "src": "/manifest/review.png",
+            "src": "/manifest/scoring.png",
             "sizes": "512x512",
             "type": "image/png"
         }

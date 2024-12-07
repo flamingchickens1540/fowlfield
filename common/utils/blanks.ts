@@ -14,20 +14,20 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
 export function getBlankMatchScoreBreakdown(): Match_Results {
     return {
         corral_empty: false,
-        totes: [
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
-        ],
+        totes: {
+            tote1: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote2: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote3: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote4: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote5: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote6: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote7: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote8: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote9: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote10: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote11: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
+            tote12: { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
+        },
         fouls: [],
         red: getBlankAllianceScoreBreakdown(),
         blue: getBlankAllianceScoreBreakdown()

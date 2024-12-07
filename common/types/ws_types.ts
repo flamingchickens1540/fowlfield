@@ -1,4 +1,4 @@
-import { EventInfo, MatchSound, PartialAlliance, PartialMatch, PartialTeam, RankingEntry } from '.'
+import { EventInfo, MatchSound, PartialAlliance, PartialMatch, PartialTeam, RankingEntry, ToteKey } from '.'
 import { Match, PlayoffAlliance, Team, Tote } from '@prisma/client'
 
 export interface ServerToClientEvents {
@@ -34,7 +34,7 @@ export interface ClientToServerEvents {
     partialTeam(data: PartialTeam): void
     partialEvent(data: Partial<EventInfo>): void
     partialAlliance(data: PartialAlliance): void
-    toteData(matchid: string, index: number, data: Partial<Tote>): void
+    toteData(matchid: string, tote: ToteKey, data: Partial<Tote>): void
 
     newTeam(data: Team): void
     deleteTeam(id: number): void

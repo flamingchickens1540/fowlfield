@@ -57,6 +57,21 @@ model Match {
   @@unique([stage_index, type])
 }
 
+type Totes {
+  tote1  Tote
+  tote2  Tote
+  tote3  Tote
+  tote4  Tote
+  tote5  Tote
+  tote6  Tote
+  tote7  Tote
+  tote8  Tote
+  tote9  Tote
+  tote10 Tote
+  tote11 Tote
+  tote12 Tote
+}
+
 type Tote {
   red_balloons  Int // The number of red balloons in the tote
   blue_balloons Int // The number of blue balloons in the tote
@@ -66,7 +81,7 @@ type Tote {
 type Match_Results {
   red          Match_AllianceResults
   blue         Match_AllianceResults
-  totes        Tote[]
+  totes        Totes
   fouls        Foul[]
   corral_empty Boolean
 }

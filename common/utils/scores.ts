@@ -1,4 +1,5 @@
 import { Match, Match_Results } from '@prisma/client'
+import { ToteKey } from '../types'
 
 export type PointsBreakdown = {
     tote_balloons: number
@@ -33,7 +34,8 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
     points.red.low_zone_bunny = 6 * breakdown.red.zone_bunnies // 6 points per bunny in low zone
     points.blue.low_zone_bunny += 6 * breakdown.blue.zone_bunnies // 6 points per bunny in low zone
 
-    for (const tote of breakdown.totes) {
+    for (const id in breakdown.totes) {
+        const tote = breakdown.totes[id as ToteKey]
         const multiplier = 3 * 2 ** tote.bunnies // 3x2^B points per balloon in tote with B bunnies
         points.red.tote_balloons += tote.red_balloons * multiplier
         points.blue.tote_balloons += tote.blue_balloons * multiplier

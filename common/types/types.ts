@@ -7,6 +7,8 @@ export type PartialMatch = PartialWithFields<Match, 'id'>
 export type PartialTeam = PartialWithFields<Team, 'id'>
 export type PartialAlliance = PartialWithFields<PlayoffAlliance, 'seed'>
 export type AlliancePosition = Exclude<keyof PlayoffAlliance, 'seed'>
+
+export type ToteKey = `tote${1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12}`
 export interface EventInfo {
     atLunch: boolean
     lunchReturnTime: number

@@ -2,7 +2,7 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/estop",
+    "start_url": "/estop/",
     "name": "FowlField Estops",
     "orientation": "landscape",
     "short_name": "E-Stops",

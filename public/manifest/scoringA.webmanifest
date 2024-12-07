@@ -2,10 +2,10 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/scoring",
+    "start_url": "/scoring/?sideA",
     "name": "FowlField Scoring",
     "orientation": "landscape",
-    "short_name": "Scoring",
+    "short_name": "Scoring A",
     "icons": [
         {
             "src": "/manifest/scoring.png",

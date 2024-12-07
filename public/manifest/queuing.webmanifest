@@ -2,7 +2,7 @@
     "theme_color": "#242424",
     "background_color": "#242424",
     "display": "fullscreen",
-    "start_url": "/queuing",
+    "start_url": "/queuing/",
     "name": "FowlField Queuing",
     "orientation": "landscape",
     "short_name": "Queuing",
