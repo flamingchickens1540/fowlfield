@@ -3,7 +3,7 @@
 	import { matchList, teamList } from '~/lib/store'
 	import LeaderLine from 'leader-line-new'
 	import type { Writable } from 'svelte/store'
-	import { LineData } from '~/pages/bracket/ElimBracket.svelte'
+	import type { LineData } from '~/pages/rankings/ElimBracket.svelte'
 
 	export let title: string;
 	export let id: string;

@@ -44,6 +44,9 @@ export async function getMatchStats(): Promise<{
     })
     const matches = await prisma.match.findMany()
     matches.forEach((match) => {
+        if (match.type == 'elimination') {
+            return
+        }
         const scores = getScores(match)
         getRedAlliance(match).forEach(({ team, card }) => {
             if (team == 0) return
