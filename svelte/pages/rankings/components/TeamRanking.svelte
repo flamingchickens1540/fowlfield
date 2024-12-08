@@ -10,7 +10,7 @@
 
 <tr>
     <td>#{rank}</td>
-    <td>{team.display_number.get()}</td>
+    <td class="bold">{team.display_number.get()}</td>
     <td>{team.team_name.get()}</td>
     <td>{rp}</td>
     <td>{win}-{loss}-{tie}</td>
@@ -18,6 +18,9 @@
 
 <style lang=scss>
     @import "../rankings";
+    .bold {
+      font-weight: 700;
+    }
     tr:nth-child(1) {
         > * {
             padding-top:30px;

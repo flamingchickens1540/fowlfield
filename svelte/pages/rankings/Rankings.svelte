@@ -18,26 +18,33 @@
 	})
 	onMount(() => {
 		let isGoingDown = true;
-		setInterval(() => {
-			if (isHovering) {return}
-			const distanceToBottom = document.body.scrollHeight-(window.scrollY + window.innerHeight)
-			const distanceToTop = window.scrollY
-			
-			if (isGoingDown) {
-				window.scrollBy(0, 1)
-				if (distanceToBottom == 0) {
-					setTimeout(() => isGoingDown = false, 3000)
-				};
-
-			} else {
-				window.scrollBy(0, -30)
-
-				if (distanceToTop == 0) {
-					setTimeout(() => isGoingDown = true, 3000)
-				};
+		let lastTime = 0
+		const scroll = ((time:number) => {
+			if (isHovering) {
+				lastTime = time
+				requestAnimationFrame(scroll);
+				return
 			}
-		}, 20)
-	});
+			const distanceToBottom = document.body.scrollHeight - (window.scrollY + window.innerHeight)
+			const distanceToTop = window.scrollY
+
+			if (isGoingDown) {
+				window.scrollBy(0, (time-lastTime)*0.1)
+				if (distanceToBottom < 1) {
+					setTimeout(() => isGoingDown = false, 3000)
+				}
+			} else {
+				window.scrollBy(0, -3*(time-lastTime))
+
+				if (distanceToTop < 1) {
+					setTimeout(() => isGoingDown = true, 3000)
+				}
+			}
+			lastTime = time
+			requestAnimationFrame(scroll)
+		})
+		scroll(0)
+	})
 	let isHovering:boolean = false
 </script>
 
