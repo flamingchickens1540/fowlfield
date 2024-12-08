@@ -231,7 +231,6 @@ export function updateAlliance(data: PlayoffAlliance) {
         return list
     })
 }
-
 const points = derived(matchDataPrivate.scores, calculateTotalPoints, { red: 0, blue: 0 })
 export const matchData: SocketWritableOf<Match> & {
     redScore: Readable<number>

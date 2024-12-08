@@ -1,78 +1,61 @@
 <script lang="ts">
-    import matchData from '~/lib/store'
-    import Foul from './components/Foul.svelte'
-    import CustomFoul from './components/CustomFoul.svelte'
-    import { calculatePointsBreakdown, calculatePointsTotal } from '~common/utils/scores'
-    import Card from './components/Card.svelte'
+	import matchData from '~/lib/store'
+	import Card from './components/Card.svelte'
+	import { createPropertyStore, createSecondOrderPropertyStore } from '~/lib/socketStore'
+	import Field from '~/pages/review/components/Field.svelte'
+	import FieldCheckbox from '~/pages/review/components/FieldCheckbox.svelte'
 
-    const { redScoreBreakdown, blueScoreBreakdown } = matchData;
+	const { redScore, blueScore, scores, id } = matchData;
+	scores.setWritable()
+	const isCorralEmpty = createPropertyStore(scores, "corral_empty")
+	const blueLowZoneBalloon = createSecondOrderPropertyStore(scores, "blue", "zone_balloons")
+	const blueLowZoneBunny = createSecondOrderPropertyStore(scores, "blue", "zone_bunnies")
+	const redLowZoneBalloon = createSecondOrderPropertyStore(scores, "red", "zone_balloons")
+	const redLowZoneBunny = createSecondOrderPropertyStore(scores, "red", "zone_bunnies")
+	const redFouls = createSecondOrderPropertyStore(scores, "red", "foul_points")
+	const blueFouls = createSecondOrderPropertyStore(scores, "blue", "foul_points")
 </script>
 
 <main>
-	<h1>Match Review</h1>
+	<h1>Match Review - {$id}</h1>
+	<div>
+		<FieldCheckbox label="Is Corral Empty?" store={isCorralEmpty}></FieldCheckbox>
+	</div>
 	<div class="reviewcontainer">
 		<div>
-			<h2>Red Points - {calculatePointsTotal($redScoreBreakdown)}</h2>
+			<h2>Red Points - {$redScore}</h2>
 		</div>
 		<div>
-			<h2>Blue Points - {calculatePointsTotal($blueScoreBreakdown)}</h2>
+			<h2>Blue Points - {$blueScore}</h2>
 		</div>
 	</div>
 	<div class="reviewcontainer">
 		<div>
-			<h2>Red Bunnies</h2>
-			<h3>Auto</h3>
-			<div class=bunnycounter>
-				<button class="red-button" on:click={() => $redScoreBreakdown.autoBunnyCount--}>-</button>
-				<input type="number" bind:value={$redScoreBreakdown.autoBunnyCount} />
-				<button class="green-button" on:click={() => $redScoreBreakdown.autoBunnyCount++}>+</button>
-			</div>
-			<h3>Endgame</h3>
-			<div class=bunnycounter>
-				<button class="red-button" on:click={() => $redScoreBreakdown.finalBunnyCount--}>-</button>
-				<input type="number" bind:value={$redScoreBreakdown.finalBunnyCount} />
-				<button class="green-button" on:click={() => $redScoreBreakdown.finalBunnyCount++}>+</button>
-			</div>
+			<h2>Red Low Zone</h2>
+			<Field label="Balloons" store={redLowZoneBalloon}></Field>
+				<Field label="Auto Bunnies" store={redLowZoneBunny}></Field>
 		</div>
 		<div>
-			<h2>Blue Bunnies</h2>
-			<h3>Auto</h3>
-			<div class=bunnycounter>
-				<button class="red-button" on:click={() => $blueScoreBreakdown.autoBunnyCount--}>-</button>
-				<input type="number" bind:value={$blueScoreBreakdown.autoBunnyCount} />
-				<button class="green-button" on:click={() => $blueScoreBreakdown.autoBunnyCount++}>+</button>
-			</div>
-			<h3>Endgame</h3>
-			<div class=bunnycounter>
-				<button class="red-button" on:click={() => $blueScoreBreakdown.finalBunnyCount--}>-</button>
-				<input type="number" bind:value={$blueScoreBreakdown.finalBunnyCount} />
-				<button class="green-button" on:click={() => $blueScoreBreakdown.finalBunnyCount++}>+</button>
-			</div>
-		</div>
-	</div>
-	<div class="reviewcontainer">
-		<div>
-			<h2>Fouls from Red ({calculatePointsBreakdown($blueScoreBreakdown).foulPoints}pts)</h2>
-			{#each $blueScoreBreakdown.fouls as foul, i}
-			<!-- Fouls giving points to the red alliance-->
-			<Foul {foul} color="#662a2a" />
-			{/each}
-			<CustomFoul breakdown={blueScoreBreakdown} />
-		</div>
-		<div>
-			<h2>Fouls from Blue ({calculatePointsBreakdown($redScoreBreakdown).foulPoints}pts)</h2>
-			{#each $redScoreBreakdown.fouls as foul, i}
-			<!-- Fouls giving points to the blue alliance-->
-			
-			<Foul {foul} color="#2a2d66" />
-			{/each}
-			<CustomFoul breakdown={redScoreBreakdown} />
+			<h2>Blue Low Zone</h2>
+			<Field label="Balloons" store={blueLowZoneBalloon}></Field>
+			<Field label="Auto Bunnies" store={blueLowZoneBunny}></Field>
 		</div>
 	</div>
 
 	<div class="reviewcontainer">
 		<div>
-			<h2>Red Alliance Misc</h2>
+			<h2>Fouls for Red</h2>
+			<Field label="Foul Points" store={redFouls}></Field>
+		</div>
+		<div>
+			<h2>Fouls for Blue</h2>
+			<Field label="Foul Points" store={blueFouls}></Field>
+		</div>
+	</div>
+
+	<div class="reviewcontainer">
+		<div>
+			<h2>Red Alliance Cards</h2>
 			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
 				<Card isRedAlliance={true} stationid={1}></Card>
 				<Card isRedAlliance={true} stationid={2}></Card>
@@ -80,7 +63,7 @@
 			</div>
 		</div>
 		<div>
-			<h2>Blue Alliance Misc</h2>
+			<h2>Blue Alliance Cards</h2>
 			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
 			<Card isRedAlliance={false} stationid={1}></Card>
 			<Card isRedAlliance={false} stationid={2}></Card>

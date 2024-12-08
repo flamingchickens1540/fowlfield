@@ -82,7 +82,6 @@ type Match_Results {
   red          Match_AllianceResults
   blue         Match_AllianceResults
   totes        Totes
-  fouls        Foul[]
   corral_empty Boolean
 }
 
@@ -92,13 +91,7 @@ type Match_AllianceResults {
   card_robot3   Card // The card for the third robot on the alliance
   zone_bunnies  Int // The number of bunnies in the alliance's low zone at the end of the match
   zone_balloons Int // The number of balloons in the alliance's low zone at the end of the match
-}
-
-type Foul {
-  isAgainstRed Boolean // Whether the foul is against the red alliance
-  timestamp    DateTime // The time the foul was committed
-  team_number  Int // The team that committed the foul
-  foul_points  Int // The number of points the foul is worth
+  foul_points   Int // The number a points an alliance earns from fouls
 }
 
 model Team {

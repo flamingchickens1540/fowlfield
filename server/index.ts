@@ -27,7 +27,7 @@ setTimeout(async () => {
 setTimeout(async () => await tba.updateEventTeams(), 1000)
 // await tba.updateAlliances()
 // await tba.updateMatches()
-// await tba.updateRankings()
+await tba.updateRankings()
 
 app.use(express.static('public'))
 app.use(express.static('dist'))

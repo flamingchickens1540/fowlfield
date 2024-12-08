@@ -248,6 +248,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
 
         const { red, blue } = getAlliances(match)
         red.concat(blue).forEach(({ team: team_number, card }) => {
+            logger.info({ team_number, card })
             setTimeout(async () => {
                 if (card == 'none') {
                     return
@@ -258,7 +259,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
                         has_card: true
                     }
                 })
-                logger.info('Committing', card, 'card for', team)
+                logger.info(`Committing ${card} for ${team_number}`)
                 io.emit('team', team)
             })
         })

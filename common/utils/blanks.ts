@@ -7,7 +7,8 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
         card_robot2: 'none',
         card_robot3: 'none',
         zone_bunnies: 0,
-        zone_balloons: 0
+        zone_balloons: 0,
+        foul_points: 0
     }
 }
 
@@ -28,7 +29,6 @@ export function getBlankMatchScoreBreakdown(): Match_Results {
             tote11: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
             tote12: { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
         },
-        fouls: [],
         red: getBlankAllianceScoreBreakdown(),
         blue: getBlankAllianceScoreBreakdown()
     }

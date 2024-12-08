@@ -40,13 +40,8 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
         points.red.tote_balloons += tote.red_balloons * multiplier
         points.blue.tote_balloons += tote.blue_balloons * multiplier
     }
-    for (const foul of breakdown.fouls) {
-        if (foul.isAgainstRed) {
-            points.blue.foul += foul.foul_points
-        } else {
-            points.red.foul += foul.foul_points
-        }
-    }
+    points.blue.foul = breakdown.blue.foul_points
+    points.red.foul = breakdown.red.foul_points
     if (breakdown.corral_empty) {
         // 20 point coopertition bonus
         points.red.empty_corral = 20

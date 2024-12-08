@@ -62,6 +62,18 @@ export function createPropertyStore<T, K extends keyof T>(parent: Writable<T>, k
         )
     )
 }
+export function createSecondOrderPropertyStore<T, K extends keyof T, L extends keyof T[K]>(parent: Writable<T>, keyA: K, keyB: L): WritableGettableStore<T[K][L]> {
+    return gettable(
+        writableDerived(
+            parent,
+            (value) => value[keyA][keyB],
+            (value, parent) => {
+                parent[keyA][keyB] = value
+                return parent
+            }
+        )
+    )
+}
 const blankMatch = getBlankMatch()
 export function createFowlMatchStore<K extends keyof Match, V extends Match[K]>(key: K): SocketWritable<V> {
     return createSocketStore('partialMatch', blankMatch, key, () => ({ id: matchData.id.get() }))

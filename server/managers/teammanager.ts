@@ -16,7 +16,7 @@ export async function getTeams(): Promise<Record<string, Team>> {
 }
 
 export async function getTeamList(): Promise<Team[]> {
-    return await prisma.team.findMany({})
+    return prisma.team.findMany({})
 }
 
 export async function getAlliances() {
@@ -37,6 +37,8 @@ export async function getMatchStats(): Promise<{
             loss: 0,
             tie: 0,
             rp: 0,
+            dq: 0,
+            avg_coop: 0,
             avg_score: 0
         }
     })
@@ -57,10 +59,14 @@ export async function getMatchStats(): Promise<{
                     stats[team].tie++
                     break
             }
-            if (card == 'none') {
+            if (card != 'red') {
                 stats[team].rp += scores.redRP
+            } else {
+                stats[team].dq++
             }
+
             stats[team].avg_score += scores.redScore
+            stats[team].avg_coop += match.scores.corral_empty ? 1 : 0
         })
         getBlueAlliance(match).forEach(({ team, card }) => {
             if (team == 0) return
@@ -76,16 +82,20 @@ export async function getMatchStats(): Promise<{
                     stats[team].tie++
                     break
             }
-            if (card == 'none') {
+            if (card != 'red') {
                 stats[team].rp += scores.blueRP
+            } else {
+                stats[team].dq++
             }
             stats[team].avg_score += scores.blueScore
+            stats[team].avg_coop += match.scores.corral_empty ? 1 : 0
         })
     })
 
     Object.entries(stats).forEach(([team, stat]) => {
         if (stat.count != 0) {
             stat.avg_score /= stat.count
+            stat.avg_coop /= stat.count
         }
     })
 
@@ -93,14 +103,13 @@ export async function getMatchStats(): Promise<{
 }
 
 export async function buildRankings(): Promise<RankingEntry[]> {
-    const stats = getMatchStats()
+    const stats = await getMatchStats()
     return Object.entries(stats)
         .sort((a, b) => b[1].rp - a[1].rp)
         .map(([team, stat], i) => {
             return {
-                rank: i + 1,
                 team: parseInt(team),
-                ...stat
+                match_stats: stat
             }
         })
 }
@@ -108,7 +117,7 @@ export async function buildRankings(): Promise<RankingEntry[]> {
 export async function updateTeam(team: PartialTeam) {
     const id = team.id
     delete team.id
-    return await prisma.team.update({
+    return prisma.team.update({
         where: { id },
         data: team
     })

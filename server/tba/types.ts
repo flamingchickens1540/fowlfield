@@ -32,7 +32,6 @@ export type TbaScoreBreakdown = {
     autoSpeakerNotePoints: number
     autoTotalNotePoints: number
     coopNotePlayed: boolean
-    coopertitionBonusAchieved: boolean
     coopertitionCriteriaMet: boolean
     endGameHarmonyPoints: number
     endGameNoteInTrapPoints: number
@@ -80,15 +79,20 @@ export class TbaAlliance {
     dqs: string[] = []
     score?: number
 
-    constructor(team1: number, team2: number, team3: number, score?: number) {
-        if (team1 != 0) {
-            this.teams.push(`frc${team1}`)
-        }
-        if (team2 != 0) {
-            this.teams.push(`frc${team2}`)
-        }
-        if (team3 != 0) {
-            this.teams.push(`frc${team3}`)
+    constructor(team1: number, team2: number, team3: number, redcard1: boolean, redcard2: boolean, redcard3: boolean, score?: number) {
+        const sets: [number, boolean][] = [
+            [team1, redcard1],
+            [team2, redcard2],
+            [team3, redcard3]
+        ]
+        for (const [team, redcard] of sets) {
+            const tbateam: TbaTeamNumber = `frc${team}`
+            if (team != 0) {
+                this.teams.push(tbateam)
+                if (redcard) {
+                    this.dqs.push(tbateam)
+                }
+            }
         }
         this.score = score
     }

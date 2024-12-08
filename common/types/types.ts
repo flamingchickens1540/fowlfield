@@ -26,6 +26,8 @@ export interface TeamMatchStats {
     loss: number
     tie: number
     rp: number
+    dq: number
+    avg_coop: number
     avg_score: number
 }
 
