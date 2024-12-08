@@ -1,4 +1,4 @@
-import { Match, Match_AllianceResults, Match_Results, Team } from '@prisma/client'
+import { Match, Match_AllianceResults, Match_Results, Team, Tote } from '@prisma/client'
 import { EventInfo } from '../types'
 
 export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
@@ -16,22 +16,26 @@ export function getBlankMatchScoreBreakdown(): Match_Results {
     return {
         corral_empty: false,
         totes: {
-            tote1: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote2: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote3: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote4: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote5: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote6: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote7: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote8: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote9: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote10: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote11: { red_balloons: 0, blue_balloons: 0, bunnies: 0 },
-            tote12: { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
+            tote1: getBlankTote(),
+            tote2: getBlankTote(),
+            tote3: getBlankTote(),
+            tote4: getBlankTote(),
+            tote5: getBlankTote(),
+            tote6: getBlankTote(),
+            tote7: getBlankTote(),
+            tote8: getBlankTote(),
+            tote9: getBlankTote(),
+            tote10: getBlankTote(),
+            tote11: getBlankTote(),
+            tote12: getBlankTote()
         },
         red: getBlankAllianceScoreBreakdown(),
         blue: getBlankAllianceScoreBreakdown()
     }
+}
+
+export function getBlankTote(): Required<Tote> {
+    return { red_balloons: 0, blue_balloons: 0, bunnies: 0 }
 }
 
 export function getBlankTeam(): Required<Team> {
