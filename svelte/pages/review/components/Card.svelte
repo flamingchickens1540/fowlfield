@@ -1,7 +1,7 @@
 <script lang="ts">
     import matchData, { teamList } from '~/lib/store'
     import { derived } from 'svelte/store'
-    import { RobotPosition } from '~common/types'
+    import type { RobotPosition } from '~common/types'
     import { createSecondOrderPropertyStore } from '~/lib/socketStore'
 
     export let isRedAlliance: boolean;
@@ -36,28 +36,10 @@
       font-size: 20px;
       width: 130px;
     }
-
-    input {
-      padding: 5px;
-      margin: 5px;
-      font-size: 20px;
-      width: 120px;
+    min-height: 0;
+    > * {
+      min-height: 0;
     }
-
-    button {
-      min-width: 100px;
-      font-size: 20px;
-    }
-
-    .linelabel {
-      height:40px;
-      display:flex;
-      span {
-        //font-size:10px;
-        align-self:flex-end
-      }
-    }
-
     gap: 5px;
     display: flex;
     flex-direction: column;

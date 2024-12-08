@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { get, Writable } from 'svelte/store'
+    import { get, type Writable } from 'svelte/store'
     import type { ChangeEventHandler } from 'svelte/elements'
 
     export let label:string

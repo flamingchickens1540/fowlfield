@@ -56,7 +56,7 @@
 	<div class="reviewcontainer">
 		<div>
 			<h2>Red Alliance Cards</h2>
-			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
+			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;margin-bottom: 30px;">
 				<Card isRedAlliance={true} stationid={1}></Card>
 				<Card isRedAlliance={true} stationid={2}></Card>
 				<Card isRedAlliance={true} stationid={3}></Card>
@@ -64,7 +64,7 @@
 		</div>
 		<div>
 			<h2>Blue Alliance Cards</h2>
-			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;height:500px">
+			<div style="display:flex;flex-direction:row;justify-content:space-evenly;align-items:center;margin-bottom: 30px">
 			<Card isRedAlliance={false} stationid={1}></Card>
 			<Card isRedAlliance={false} stationid={2}></Card>
 			<Card isRedAlliance={false} stationid={3}></Card>
@@ -91,18 +91,6 @@
 				background-color: #001638;
 			}
 			border: 1px white dashed;
-		}
-	}
-	.bunnycounter {
-		.red-button {
-			background-color: #710000;
-		}
-		.green-button {
-			background-color: #004e00;
-		}
-		& > *{
-			font-size:20px;
-			height:50px;
 		}
 	}
 
