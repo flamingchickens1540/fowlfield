@@ -8,9 +8,12 @@
 	const { redScore, blueScore, scores, id } = matchData;
 	scores.setWritable()
 	const isCorralEmpty = createPropertyStore(scores, "corral_empty")
-	const blueLowZoneBalloon = createSecondOrderPropertyStore(scores, "blue", "zone_balloons")
+	const blueLowZoneBalloonOwn = createSecondOrderPropertyStore(scores, "blue", "zone_balloons_own")
+	const redLowZoneBalloonOpp = createSecondOrderPropertyStore(scores, "blue", "zone_balloons_opp")
+	const redLowZoneBalloonOwn = createSecondOrderPropertyStore(scores, "red", "zone_balloons_own")
+	const blueLowZoneBalloonOpp = createSecondOrderPropertyStore(scores, "red", "zone_balloons_opp")
 	const blueLowZoneBunny = createSecondOrderPropertyStore(scores, "blue", "zone_bunnies")
-	const redLowZoneBalloon = createSecondOrderPropertyStore(scores, "red", "zone_balloons")
+
 	const redLowZoneBunny = createSecondOrderPropertyStore(scores, "red", "zone_bunnies")
 	const redFouls = createSecondOrderPropertyStore(scores, "red", "foul_points")
 	const blueFouls = createSecondOrderPropertyStore(scores, "blue", "foul_points")
@@ -32,12 +35,14 @@
 	<div class="reviewcontainer">
 		<div>
 			<h2>Red Low Zone</h2>
-			<Field label="Balloons" store={redLowZoneBalloon}></Field>
-				<Field label="Auto Bunnies" store={redLowZoneBunny}></Field>
+			<Field label="Balloons (own zone)" store={redLowZoneBalloonOwn}></Field>
+			<Field label="Balloons (opp zone)" store={redLowZoneBalloonOpp}></Field>
+			<Field label="Auto Bunnies" store={redLowZoneBunny}></Field>
 		</div>
 		<div>
 			<h2>Blue Low Zone</h2>
-			<Field label="Balloons" store={blueLowZoneBalloon}></Field>
+			<Field label="Balloons (own zone)" store={blueLowZoneBalloonOwn}></Field>
+			<Field label="Balloons (opp zone)" store={blueLowZoneBalloonOpp}></Field>
 			<Field label="Auto Bunnies" store={blueLowZoneBunny}></Field>
 		</div>
 	</div>
