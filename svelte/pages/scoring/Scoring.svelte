@@ -1,5 +1,5 @@
 <script context=module lang=ts>
-
+    export type LowZoneKeys = "zone_bunnies"|"zone_balloons_own"|"zone_balloons_opp"
 </script>
 <script lang=ts>
     import matchData, { loadedMatch } from '~/lib/store'
@@ -11,10 +11,15 @@
     import type { Tote } from '@prisma/client'
     import socket from '~/lib/socket'
     import { onMount } from 'svelte'
+    import LowZoneSelectorButton from '~/pages/scoring/components/LowZoneSelectorButton.svelte'
+    import LowZoneInputComponent from '~/pages/scoring/components/LowZoneInputComponent.svelte'
 
     const { scores, state } = matchData
-    const index = writable<ToteKey>('tote1')
-    const tote = derived([scores, index], ([$scores, $index]) => $scores.totes[$index], getBlankTote())
+    const index = writable<string>('tote1')
+    const blankTote = getBlankTote()
+    $: isTote = $index in $scores.totes
+    const isRed = derived(index, ($index) => $index == "red")
+    const tote = derived([scores, index], ([$scores, $index]) => $scores.totes[$index as ToteKey] ?? blankTote, blankTote)
     scores.setWritable()
     onMount(() => {
         const initialSize = window.visualViewport!.height
@@ -35,35 +40,58 @@
 
 
     // Avoid updating too quickly
-    const timeouts = new Map<string, number>()
-    function update(field: keyof Tote, value?: number) {
+    // const totetimeouts = new Map<string, number>()
+    function updateTote(field: keyof Tote, value?: number) {
+        const key = $index
+        if (!(key in $scores.totes)) {
+            return
+        }
         if (field == 'bunnies' && value != null && value < 0) {
             value = 0
         }
         if (value != null) {
-            if (timeouts.has(field)) {
-                clearTimeout(timeouts.get(field))
-            }
-            timeouts.set(field, setTimeout(() => {
-                socket.emit('toteData', $loadedMatch, $index, { [field]: value })
-                timeouts.delete(field)
-            }, 500) as unknown as number)
+            // if (totetimeouts.has(key+field)) {
+            //     clearTimeout(totetimeouts.get(key+field))
+            // }
+            // totetimeouts.set(key+field, setTimeout(() => {
+                socket.emit('toteData', $loadedMatch, key as ToteKey, { [field]: value })
+                // totetimeouts.delete(key+field)
+            // }, 1000) as unknown as number)
+        }
+    }
+
+
+    function updateLowZone(field: LowZoneKeys, value?: number) {
+        const key = $index
+        if ((key in $scores.totes)) {
+            return
+        }
+        if (value != null && value < 0) {
+            value = 0
+        }
+        if (value != null) {
+            socket.emit('zoneData', $loadedMatch, key == "red", { [field]: value })
         }
     }
 </script>
 
 <div class="btn-group">
+    <LowZoneSelectorButton parentStore={index} isRed={true}></LowZoneSelectorButton>
     {#each totes as { key, label },i}
         <SelectorButton {key} {label} parentStore={index}></SelectorButton>
     {/each}
+    <LowZoneSelectorButton parentStore={index} isRed={false}></LowZoneSelectorButton>
 </div>
 <div class="parent">
-    <div class="inputcontainer">
-        <InputComponent updateFunction={update} {tote} field="red_balloons"></InputComponent>
-        <InputComponent updateFunction={update} {tote} field="blue_balloons"></InputComponent>
-        <InputComponent updateFunction={update} {tote} field="bunnies"></InputComponent>
+    <div class="inputcontainer" style={`display:${isTote?"flex":"none"}`}>
+        <InputComponent updateFunction={updateTote} {index} {tote} field="red_balloons"></InputComponent>
+        <InputComponent updateFunction={updateTote} {index} {tote} field="blue_balloons"></InputComponent>
+        <InputComponent updateFunction={updateTote} {index} {tote} field="bunnies"></InputComponent>
     </div>
-    <div class="scorecontainer">
+    <div class="inputcontainer" style={`display:${isTote?"none":"flex"}`}>
+        <LowZoneInputComponent updateFunction={updateLowZone} {isRed} field="zone_balloons_own"></LowZoneInputComponent>
+        <LowZoneInputComponent updateFunction={updateLowZone} {isRed} field="zone_balloons_opp"></LowZoneInputComponent>
+        <LowZoneInputComponent updateFunction={updateLowZone} {isRed} field="zone_bunnies"></LowZoneInputComponent>
     </div>
 </div>
 <style lang=scss>
@@ -78,13 +106,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height:40%;
   }
 
-  .scorecontainer {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
 
   :global(:root) {
     //touch-action: none;

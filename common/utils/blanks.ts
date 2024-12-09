@@ -7,7 +7,8 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
         card_robot2: 'none',
         card_robot3: 'none',
         zone_bunnies: 0,
-        zone_balloons: 0,
+        zone_balloons_own: 0,
+        zone_balloons_opp: 0,
         foul_points: 0
     }
 }

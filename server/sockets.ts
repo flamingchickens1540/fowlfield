@@ -16,7 +16,7 @@ import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
 import { getAlliances } from '~common/utils/scores'
-import { Tote } from '@prisma/client'
+import { Match_AllianceResults, Tote } from '@prisma/client'
 
 const logger = createLogger('socket')
 export let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -164,6 +164,21 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
                 scores: {
                     update: {
                         totes: { update: { [key]: { update: data } } }
+                    }
+                }
+            }
+        })
+        io.emit('match', match)
+    })
+    socket.on('zoneData', async (matchid: string, isRed: boolean, data: Partial<Match_AllianceResults>) => {
+        const match = await prisma.match.update({
+            where: {
+                id: matchid
+            },
+            data: {
+                scores: {
+                    update: {
+                        [isRed ? 'red' : 'blue']: { update: data }
                     }
                 }
             }

@@ -28,10 +28,13 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
     if (breakdown == null) {
         return points
     }
-    points.red.low_zone_balloon = 1 * breakdown.red.zone_balloons // 1 point per balloon in low zone
-    points.blue.low_zone_balloon = 1 * breakdown.blue.zone_balloons // 1 point per balloon in low zone
+    points.red.low_zone_balloon += 1 * breakdown.red.zone_balloons_own // 1 point per balloon in low zone
+    points.red.low_zone_balloon += 1 * breakdown.blue.zone_balloons_opp // 1 point per balloon in low zone
 
-    points.red.low_zone_bunny = 6 * breakdown.red.zone_bunnies // 6 points per bunny in low zone
+    points.blue.low_zone_balloon += 1 * breakdown.blue.zone_balloons_own // 1 point per balloon in low zone
+    points.blue.low_zone_balloon += 1 * breakdown.red.zone_balloons_opp // 1 point per balloon in low zone
+
+    points.red.low_zone_bunny += 6 * breakdown.red.zone_bunnies // 6 points per bunny in low zone
     points.blue.low_zone_bunny += 6 * breakdown.blue.zone_bunnies // 6 points per bunny in low zone
 
     for (const id in breakdown.totes) {

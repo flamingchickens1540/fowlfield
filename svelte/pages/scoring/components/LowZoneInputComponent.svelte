@@ -1,21 +1,24 @@
 <script lang="ts">
-    import type { Tote } from '@prisma/client'
-    import { type Readable, writable } from 'svelte/store'
+    import { derived, type Readable, writable } from 'svelte/store'
     import { safeParseInt } from '~common/utils'
+    import { type LowZoneKeys } from '~/pages/scoring/Scoring.svelte'
+    import matchData from '~/lib/store'
 
-    export let updateFunction: (field: keyof Tote, value?: number) => void
-    export let tote: Readable<Tote>
-    export let field: keyof Tote
-    export let index : Readable<string>
+    export let updateFunction: (field: LowZoneKeys, value?: number) => void
+    export let isRed: Readable<boolean>
+    export let field: LowZoneKeys
+
+    const { scores } = matchData
+    const parent = derived([scores, isRed], ([$scores, $isRed]) => $scores[$isRed ? 'red' : 'blue'])
     const store = writable(0)
-    let timeout = 0
     let isStart = true
-    let id = ""
-    tote.subscribe((value) => {
+    let timeout = 0
+    let id = false
+    parent.subscribe((value) => {
         clearTimeout(timeout)
-        if (id != $index || isStart) {
+        if (id != $isRed || isStart) {
             isStart = false
-            id = $index
+            id = $isRed
             store.set(value[field])
         } else {
             timeout = setTimeout(() => {store.set(value[field])}, 1000) as unknown as number
@@ -28,29 +31,55 @@
     }
 </script>
 
-<div class={`inputrow style_${field}`}>
+<div class={`inputrow alliance_${isRed?"red":"blue"} style_${field}`}>
     <button class="btn btnminus" on:click={() => {$store--; update()}}>-</button>
     <input type="number" bind:value={$store} on:change={update}>
     <button class="btn btnplus" on:click={() => {$store++; update()}}>+</button>
-    {#if field != "bunnies"}
-        <div class="label"><span>{3*$store*2**$tote.bunnies}pts</span></div>
+    {#if field != "zone_bunnies"}
+        <div class="label"><span>{$store}pts</span></div>
     {:else}
-        <div class="label"><span>x{2**$store}</span></div>
+        <div class="label"><span>{6 * $store}pts</span></div>
     {/if}
 </div>
 
 <style lang="scss">
+  .alliance_red.style_zone_balloons_own, .alliance_blue.style_zone_balloons_opp {
+    background-color: #d23f3f;
+
+    .label {
+      background-color: #a42323;
+    }
+  }
+
+  .alliance_red.style_zone_balloons_opp, .alliance_blue.style_zone_balloons_own {
+    background-color: #305ac5;
+
+    .label {
+      background-color: #1e3b7f;
+    }
+  }
+
+  .style_zone_bunnies {
+    margin-top: 20px;
+    background-color: #4fcb4f;
+
+    .label {
+      background-color: #258a25;
+    }
+  }
+
   .label {
     font-size: 2rem;
     text-align: center;
     flex-grow: 0;
-    height:100%;
+    height: 100%;
     min-width: 11rem;
-    display:flex;
+    display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 10px;
   }
+
   input {
     font-size: 2rem;
     text-align: center;
@@ -76,28 +105,6 @@
     background-color: #590000;
   }
 
-  .style_red_balloons {
-    background-color: #d23f3f;
-    .label {
-      background-color: #a42323;
-    }
-  }
-
-  .style_blue_balloons {
-    background-color: #305ac5;
-    .label {
-      background-color: #1e3b7f;
-    }
-  }
-
-  .style_bunnies {
-    margin-top: 20px;
-    background-color: #4fcb4f;
-    .label {
-      background-color: #258a25;
-    }
-  }
-
   .inputrow {
     flex-grow: 1;
     border: 2px black solid;
@@ -107,5 +114,6 @@
     gap: 0.5rem;
     padding: 0.5rem;
     min-width: 0;
+    min-height: 0;
   }
 </style>

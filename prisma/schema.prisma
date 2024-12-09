@@ -86,12 +86,13 @@ type Match_Results {
 }
 
 type Match_AllianceResults {
-  card_robot1   Card // The card for the first robot on the alliance
-  card_robot2   Card // The card for the second robot on the alliance
-  card_robot3   Card // The card for the third robot on the alliance
-  zone_bunnies  Int // The number of bunnies in the alliance's low zone at the end of the match
-  zone_balloons Int // The number of balloons in the alliance's low zone at the end of the match
-  foul_points   Int // The number a points an alliance earns from fouls
+  card_robot1       Card // The card for the first robot on the alliance
+  card_robot2       Card // The card for the second robot on the alliance
+  card_robot3       Card // The card for the third robot on the alliance
+  zone_bunnies      Int // The number of bunnies in the alliance's low zone at the end of the match
+  zone_balloons_own Int // The number of own balloons in the alliance's low zone at the end of the match
+  zone_balloons_opp Int // The number of opponent ballons in the alliance's low zone at the end of the match
+  foul_points       Int // The number a points an alliance earns from fouls
 }
 
 model Team {

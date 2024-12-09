@@ -4,7 +4,7 @@
     import { matchData } from '~/lib/store'
 
     const {scores} = matchData
-    export let parentStore:Writable<ToteKey>
+    export let parentStore:Writable<string>
     export let key:ToteKey
     export let label:string;
     const tote = derived(scores, ($scores) => $scores.totes[key])
@@ -13,47 +13,38 @@
     $: isActive = $parentStore == key
 </script>
 
-<button class={isActive ? "active" : isDone ? "done" :  isPartial ? "partial" : "blank"} on:click={() => $parentStore = key}>{label}</button>
+<button class={`${isActive ? "active" : ""}  ${isDone ? "done" : ""} ${isPartial ? "partial" : ""}`} on:click={() => $parentStore = key}>{label}</button>
 
 <style lang="scss">
   button {
     font-weight: 300;
     outline:none;
-    &.active {
-      font-weight: 900;
-        background-color: #9904aa;
-        border: 1px solid white;
+    background-color: #383838;
+    color: white;
 
-        color: white;
-    }
-    &.blank {
-      background-color: #383838;
-      border: 1px solid #181818;
-      color: white;
-    }
+    border: 2px solid #595959;
     &.partial {
-      background-color: #6c5300;
-      border: 1px solid #6c4600;
-      color: white;
+        color: #ffff00
     }
+
     &.done {
       background-color: #098000;
-      border: 1px solid #104d00;
-      color: white;
     }
-    background-color: #04AA6D; /* Green background */
-    border: 1px solid green; /* Green border */
-    color: white; /* White text */
+    &.active {
+      font-weight: 900;
+      background-color: #9904aa;
+      box-shadow: inset 0 0 10px 1px #363636;
+    }
     padding: 10px 24px; /* Some padding */
     cursor: pointer; /* Pointer/hand icon */
     float: left; /* Float the buttons side by side */
     border-radius: 0;
     flex-grow:1;
-    font-size: 2em;
-    &:first-child {
+    font-size: 1.5em;
+    &:nth-child(2) {
       border-radius: 5px 0 0 5px;
     }
-    &:last-child {
+    &:nth-last-child(2) {
       border-radius: 0 5px 5px 0;
     }
   }
