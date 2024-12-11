@@ -1,3 +1,5 @@
+<script></script>
+
 <div class="on-screen-message">
 </div>
 

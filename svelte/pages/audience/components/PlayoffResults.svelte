@@ -84,15 +84,15 @@
 			blueAllianceTo = "Replay";
 		} else if (blueWon) {
 			if (schedule[$stage_index]?.loserTo != null) {
-				redAllianceTo = "Advances to "+schedule[schedule[$stage_index].loserTo!.match]?.title ?? "Unknown"
+				redAllianceTo = "Advances to "+schedule[schedule[$stage_index].loserTo!.match]?.title
 			} else {
 				redAllianceTo = "Eliminated";
 			}
-			blueAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title ?? "Unknown"
+			blueAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title
 		} else {
-			redAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title ?? "Unknown"
+			redAllianceTo = "Advances to "+ schedule[schedule[$stage_index]?.winnerTo?.match ?? -1]?.title
 			if (schedule[$stage_index]?.loserTo != null) {
-				blueAllianceTo = "Advances to "+schedule[schedule[$stage_index]?.loserTo!.match]?.title ?? "Unknown"
+				blueAllianceTo = "Advances to "+schedule[schedule[$stage_index]?.loserTo!.match]?.title
 			} else {
 				blueAllianceTo = "Eliminated";
 			}

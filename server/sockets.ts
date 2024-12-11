@@ -132,6 +132,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('alliance', alliance)
     })
     socket.on('commitAlliances', async (cb) => {
+        
         cb(await tba.updateAlliances())
     })
 

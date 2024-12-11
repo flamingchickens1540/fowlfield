@@ -1,55 +1,52 @@
 <script lang="ts">
-	import { Card } from '~common/types'
+	// import { Card } from '~common/types'
 	import { calculatePointsBreakdown } from '~common/utils/scores'
-	import matchData, { teamsSorted } from '~/lib/store'
+	import matchData, {rankings, teamList} from '~/lib/store'
 	import { derived } from 'svelte/store'
 
-	const { red1, red2, red3, blue1, blue2, blue3, matchNumber, type, redCards, blueCards, redScoreBreakdown, blueScoreBreakdown, redScore, blueScore } = matchData;
+	const { red1, red2, red3, blue1, blue2, blue3, stage_index, scores, redScore, blueScore } = matchData;
 	const teamMap: { [key: number]: { num: string; rank: number; card: string } } = {};
 
-	const colors = {
-		[Card.RED]: "#ff0000",
-		[Card.YELLOW]: "#ffff00",
-		[Card.NONE]: "#00000000",
+	const colors:Record<string, string> = {
+		["red"]: "#ff0000",
+		["yellow"]: "#ffff00",
+		["none"]: "#00000000",
 	};
 
 	$: {
-		Object.values($teamsSorted).forEach((team, i) => {
-			let matchCard = Card.NONE;
-			if (team.id == $red1) {
-				matchCard = $redCards[0];
-			}
-			if (team.id == $red2) {
-				matchCard = $redCards[1];
-			}
-			if (team.id == $red3) {
-				matchCard = $redCards[2];
-			}
-			if (team.id == $blue1) {
-				matchCard = $blueCards[0];
-			}
-			if (team.id == $blue2) {
-				matchCard = $blueCards[1];
-			}
-			if (team.id == $blue3) {
-				matchCard = $blueCards[2];
+		Object.values($rankings).forEach((ranking, i) => {
+			let card = "none";
+			switch (ranking.team) {
+				case $red1: card = $scores.red.card_robot1; break;
+				case $red2: card = $scores.red.card_robot2; break;
+				case $red3: card = $scores.red.card_robot3; break;
+				case $blue1: card = $scores.blue.card_robot1; break;
+				case $blue2: card = $scores.blue.card_robot2; break;
+				case $blue3: card = $scores.blue.card_robot3; break;
 			}
 
-			teamMap[team.id] = {
-				num: team.displaynum.get(),
+			if (card == "none" && $teamList[ranking.team].has_card.get()) {
+				card = "yellow";
+			}
+
+			teamMap[ranking.team] = {
+				num: $teamList[ranking.team].display_number.get(),
 				rank: i + 1,
-				card: matchCard == Card.NONE ? colors[team.card.get()] : colors[matchCard],
+				card: colors[card],
 			};
 		});
 	}
 
-	const calculatedRed = derived(redScoreBreakdown, ($redScoreBreakdown) => calculatePointsBreakdown($redScoreBreakdown));
-	const calculatedBlue = derived(blueScoreBreakdown, ($blueScoreBreakdown) => calculatePointsBreakdown($blueScoreBreakdown));
+
+	const breakdown = derived(scores, ($scores) => calculatePointsBreakdown($scores));
 	$: blueWon = $blueScore > $redScore;
 	$: tie = $blueScore == $redScore;
+	$: empty = $scores.corral_empty;
+	
 </script>
 
 <div class="final-scores" style="clip-path:polygon(148px 87px, 3692px 87px, 3490px 2060px, 350px 2060px)">
+	<img src="handshake.png" alt="Co-op Point Achieved" id="clear" style={`display: ${empty ? "block" : "none"};`}>
 	<svg class="background" width="3548" height="1994" viewBox="0 0 3548 1994" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<g filter="url(#filter0_d_95_212)">
 			<path d="M971.858 1985.07L774.354 992.537L576.851 0H971.858V1985.07Z" fill="#ED1C24" />
@@ -139,21 +136,21 @@
 	<!-- Red Score Breakdown -->
 	<div class="_200">{$redScore}</div>
 	<div class="total">TOTAL</div>
-	<div class="_100">{$calculatedRed.autoTaxi + $calculatedRed.autoBunny}</div>
-	<div class="hybrid">HYBRID</div>
-	<div class="_95">{$calculatedRed.endgamePark + $calculatedRed.finalBunny + $calculatedRed.targetHits}</div>
-	<div class="teleop">TELEOP</div>
-	<div class="_5">{$calculatedRed.foulPoints}</div>
+	<div class="_100">{$breakdown.red.tote_balloons}</div>
+	<div class="hybrid">TOTES</div>
+	<div class="_95">{$breakdown.red.low_zone_balloon + $breakdown.red.low_zone_bunny}</div>
+	<div class="teleop">LOW ZONE</div>
+	<div class="_5">{$breakdown.red.foul}</div>
 	<div class="fouls">FOULS</div>
 
 	<!-- Blue Score Breakdown -->
 	<div class="_190">{$blueScore}</div>
 	<div class="total2">TOTAL</div>
-	<div class="_952">{$calculatedBlue.autoTaxi + $calculatedBlue.autoBunny}</div>
-	<div class="hybrid2">HYBRID</div>
-	<div class="_52">{$calculatedBlue.endgamePark + $calculatedBlue.finalBunny + $calculatedBlue.targetHits}</div>
-	<div class="teleop2">TELEOP</div>
-	<div class="_90">{$calculatedBlue.foulPoints}</div>
+	<div class="_952">{$breakdown.blue.tote_balloons}</div>
+	<div class="hybrid2">TOTES</div>
+	<div class="_52">{$breakdown.blue.low_zone_balloon + $breakdown.blue.low_zone_bunny}</div>
+	<div class="teleop2">LOW ZONE</div>
+	<div class="_90">{$breakdown.blue.foul}</div>
 	<div class="fouls2">FOULS</div>
 
 	<div>
@@ -220,11 +217,18 @@
 
 	<!-- Footer -->
 	<div class="rectangle-72" />
-	<div class="qualification-match-13">Qualification Match {$matchNumber}</div>
-	<div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2023</div>
+	<div class="qualification-match-13">Qualification Match {$stage_index}</div>
+	<div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2024</div>
 </div>
 
 <style lang="scss">
+	#clear {
+		z-index: 999;
+		position: absolute;
+		top: 24%;
+		left: 50%;
+		transform: translate(-50%);
+	}
 	.final-scores,
 	.final-scores * {
 		box-sizing: border-box;

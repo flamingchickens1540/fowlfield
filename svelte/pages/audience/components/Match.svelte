@@ -4,54 +4,18 @@
     import {derived, writable} from "svelte/store";
     import socket from "~//lib/socket";
 
-    const {red1, red2, red3, blue1, blue2, blue3, redAlliance, blueAlliance, redScore, blueScore, matchNumber, type} = matchData;
+    const { red1, red2, red3, blue1, blue2, blue3, stage_index, elim_info, scores, redScore, blueScore, type} = matchData;
 
     const scoreHeight = derived(type, ($type) => ($type === "qualification" ? "1859px" : "1900px"));
     const allianceDisplay = derived(type, ($type) => ($type === "qualification" ? "none" : "block"));
 
-    const teamNumberMap = {};
+    const teamNumberMap: {[key : number] : string} = {};
     teamList.subscribe(($teamList) => {
       Object.entries($teamList).forEach(([key, value]) => {
-        teamNumberMap[key] = value.displaynum.get()
+        teamNumberMap[parseInt(key)] = value.display_number.get()
       })
     })
-    const red1HitCount = writable(0);
-    const red2HitCount = writable(0);
-    const red3HitCount = writable(0);
-    const blue1HitCount = writable(0);
-    const blue2HitCount = writable(0);
-    const blue3HitCount = writable(0);
 
-    socket.on("robotHitState", (ds, state) => {
-        switch (ds) {
-            case "R1":
-                red1HitCount.set(state.count);
-                break;
-            case "R2":
-                red2HitCount.set(state.count);
-                break;
-            case "R3":
-                red3HitCount.set(state.count);
-                break;
-            case "B1":
-                blue1HitCount.set(state.count);
-                break;
-            case "B2":
-                blue2HitCount.set(state.count);
-                break;
-            case "B3":
-                blue3HitCount.set(state.count);
-                break;
-        }
-    });
-    socket.emit("getHitStates", (states) => {
-        red1HitCount.set(states.R1.count);
-        red2HitCount.set(states.R2.count);
-        red3HitCount.set(states.R3.count);
-        blue1HitCount.set(states.B1.count);
-        blue2HitCount.set(states.B2.count);
-        blue3HitCount.set(states.B3.count);
-    });
 
 
     const icons: { [key in MatchPeriod]: string } = {
@@ -155,42 +119,20 @@
     <div class="_40" style="top:{$scoreHeight}">{$blueScore}</div>
     <div class="rectangle-100"/>
     <!-- Finish integrating the $blueXHitcount variables -->
-    <div class="hitMarker {$blue1HitCount >= 3 ? 'hitActive' : ''} ellipse-34">X</div>
-    <div class="hitMarker {$blue1HitCount >= 2 ? 'hitActive' : ''} ellipse-35">X</div>
-    <div class="hitMarker {$blue1HitCount >= 1 ? 'hitActive' : ''} ellipse-36">X</div>
-    <div class="rectangle-101"/>
-    <div class="hitMarker {$blue2HitCount >= 3 ? 'hitActive' : ''} ellipse-37">X</div>
-    <div class="hitMarker {$blue2HitCount >= 2 ? 'hitActive' : ''} ellipse-38">X</div>
-    <div class="hitMarker {$blue2HitCount >= 1 ? 'hitActive' : ''} ellipse-39">X</div>
-    <div class="rectangle-102"/>
-    <div class="hitMarker {$blue3HitCount >= 3 ? 'hitActive' : ''} ellipse-40">X</div>
-    <div class="hitMarker {$blue3HitCount >= 2 ? 'hitActive' : ''} ellipse-41">X</div>
-    <div class="hitMarker {$blue3HitCount >= 1 ? 'hitActive' : ''} ellipse-42">X</div>
+  
     <div class="_5970">{teamNumberMap[$blue3] ?? ""}</div>
     <div class="_59702">{teamNumberMap[$blue2] ?? ""}</div>
     <div class="_59703">{teamNumberMap[$blue1] ?? ""}</div>
     <div class="qualification-match-13">
-        {$type == "qualification" ? "Qualification" : "Elimination"} Match {$matchNumber}
+        {$type == "qualification" ? "Qualification" : "Elimination"} Match {$stage_index}
     </div>
     <div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2023: Rabbit Roundup</div>
-    <div class="rectangle-1002"/>
-    <div class="hitMarker {$red3HitCount >= 3 ? 'hitActive' : ''} ellipse-342">X</div>
-    <div class="hitMarker {$red3HitCount >= 2 ? 'hitActive' : ''} ellipse-352">X</div>
-    <div class="hitMarker {$red3HitCount >= 1 ? 'hitActive' : ''} ellipse-362">X</div>
-    <div class="rectangle-1012"/>
-    <div class="hitMarker {$red2HitCount >= 3 ? 'hitActive' : ''} ellipse-372">X</div>
-    <div class="hitMarker {$red2HitCount >= 2 ? 'hitActive' : ''} ellipse-382">X</div>
-    <div class="hitMarker {$red2HitCount >= 1 ? 'hitActive' : ''} ellipse-392">X</div>
-    <div class="rectangle-1022"/>
-    <div class="hitMarker {$red1HitCount >= 3 ? 'hitActive' : ''} ellipse-402">X</div>
-    <div class="hitMarker {$red1HitCount >= 2 ? 'hitActive' : ''} ellipse-412">X</div>
-    <div class="hitMarker {$red1HitCount >= 1 ? 'hitActive' : ''} ellipse-422">X</div>
     <div class="_59704">{teamNumberMap[$red1] ?? ""}</div>
     <div class="_59705">{teamNumberMap[$red2] ?? ""}</div>
     <div class="_59706">{teamNumberMap[$red3] ?? ""}</div>
 
-    <div class="red-alliance" style="display:{$allianceDisplay}">Alliance {$redAlliance}</div>
-    <div class="blue-alliance" style="display:{$allianceDisplay}">Alliance {$blueAlliance}</div>
+    <div class="red-alliance" style="display:{$allianceDisplay}">Alliance {$elim_info?.red_alliance}</div>
+    <div class="blue-alliance" style="display:{$allianceDisplay}">Alliance {$elim_info?.blue_alliance}</div>
 </div>
 
 <!-- <svg
