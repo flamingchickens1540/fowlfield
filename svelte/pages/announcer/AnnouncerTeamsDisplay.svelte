@@ -1,15 +1,15 @@
 <script lang="ts">
-    import matchData from "~/lib/store"
-    import TeamCard from "./components/TeamCard.svelte";
+    import matchData from '~/lib/store'
+    import TeamCard from './components/TeamCard.svelte'
 
-    const {red1, red2, red3, blue1, blue2, blue3, type, redAlliance, blueAlliance} = matchData
+    const {red1, red2, red3, blue1, blue2, blue3, type, elim_info} = matchData
 </script>
 
 
 <div class="grid-cols-2">
     <div class="grid-rows-flux">
         {#if $type === 'elimination'}
-            <h1>Alliance {$redAlliance}</h1>
+            <h1>Alliance {$elim_info?.red_alliance}</h1>
         {:else}
             <h1>Red Alliance</h1>
         {/if}
@@ -19,7 +19,7 @@
     </div>
     <div class="grid-rows-flux">
         {#if $type === 'elimination'}
-            <h1>Alliance {$blueAlliance}</h1>
+            <h1>Alliance {$elim_info?.blue_alliance}</h1>
         {:else}
             <h1>Blue Alliance</h1>
         {/if}

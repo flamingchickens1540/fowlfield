@@ -1,7 +1,6 @@
 <script>
-    import ScoreSummary from "../../lib/components/ScoreSummary.svelte";
-    import matchData from "~/lib/store"
-    import {MatchState} from "~common/types/index.js";
+    import ScoreSummary from '../../lib/components/ScoreSummary.svelte'
+    import matchData from '~/lib/store'
 
     const {state} = matchData
 </script>
@@ -9,8 +8,8 @@
 <main>
     <ScoreSummary></ScoreSummary>
 
-    <div class=stateindicator style="background-color: {$state == MatchState.POSTED ? '#408f54' : '#8f7d40'}">
-        {$state == MatchState.POSTED ? 'Posted' : 'Unpublished'}
+    <div class=stateindicator style="background-color: {$state == 'posted' ? '#408f54' : '#8f7d40'}">
+        {$state == "posted" ? 'Posted' : 'Unpublished'}
     </div>
 </main>
 

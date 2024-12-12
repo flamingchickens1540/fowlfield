@@ -1,8 +1,7 @@
 <script lang="ts">
-    import {MatchPeriod} from "~common/types";
-    import matchData, {matchPeriod, remainingTimeInDisplayPeriod, teamList} from "~/lib/store";
-    import {derived, writable} from "svelte/store";
-    import socket from "~//lib/socket";
+    import { MatchPeriod } from '~common/types'
+    import matchData, { matchPeriod, remainingTimeInDisplayPeriod, teamList } from '~/lib/store'
+    import { derived } from 'svelte/store'
 
     const { red1, red2, red3, blue1, blue2, blue3, stage_index, elim_info, scores, redScore, blueScore, type} = matchData;
 
@@ -115,10 +114,8 @@
         {Math.max(Math.floor($remainingTimeInDisplayPeriod), 0)}
     </div>
     <span class="period-icon material-icons">{icons[$matchPeriod]}</span>
-    <div class="_15" style="top:{$scoreHeight}">{$redScore}</div>
-    <div class="_40" style="top:{$scoreHeight}">{$blueScore}</div>
-    <div class="rectangle-100"/>
-    <!-- Finish integrating the $blueXHitcount variables -->
+    <div class="_15" style="top:{$scoreHeight}"></div>
+    <div class="_40" style="top:{$scoreHeight}"></div>
   
     <div class="_5970">{teamNumberMap[$blue3] ?? ""}</div>
     <div class="_59702">{teamNumberMap[$blue2] ?? ""}</div>

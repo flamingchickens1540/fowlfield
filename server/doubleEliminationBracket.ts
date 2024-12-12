@@ -68,8 +68,8 @@ export class DoubleEliminationBracket {
     }
 
     getNextMatch(): ScheduleItem {
-        if (this.scheduleIndex > 8 || (this.scheduleIndex == 7 && this.netFinalWins != 0)) {
-            bracketLogger.error('Cannot get next match, bracket is over')
+        if (this.scheduleIndex > 8 || (this.scheduleIndex == 8 && this.netFinalWins != 0)) {
+            bracketLogger.error(this, 'Cannot get next match, bracket is over')
             return
         }
         if (this.matches[this.scheduleIndex].red == null || this.matches[this.scheduleIndex].blue == null) {

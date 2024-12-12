@@ -1,10 +1,21 @@
 <script lang="ts">
-    import {fade, slide} from "svelte/transition";
-    import {teamList, alliances} from "~/lib/store";
-    import {derived, writable} from "svelte/store";
-    import IdontKnowWhatToCallThis from "./IdontKnowWhatToCallThis.svelte"
+    import { slide } from 'svelte/transition'
+    import { alliances, rankings, teamList } from '~/lib/store'
+    import { derived } from 'svelte/store'
+    import AllianceItem from '../components/AllianceItem.svelte'
 
-    const nextTeams = writable([])
+    const unavailable = new Set<number>()
+    const addUnavailable = (team:number|null) => {if (team) {unavailable.add(team)}}
+    const nextTeams = derived([teamList, alliances, rankings], ([$teams, $alliances, $rankings]) => {
+        unavailable.clear()
+        for (let i = 1; i <= 4; i++) {
+            addUnavailable($alliances[i]?.captain?.get())
+            addUnavailable($alliances[i]?.first_pick?.get())
+            addUnavailable($alliances[i]?.second_pick?.get())
+            addUnavailable($alliances[i]?.third_pick?.get())
+        }
+        return $rankings.filter((ranking) => !unavailable.has(ranking.team)).map((ranking) => $teams[ranking.team].display_number.get())
+    })
 
 </script>
 
@@ -12,7 +23,7 @@
     <h1>Alliances</h1>
     <div id="allianceGrid">
         {#each Object.values($alliances) as alliance, i}
-            <IdontKnowWhatToCallThis {alliance}></IdontKnowWhatToCallThis>
+            <AllianceItem {alliance}></AllianceItem>
         {/each}
     </div>
     <div id="line"></div>
@@ -21,9 +32,9 @@
 <div id="team-display">
     <h1>Available Teams</h1>
     <div id="teamGrid">
-        {#each Object.values($teamList) as team, i}
+        {#each $nextTeams as team, i}
             <div class="team-box" transition:slide|local>
-                <p><strong>{i + 1})</strong> {team.display_number.get()}</p>
+                <p><strong>{i + 1})</strong> {team}</p>
             </div>
         {/each}
     </div>
@@ -33,23 +44,17 @@
 </div>
 
 <style lang="scss">
-  #line {
-    position: absolute;
-    width: 5px;
-    height: 80%;
-    background-color: #1c1c1c;
-    right: 49%;
-    transform: translate(-50%);
-    top: 16%;
-  }
   p {
     color: white;
   }
   #allianceGrid {
     display:grid;
 
-    grid-template-columns: repeat(2, 50%);
-    grid-template-rows: repeat(2, 40vh);
+    grid-template-columns: 1fr 1fr;
+    row-gap:5em;
+    column-gap:5em;
+    grid-template-rows: 1fr 1fr;
+    margin:2em;
     .alliance-box {
       background-color:#4c4c4c;
       padding:10px;

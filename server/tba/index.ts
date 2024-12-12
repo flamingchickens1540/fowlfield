@@ -113,7 +113,7 @@ export async function reset(...fields: ('alliance' | 'team' | 'match' | 'ranking
     if (fields.includes('match'))
         await post(
             'matches/delete',
-            Object.values(getMatches()).map((match) => match.id.toLowerCase() as any)
+            Object.values(await getMatches()).map((match) => match.id.toLowerCase() as any)
         )
     if (fields.includes('ranking')) await post('rankings/update', { breakdowns: [], rankings: [] })
 }

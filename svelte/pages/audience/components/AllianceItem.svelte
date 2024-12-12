@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { PlayoffAlliance } from "@prisma/client"
-    import { fade } from "svelte/transition"
-    import type { SocketWritableOf } from "~/lib/socketStore"
-    import { teamList } from "~/lib/store"
+    import type { PlayoffAlliance } from '@prisma/client'
+    import { fade } from 'svelte/transition'
+    import type { SocketWritableOf } from '~/lib/socketStore'
+    import { teamList } from '~/lib/store'
 
     export let alliance: SocketWritableOf<PlayoffAlliance>
 
@@ -18,61 +18,60 @@
         <div class="alliance-label"><strong><p>2nd Pick</p></strong></div>
         <div class="alliance-label"><strong><p>3rd Pick</p></strong></div>
         <div transition:fade class="alliance-member">
-          <p>{$teamList[$captain??0]?.display_number.get() ?? ""}</p>
+          <div>{$teamList[$captain??0]?.display_number.get() ?? ""}</div>
       </div>
       <div transition:fade class="alliance-member">
-        <p>{$teamList[$first_pick??0]?.display_number.get() ?? ""}</p>
+        <div>{$teamList[$first_pick??0]?.display_number.get() ?? ""}</div>
     </div>
     <div transition:fade class="alliance-member">
-        <p>{$teamList[$second_pick??0]?.display_number.get() ?? ""}</p>
+        <div>{$teamList[$second_pick??0]?.display_number.get() ?? ""}</div>
     </div>
     <div transition:fade class="alliance-member">
-        <p>{$teamList[$third_pick??0]?.display_number.get() ?? ""}</p>
+        <div>{$teamList[$third_pick??0]?.display_number.get() ?? ""}</div>
     </div>
     </div>
 </div>
 
 <style lang="scss">
+  .alliance-member {
+
+    position:relative;
+
+    &:nth-child(-n+4) {
+      font-weight:500;
+    }
+
+    background-color: #444444;
+    text-align: center;
+    vertical-align: center;
+    //height:100%;
+    //margin:5px;
+    padding:5px;
+
+    //padding: 0.3em;
+    //padding-bottom: 0.3em;
+    border-radius: 5px;
+    //top:50%;
+    //left:50%;
+    //transform: translate(-60%, -50%);
+    font-size:40px;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+  }
     p {
       color: white;
     }
-    #allianceGrid {
-      display:grid;
-  
-      grid-template-columns: repeat(2, 50%);
-      grid-template-rows: repeat(2, 40vh);
-      .alliance-box {
-        background-color:#4c4c4c;
-        padding:10px;
-        margin:20px;
-        border-radius: 10px;
-        display:flex;
-        flex-direction: column;
-      }
-      .alliance-member {
-        text-align: left;
-        position:relative;
-        &:nth-child(-n+4) {
-          font-weight:500;
-        }
-        p {
-          margin:0;
-          position:relative;
-          padding-top: 5%;
-          padding-bottom: 5%;
-          top:50%;
-          left:50%;
-          transform: translate(-60%, -50%);
-          font-size:45px;
-        }
-      }
+
+
       .alliance-label {
-        text-align: right;
+
         position:relative;
         &:nth-child(-n+4) {
           font-weight:500;
         }
         p {
+          text-align: right;
           margin:0;
           position:relative;
           padding-top: 5%;
@@ -89,14 +88,14 @@
       h2 {
         font-size:80px;
       }
-  
-    }
+
     .alliance-teams {
       flex: 1;
       display:grid;
       grid-template-rows:auto auto auto auto;
       grid-auto-flow: column;
-      grid-template-columns: 65% 35%;
+      grid-template-columns: 3fr 2fr;
+      gap:5px;
     }
     #teamGrid {
       display: grid;

@@ -3,7 +3,7 @@ import * as http from 'http'
 import { Server, Socket } from 'socket.io'
 import config from '~common/config'
 import * as matchmanager from './managers/matchmanager'
-import { getMatches } from './managers/matchmanager'
+import { getMatches, notifyMatchUpdated } from './managers/matchmanager'
 import { getMatchPeriod } from '~common/utils/match_timer'
 import * as teammanager from './managers/teammanager'
 import { buildRankings, getTeams } from './managers/teammanager'
@@ -132,7 +132,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('alliance', alliance)
     })
     socket.on('commitAlliances', async (cb) => {
-        
         cb(await tba.updateAlliances())
     })
 
@@ -279,10 +278,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
                 io.emit('team', team)
             })
         })
+        if (match.type == 'elimination') {
+            notifyMatchUpdated(match)
+        }
         logger.info('Committing', id)
         setTimeout(tba.updateMatches)
 
-        io.to('dashboard').emit('match', match)
+        io.emit('match', match)
     })
 
     socket.on('nextMatch', async (type) => {

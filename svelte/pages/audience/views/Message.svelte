@@ -1,30 +1,30 @@
-<!--suppress CommaExpressionJS -->
 <script lang=ts>
-    import {eventData} from "~/lib/store"
+    import { eventData } from '~/lib/store'
 
-    import {onDestroy} from "svelte";
-    import {derived} from "svelte/store";
-    import {fade} from "svelte/transition";
+    import { onDestroy } from 'svelte'
+    import { derived } from 'svelte/store'
+    import { fade } from 'svelte/transition'
 
+    const {lunchReturnTime} = eventData
 
-    const time = derived(eventData, ($eventData) => {
-            const date = new Date($eventData.lunchReturnTime)
+    const time = derived(lunchReturnTime, ($returntime) => {
+            const date = new Date($returntime)
             let hours = date.getHours() % 12
             if (hours == 0) {hours = 12}
-            return hours+":"+date.getMinutes()+" "+(date.getHours() >= 12 ? "PM" : "AM")
+            return hours+":"+date.getMinutes().toString().padStart(2,"0")+" "+(date.getHours() >= 12 ? "PM" : "AM")
     })
-    let timer;
+    let timer:number;
 
     onDestroy(() => clearInterval(timer))
 
     let timeRemaining = 0
     const timerCb = () => {
-        timeRemaining = Math.ceil(($eventData.lunchReturnTime - Date.now())/1000/60/5)*5
+        timeRemaining = Math.ceil(($lunchReturnTime - Date.now())/1000/60/5)*5
         if (timeRemaining <= 0) {timeRemaining = 0}
     }
 
-    $: $eventData, timerCb()
-    timer = setInterval(timerCb, 15000)
+    $: $lunchReturnTime, timerCb()
+    timer = setInterval(timerCb, 15000) as unknown as number
 </script>
 <div class="on-screen-message" out:fade={{}} in:fade={{}}>
     <svg
