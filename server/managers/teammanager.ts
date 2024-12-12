@@ -49,7 +49,7 @@ export async function getMatchStats(): Promise<{
         }
         const scores = getScores(match)
         getRedAlliance(match).forEach(({ team, card }) => {
-            if (team == 0) return
+            if (team == 0 || stats[team] == null) return
             stats[team].count++
             switch (scores.winner) {
                 case 'red':

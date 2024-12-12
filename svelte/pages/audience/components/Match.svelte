@@ -126,7 +126,7 @@
     <div class="qualification-match-13">
         {$type == "qualification" ? "Qualification" : "Elimination"} Match {$stage_index}
     </div>
-    <div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2023: Rabbit Roundup</div>
+    <div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2024: Balloona Palooza</div>
     <div class="_59704">{teamNumberMap[$red1] ?? ""}</div>
     <div class="_59705">{teamNumberMap[$red2] ?? ""}</div>
     <div class="_59706">{teamNumberMap[$red3] ?? ""}</div>

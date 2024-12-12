@@ -1,50 +1,29 @@
 <script lang="ts">
     import {fade, slide} from "svelte/transition";
-    import {teamList, teamsSorted} from "~/lib/store";
-    import {derived} from "svelte/store";
+    import {teamList, alliances} from "~/lib/store";
+    import {derived, writable} from "svelte/store";
+    import IdontKnowWhatToCallThis from "./IdontKnowWhatToCallThis.svelte"
 
-    export const alliances = derived(teamList, ($teamList) => {
-        const list = [[0,0,0,0],[0,0,0,0],[0,0,0,0],[0,0,0,0]]
-        Object.values($teamList).forEach((team) => {
-            if (team.alliance.get() == 0 || team.alliancePosition.get() == 0) {return}
-            list[team.alliance.get()-1][team.alliancePosition.get()-1] = team.id
-        })
-        return list
-    })
-
-    const nextTeams = derived(teamsSorted, (teams) => teams.filter((team) => team.alliance.get() == 0).map((team) => team.displaynum.get()))
+    const nextTeams = writable([])
 
 </script>
 
 <div id="alliances">
     <h1>Alliances</h1>
     <div id="allianceGrid">
-        {#each $alliances as alliance, i}
-            <div class="alliance-box">
-                <h2>Alliance {i + 1}</h2>
-
-                <div class=alliance-teams>
-                    <div class="alliance-member"><p>Captain</p></div>
-                    <div class="alliance-member"><p>1st Pick</p></div>
-                    <div class="alliance-member"><p>2nd Pick</p></div>
-                    <div class="alliance-member"><p>3rd Pick</p></div>
-                    {#each alliance as team}
-                        <div transition:fade class="alliance-member">
-                            <p>{$teamList[team]?.displaynum.get() ?? ""}</p>
-                        </div>
-                    {/each}
-                </div>
-            </div>
+        {#each Object.values($alliances) as alliance, i}
+            <IdontKnowWhatToCallThis {alliance}></IdontKnowWhatToCallThis>
         {/each}
     </div>
+    <div id="line"></div>
 </div>
 
 <div id="team-display">
     <h1>Available Teams</h1>
     <div id="teamGrid">
-        {#each $nextTeams as team, i}
+        {#each Object.values($teamList) as team, i}
             <div class="team-box" transition:slide|local>
-                <p><strong>{i + 1})</strong> {team}</p>
+                <p><strong>{i + 1})</strong> {team.display_number.get()}</p>
             </div>
         {/each}
     </div>
@@ -54,8 +33,17 @@
 </div>
 
 <style lang="scss">
+  #line {
+    position: absolute;
+    width: 5px;
+    height: 80%;
+    background-color: #1c1c1c;
+    right: 49%;
+    transform: translate(-50%);
+    top: 16%;
+  }
   p {
-    color: black;
+    color: white;
   }
   #allianceGrid {
     display:grid;
@@ -63,7 +51,7 @@
     grid-template-columns: repeat(2, 50%);
     grid-template-rows: repeat(2, 40vh);
     .alliance-box {
-      background-color:#f7dc99;
+      background-color:#4c4c4c;
       padding:10px;
       margin:20px;
       border-radius: 10px;
@@ -71,22 +59,41 @@
       flex-direction: column;
     }
     .alliance-member {
-      text-align: center;
-      position:relative;
-      &:nth-child(-n+4) {
-        font-weight:500;
+        text-align: left;
+        position:relative;
+        &:nth-child(-n+4) {
+          font-weight:500;
+        }
+        p {
+          margin:0;
+          position:relative;
+          padding-top: 5%;
+          padding-bottom: 5%;
+          top:50%;
+          left:50%;
+          transform: translate(-60%, -50%);
+          font-size:45px;
+        }
       }
-      p {
-        margin:0;
-        position:absolute;
-        top:50%;
-        left:50%;
-        transform: translate(-50%, -50%);
-        font-size:65px;
+      .alliance-label {
+        text-align: right;
+        position:relative;
+        &:nth-child(-n+4) {
+          font-weight:500;
+        }
+        p {
+          margin:0;
+          position:relative;
+          padding-top: 5%;
+          padding-bottom: 5%;
+          top:50%;
+          left:50%;
+          transform: translate(-60%, -50%);
+          font-size:45px;
+        }
       }
-    }
     P {
-      font-size:25px;
+      font-size:35px;
     }
     h2 {
       font-size:80px;
@@ -110,14 +117,13 @@
     display: block;
     border-radius: 25px;
     text-align: left;
-    padding-left: 20px;
-    font-size: 65px;
+    font-size: 35px;
     p {
       line-height: 100%;
-      margin: 2.6vh;
+      margin: 2.0vh;
     }
     strong {
-      font-weight: 900;
+      font-weight: 700;
     }
   }
 
@@ -129,7 +135,7 @@
     top: 1vw;
     bottom: 1vw;
     text-justify: auto;
-    background-color: #f7dc99;
+    background-color: #4c4c4c;
     justify-content: center;
     border-radius: 25px;
     align-items: center;
@@ -152,15 +158,15 @@
     right: 51vw;
     top: 1vw;
     bottom: 1vw;
-    background-color: #eea19c;
+    background-color: #4c4c4c;
     border-radius: 20px;
 
   }
   h2 {
-    color: black;
+    color: #FFC145;
   }
 
   h1 {
-    color: black;
+    color: #FFC145;
   }
 </style>

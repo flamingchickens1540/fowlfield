@@ -1,18 +1,18 @@
 <script lang="ts">
     import matchData, {eventData} from "~/lib/store";
-    import Match from "./components/Match.svelte";
+    // import Match from "./components/Match.svelte";
     // import Message from "./components/Message.svelte";
     // import Results from "./components/QualsResults.svelte";
     // import PlayoffResults from "./components/PlayoffResults.svelte";
     import {derived} from "svelte/store";
     import {MatchState} from "~common/types";
-    // import AllianceDisplay from "./components/AllianceDisplay.svelte";
+    import AllianceDisplay from "./components/AllianceDisplay.svelte";
     // import Blank from "./components/Blank.svelte";
 
 
-    const isAlliance = window.location.pathname.endsWith("alliance")
+    const isAlliance = window.location.pathname.endsWith("alliance") || true
     const shown = derived([matchData.type, matchData.state], ([$type, $state]) => {
-        return "results"
+        return "playoffResults"
         if (false) {
             return "msg"
         } else {
@@ -42,9 +42,9 @@
         <PlayoffResults></PlayoffResults>
     </div> -->
 
-    <div style="display:{$shown === 'match' ? 'contents': 'none'}">
+    <!-- <div style="display:{$shown === 'match' ? 'contents': 'none'}">
         <Match></Match>
-    </div>
+    </div> -->
 
     <!-- <div style="display:{$shown === 'blank' ? 'contents': 'none'}">
         <Blank></Blank>
