@@ -99,7 +99,7 @@ export default function startServer(server: http.Server) {
 }
 
 async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
-    logger.info('new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role ?? 'default')
+    logger.info('new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
 
     socket.onAny((event, ...args) => {
         logger.debug(['received', event, ...args].join(' '))
@@ -280,7 +280,9 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         })
         if (match.type == 'elimination') {
             notifyMatchUpdated(match)
-        }
+        } else {
+	    io.emit('rankings', await buildRankings())
+	}
         logger.info('Committing', id)
         setTimeout(tba.updateMatches)
 
