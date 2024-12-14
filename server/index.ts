@@ -25,13 +25,13 @@ setTimeout(async () => {
 })
 // await tba.reset('match', 'alliance', 'ranking') // TODO: Remove this when teams are finalized
 setTimeout(async () => await tba.updateEventTeams(), 1000)
-// await tba.updateAlliances()
-// await tba.updateMatches()
-// await tba.updateRankings()
+await tba.updateAlliances()
+await tba.updateMatches()
+await tba.updateRankings()
 
 app.use(express.static('public'))
 app.use(express.static('dist'))
 
 rootLogger.info('Starting node')
 
-server.listen(3000)
+server.listen(9001)

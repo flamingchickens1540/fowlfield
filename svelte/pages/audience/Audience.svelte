@@ -10,7 +10,7 @@
     import Blank from './views/Blank.svelte'
 
 
-    const isAlliance = window.location.pathname.endsWith("alliance")
+    const isAlliance = window.location.search.includes("alliance")
     const shown = derived([matchData.type, matchData.state, eventData.atLunch], ([$type, $state, $atLunch]) => {
         if ($atLunch) {
             return "msg"

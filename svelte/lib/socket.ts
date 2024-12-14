@@ -17,7 +17,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '~common/types'
 const disconnectedBackgroundColor = '#463500'
 let isConnected = true
 
-const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(window.location.protocol + '//' + window.location.hostname + ':3000', {
+const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(window.location.protocol + '//' + window.location.hostname + ':9001', {
     auth: {
         token: localStorage.getItem('auth')
     },
