@@ -1,13 +1,26 @@
 import { MatchID } from '~common/types'
 import { getMatchTitle } from '~common/utils'
-import { calculatePointsBreakdown, getScores, sumBreakdownPoints } from '~common/utils/scores'
+import { calculatePointsBreakdown, getScores, getWinner, sumBreakdownPoints } from '~common/utils/scores'
 import axios from 'axios'
 import crypto from 'crypto'
 import { createLogger } from '~/logger'
-import { getMatches } from '~/managers/matchmanager'
+import { getLastFinals, getMatches } from '~/managers/matchmanager'
 import { buildRankings, getTeams } from '~/managers/teammanager'
 import config from '~common/config'
-import { DisplayNumber, TbaAlliance, TbaEventInfo, TbaMatch, TbaPlayoffAlliances, TbaPlayoffType, TbaRanking, TbaRankings, TbaScoreBreakdown, TbaTeamNumber } from './types'
+import {
+    DisplayNumber,
+    TbaAlliance,
+    TbaAward,
+    TbaAwardType,
+    TbaEventInfo,
+    TbaMatch,
+    TbaPlayoffAlliances,
+    TbaPlayoffType,
+    TbaRanking,
+    TbaRankings,
+    TbaScoreBreakdown,
+    TbaTeamNumber
+} from './types'
 import prisma from '~/managers/db'
 import { Match, Match_Results, Team } from '@prisma/client'
 
@@ -34,7 +47,7 @@ function getTBATeamNumber(teamNumber: DisplayNumber): TbaTeamNumber {
 interface Endpoints {
     'info/update': TbaEventInfo
     'alliance_selections/update': TbaPlayoffAlliances
-    'awards/update': never
+    'awards/update': TbaAward[]
     'matches/update': TbaMatch[]
     'matches/delete': MatchID[]
     'rankings/update': TbaRankings
@@ -145,6 +158,37 @@ export async function updateRankings() {
         rankings: tba_rankings
     }
     await post('rankings/update', body)
+}
+export async function updateAwards() {
+    const results = await getLastFinals()
+    logger.info(results, 'Got last finals')
+    if (results == null) {
+        return
+    }
+    const winner = getWinner(results)
+    const redAlliance = await prisma.playoffAlliance.findUnique({ where: { seed: results.elim_info.red_alliance } })
+    const redTeams = []
+    const blueAlliance = await prisma.playoffAlliance.findUnique({ where: { seed: results.elim_info.blue_alliance } })
+    const blueTeams = []
+    for (let team of [redAlliance.captain, redAlliance.first_pick, redAlliance.second_pick, redAlliance.third_pick]) {
+        if (team != null) {
+            redTeams.push(getTBATeamNumber(team))
+        }
+    }
+    for (let team of [blueAlliance.captain, blueAlliance.first_pick, blueAlliance.second_pick, blueAlliance.third_pick]) {
+        if (team != null) {
+            blueTeams.push(getTBATeamNumber(team))
+        }
+    }
+    const body: TbaAward[] = []
+    if (winner == 'red') {
+        redTeams.forEach((team) => body.push({ type_enum: TbaAwardType.WINNER, name_str: 'Winner', team_key: team }))
+        blueTeams.forEach((team) => body.push({ type_enum: TbaAwardType.FINALIST, name_str: 'Finalist', team_key: team }))
+    } else {
+        redTeams.forEach((team) => body.push({ type_enum: TbaAwardType.FINALIST, name_str: 'Finalist', team_key: team }))
+        blueTeams.forEach((team) => body.push({ type_enum: TbaAwardType.WINNER, name_str: 'Winner', team_key: team }))
+    }
+    await post('awards/update', body)
 }
 function matchToTBAMatch(match: Match): TbaMatch {
     const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)

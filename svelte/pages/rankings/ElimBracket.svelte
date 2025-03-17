@@ -3,7 +3,7 @@
 </script>
 
 <script lang=ts>
-        import {onMount} from "svelte";
+        import { onDestroy, onMount } from 'svelte'
         import Match from "./components/BracketMatch.svelte";
         import LeaderLine from 'leader-line-new';
         import {type Writable, writable} from "svelte/store";
@@ -47,6 +47,15 @@
         createLines("sf3m1", "f1m1", "sf5m1")
         createLines("sf5m1", "f1m1")
     })
+        onDestroy(() => {
+            lines.update((data) => {
+                for (let [key, [line1, line2]] of Object.entries(data)) {
+                        line1?.line.remove()
+                        line2?.line.remove()
+                }
+                return {}
+            })
+        })
 
 </script>
 <div class=estop-container>
@@ -89,7 +98,7 @@
         grid-row:10/span 2;
     }   
     #container-sf3m1 {
-        grid-column: 3;
+        grid-column: 2;
         grid-row:3 / span 2;
     }   
     #container-sf5m1 {

@@ -68,7 +68,7 @@ export class DoubleEliminationBracket {
     }
 
     getNextMatch(): ScheduleItem {
-        if (this.scheduleIndex > 8 || (this.scheduleIndex == 8 && this.netFinalWins != 0)) {
+        if (this.isOver()) {
             bracketLogger.error(this, 'Cannot get next match, bracket is over')
             return
         }
@@ -83,5 +83,15 @@ export class DoubleEliminationBracket {
 
     getCurrentMatch(): ScheduleItem {
         return this.matches[this.scheduleIndex]
+    }
+
+    isOver(): boolean {
+        return this.scheduleIndex > 8 || (this.scheduleIndex == 8 && this.netFinalWins != 0)
+    }
+    getFinalMatch(): ScheduleItem | undefined {
+        if (!this.isOver()) {
+            return
+        }
+        return this.matches[this.scheduleIndex - 1]
     }
 }

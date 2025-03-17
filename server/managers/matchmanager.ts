@@ -60,6 +60,14 @@ export function getMatchMaker(): MatchMaker {
     return matchMaker
 }
 
+export async function getLastFinals(): Promise<Match | null> {
+    const scheduleItem = matchMaker.getBracket().getFinalMatch()
+    if (scheduleItem != null) {
+        return prisma.match.findUnique({ where: { id: scheduleItem.details.matchId } })
+    }
+    return null
+}
+
 export function advanceMatches(type: 'qualification' | 'elimination') {
     if (type == 'qualification') {
         return matchMaker.advanceQualsMatch()

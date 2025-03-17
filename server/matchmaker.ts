@@ -103,6 +103,9 @@ export class MatchMaker {
     initElims(currentmatch: number) {
         this.bracket = new DoubleEliminationBracket(currentmatch)
     }
+    getBracket() {
+        return this.bracket
+    }
 
     /**
      *
