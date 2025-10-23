@@ -42,6 +42,7 @@ export async function getMatchStats(): Promise<{
             avg_score: 0
         }
     })
+
     const matches = await prisma.match.findMany()
     matches.forEach((match) => {
         if (match.type == 'elimination') {
@@ -71,6 +72,7 @@ export async function getMatchStats(): Promise<{
             stats[team].avg_score += scores.redScore
             stats[team].avg_coop += match.scores.corral_empty ? 1 : 0
         })
+
         getBlueAlliance(match).forEach(({ team, card }) => {
             if (team == 0) return
             stats[team].count++

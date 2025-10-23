@@ -23,8 +23,14 @@ function getBlankPointsBreakdown(): PointsBreakdown {
 // 3x2^B points per balloon in tote with B bunnies
 // Foul points
 // 20 point coopertition bonus
-export function calculatePointsBreakdown(breakdown: Match_Results): { red: PointsBreakdown; blue: PointsBreakdown } {
-    const points = { red: getBlankPointsBreakdown(), blue: getBlankPointsBreakdown() }
+export function calculatePointsBreakdown(breakdown: Match_Results): {
+    red: PointsBreakdown
+    blue: PointsBreakdown
+} {
+    const points = {
+        red: getBlankPointsBreakdown(),
+        blue: getBlankPointsBreakdown()
+    }
     if (breakdown == null) {
         return points
     }

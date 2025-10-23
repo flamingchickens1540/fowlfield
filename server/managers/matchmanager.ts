@@ -74,7 +74,9 @@ export function getMatchMaker(): MatchMaker {
 export async function getLastFinals(): Promise<Match | null> {
     const scheduleItem = matchMaker.getBracket()?.getFinalMatch()
     if (scheduleItem != null) {
-        return prisma.match.findUnique({ where: { id: scheduleItem.details.matchId } })
+        return prisma.match.findUnique({
+            where: { id: scheduleItem.details.matchId }
+        })
     }
     return null
 }
