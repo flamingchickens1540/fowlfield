@@ -1,120 +1,116 @@
 <script lang="ts">
     import { eventData, teamList } from '~/lib/store'
-    import TeamEntry from "./components/TeamEntry.svelte"
-    import type {Team} from "@prisma/client";
-    import socket from "~/lib/socket";
-    import {derived, get} from "svelte/store";
-    import writableDerived from "svelte-writable-derived";
+    import TeamEntry from './components/TeamEntry.svelte'
+    import type { Team } from '@prisma/client'
+    import socket from '~/lib/socket'
+    import { derived, get } from 'svelte/store'
+    import writableDerived from 'svelte-writable-derived'
     import { getBlankTeam } from '~common/utils/blanks'
 
-    let nextTeam:Team = getBlankTeam()
+    let nextTeam: Team = getBlankTeam()
     function addTeam() {
-        socket.emit("newTeam", nextTeam)
+        socket.emit('newTeam', nextTeam)
         nextTeam = getBlankTeam()
     }
-    const {atLunch, lunchReturnTime} = eventData
+    const { atLunch, lunchReturnTime } = eventData
     lunchReturnTime.setWritable()
     atLunch.setWritable()
     $: {
-        console.log("EVENTDATA", {$atLunch, $lunchReturnTime})
+        console.log('EVENTDATA', { $atLunch, $lunchReturnTime })
     }
-
-
 
     const lunchReturnPretty = writableDerived(
         lunchReturnTime,
         ($lunchReturnTime) => {
             const date = new Date($lunchReturnTime)
-            return date.getHours()+":"+date.getMinutes().toFixed(0).padStart(0)
+            return date.getHours() + ':' + date.getMinutes().toFixed(0).padStart(0)
         },
         (time) => {
             const date = new Date()
-            const [hours, minutes] = time.split(":")
+            const [hours, minutes] = time.split(':')
             date.setHours(parseInt(hours))
             date.setMinutes(parseInt(minutes))
             date.setSeconds(0)
             console.log(date.getTime())
             return date.getTime()
-        })
-    const teams = derived(teamList, ($teams) => Object.values($teams).sort((a, b) => a.display_number.get().localeCompare(b.display_number.get(), undefined, {numeric:true, sensitivity:"base"})) )
+        }
+    )
+    const teams = derived(teamList, ($teams) => Object.values($teams).sort((a, b) => a.display_number.get().localeCompare(b.display_number.get(), undefined, { numeric: true, sensitivity: 'base' })))
 </script>
 
 <main>
     <h1>Teams</h1>
-    <div id=teamlist>
-        <div class=tableheader>
-            <div class=tableitem>Number</div>
-            <div class=tableitem>Display</div>
-            <div class=tableitem>Name</div>
-            <div class=tableitem>Robot Name</div>
-            <div class=tableitem>Card</div>
-            <div class=tableitem></div>
+    <div id="teamlist">
+        <div class="tableheader">
+            <div class="tableitem">Number</div>
+            <div class="tableitem">Display</div>
+            <div class="tableitem">Name</div>
+            <div class="tableitem">Robot Name</div>
+            <div class="tableitem">Card</div>
+            <div class="tableitem"></div>
         </div>
         {#key $teamList}
-            {#each $teams as team, i }
-                <TeamEntry team={team}/>
+            {#each $teams as team, i}
+                <TeamEntry {team} />
             {/each}
         {/key}
-        <div id="addrow" class=tablerow>
-            <input class="tableitem" type=number bind:value={nextTeam.id}>
+        <div id="addrow" class="tablerow">
+            <input class="tableitem" type="number" bind:value={nextTeam.id} />
             <input class="tableitem centertext" type="text" bind:value={nextTeam.display_number} />
             <input class="tableitem" type="text" bind:value={nextTeam.team_name} />
             <input class="tableitem" type="text" bind:value={nextTeam.robot_name} />
             <div class="tableitem"></div>
             <button class="tableitem" on:click={addTeam}>+</button>
         </div>
-        
     </div>
     <h1>Other</h1>
-    <div id=lunchinput>
+    <div id="lunchinput">
         <span>Lunch</span>
-        <input type="time" step=300 bind:value={$lunchReturnPretty}>
-        <button on:click={() => $atLunch = !$atLunch}>{$atLunch ? "Stop Lunch" : "Start Lunch"}</button>
+        <input type="time" step="300" bind:value={$lunchReturnPretty} />
+        <button on:click={() => ($atLunch = !$atLunch)}>{$atLunch ? 'Stop Lunch' : 'Start Lunch'}</button>
     </div>
-    <br>
+    <br />
 </main>
 
 <style lang="scss">
     #lunchinput {
-        width:40%;
-        margin-left:auto;
-        margin-right:auto;
+        width: 40%;
+        margin-left: auto;
+        margin-right: auto;
         // border: 1px solid white;
-        padding:10px;
+        padding: 10px;
         border-radius: 10px;
-        display:flex;
+        display: flex;
         justify-content: space-around;
         flex-direction: row;
         align-items: center;
         // height:50px;
-        background-color:hsl(0, 0%, 20%);
+        background-color: hsl(0, 0%, 20%);
         span {
-            font-size:20px;
+            font-size: 20px;
         }
         button {
-            height:30px;
-            margin:0;
-            padding:5px;
-            width:150px;
-            background-color:hsl(0, 0%, 30%);
+            height: 30px;
+            margin: 0;
+            padding: 5px;
+            width: 150px;
+            background-color: hsl(0, 0%, 30%);
         }
     }
     #teamlist {
-        display:grid;
-        grid-template-columns:100px 100px auto auto 150px 50px;
+        display: grid;
+        grid-template-columns: 100px 100px auto auto 150px 50px;
         grid-auto-flow: row;
     }
-    
-    #addrow { 
+
+    #addrow {
         button.tableitem {
             background-color: green;
         }
         .tableitem {
-            margin-top:40px;
+            margin-top: 40px;
         }
     }
-    
-    
-    @import "event";
-    
+
+    @import 'event';
 </style>

@@ -6,7 +6,7 @@
     const { type } = matchData
 </script>
 
-{#if $type == "elimination"}
+{#if $type == 'elimination'}
     <ElimBracket></ElimBracket>
 {:else}
     <QualsRankings></QualsRankings>

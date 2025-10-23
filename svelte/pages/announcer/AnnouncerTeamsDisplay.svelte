@@ -2,9 +2,8 @@
     import matchData from '~/lib/store'
     import TeamCard from './components/TeamCard.svelte'
 
-    const {red1, red2, red3, blue1, blue2, blue3, type, elim_info} = matchData
+    const { red1, red2, red3, blue1, blue2, blue3, type, elim_info } = matchData
 </script>
-
 
 <div class="grid-cols-2">
     <div class="grid-rows-flux">
@@ -13,9 +12,9 @@
         {:else}
             <h1>Red Alliance</h1>
         {/if}
-        <TeamCard alliance={'red'} team_num={$red1}/>
-        <TeamCard alliance={'red'} team_num={$red2}/>
-        <TeamCard alliance={'red'} team_num={$red3}/>
+        <TeamCard alliance={'red'} team_num={$red1} />
+        <TeamCard alliance={'red'} team_num={$red2} />
+        <TeamCard alliance={'red'} team_num={$red3} />
     </div>
     <div class="grid-rows-flux">
         {#if $type === 'elimination'}
@@ -23,14 +22,13 @@
         {:else}
             <h1>Blue Alliance</h1>
         {/if}
-        <TeamCard alliance={'blue'} team_num={$blue1}/>
-        <TeamCard alliance={'blue'} team_num={$blue2}/>
-        <TeamCard alliance={'blue'} team_num={$blue3}/>
+        <TeamCard alliance={'blue'} team_num={$blue1} />
+        <TeamCard alliance={'blue'} team_num={$blue2} />
+        <TeamCard alliance={'blue'} team_num={$blue3} />
     </div>
 </div>
 
 <style>
-
     .grid-rows-flux {
         display: grid;
         place-items: center;

@@ -1,17 +1,5 @@
 <script lang="ts">
-
-    import matchData, {
-        abortMatch,
-        commitMatch,
-        fetchMatch,
-        loadedMatch,
-        matchList,
-        preloadedMatch,
-        remainingTimeInPeriod,
-        setPreloadingTrack,
-        startMatch,
-        teamList
-    } from '~/lib/store'
+    import matchData, { abortMatch, commitMatch, fetchMatch, loadedMatch, matchList, preloadedMatch, remainingTimeInPeriod, setPreloadingTrack, startMatch, teamList } from '~/lib/store'
     import { onMount } from 'svelte'
     import { derived, type Readable, type Unsubscriber, writable } from 'svelte/store'
 
@@ -33,7 +21,6 @@
     setPreloadingTrack(true)
 
     configureAudio()
-
 
     const buttonData: { [key in Match_State]: { text: string; color: string; cb: () => void } } = {
         not_started: { text: 'Start', color: '#02ae02', cb: startMatch },
@@ -62,18 +49,17 @@
             socket.emit('resetMatch', $matchid)
         }
     }
-    function getLoadButtonByMatch(id:string) {
-        if (id == $loadedMatch) return getLoadButton("loaded")
-        if (id == $preloadedMatch) return getLoadButton("preloaded")
-        return getLoadButton("none")
+    function getLoadButtonByMatch(id: string) {
+        if (id == $loadedMatch) return getLoadButton('loaded')
+        if (id == $preloadedMatch) return getLoadButton('preloaded')
+        return getLoadButton('none')
     }
-    function getLoadButton(state:"loaded"|"preloaded"|"none") {
-        if (state == "loaded") return { text: 'Reload', buttoncolor: '#650064', itemstyle: 'background-color:#680066' }
-        if (state == "preloaded") return { text: 'Load', buttoncolor: '#b400b1', itemstyle: 'background-color:#683900' }
+    function getLoadButton(state: 'loaded' | 'preloaded' | 'none') {
+        if (state == 'loaded') return { text: 'Reload', buttoncolor: '#650064', itemstyle: 'background-color:#680066' }
+        if (state == 'preloaded') return { text: 'Load', buttoncolor: '#b400b1', itemstyle: 'background-color:#683900' }
         return { text: 'Preload', buttoncolor: '#a56600', itemstyle: '' }
     }
-    const matchLoadState = derived([preloadedMatch, loadedMatch, matchData.id], ([preloaded, loaded, current]) => getLoadButton(loaded == current ? "loaded" : preloaded == current ? "preloaded" : "none"))
-
+    const matchLoadState = derived([preloadedMatch, loadedMatch, matchData.id], ([preloaded, loaded, current]) => getLoadButton(loaded == current ? 'loaded' : preloaded == current ? 'preloaded' : 'none'))
 
     let showTeams = false
     let teamlistunsub: Unsubscriber
@@ -93,7 +79,6 @@
     let blueTeamParent: HTMLElement
 
     let setSortingEnabled: (enabled: boolean) => void
-
 
     onMount(() => {
         function onEnd(event: Sortable.SortableEvent) {
@@ -135,7 +120,7 @@
             $isSortingEnabled = enabled
         }
 
-        matchData.state.subscribe((v) => setSortingEnabled(v == "not_started"))
+        matchData.state.subscribe((v) => setSortingEnabled(v == 'not_started'))
     })
 
     let isSortingEnabled = writable(true)
@@ -157,9 +142,9 @@
         <h2>Matches</h2>
         <div id="matchGrid">
             {#each $matches as match, i}
-                <div class="matchEntry" style={getLoadButton(match.id == $loadedMatch ? "loaded" : match.id == $preloadedMatch ? "preloaded" : match.id == $loadedMatch ? "loaded" : "none").itemstyle}>
+                <div class="matchEntry" style={getLoadButton(match.id == $loadedMatch ? 'loaded' : match.id == $preloadedMatch ? 'preloaded' : match.id == $loadedMatch ? 'loaded' : 'none').itemstyle}>
                     <span>{match.id}</span>
-                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => (fetchMatch(match.id))}> Open </button>
+                    <button disabled={match.id == $matchid} class="loadButton" on:click={() => fetchMatch(match.id)}> Open </button>
                     <div class="statustext" style="background-color:{statusColors[match.state]}">{statusMessages[match.state]}</div>
                 </div>
             {/each}
@@ -173,10 +158,10 @@
             <button on:click={transitionLoadState} class="match-control" style="background-color:{$matchLoadState.buttoncolor};">{$matchLoadState.text}</button>
             <button on:click={buttonData[$matchstate].cb} class="match-control" style="background-color:{buttonData[$matchstate].color};">{buttonData[$matchstate].text}</button>
         </div>
-        <h3 id="match-time">{$matchstate != "in_progress" ? statusMessages[$matchstate] : formatDuration($remainingTimeInPeriod)}</h3>
+        <h3 id="match-time">{$matchstate != 'in_progress' ? statusMessages[$matchstate] : formatDuration($remainingTimeInPeriod)}</h3>
         <p id="teams-header">Teams</p>
         <div id="teamsgrid">
-            {#if $matchtype == "qualification"}
+            {#if $matchtype == 'qualification'}
                 <div class="row">
                     <div class="item item-1-1">Red</div>
                     <div class="item item-2-1">Blue</div>

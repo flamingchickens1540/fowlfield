@@ -27,14 +27,8 @@ export default function configureAudio() {
     })
     matchPeriod.subscribe((period) => {
         const match_time = get(matchTime)
-        if (
-            Math.abs(getElapsedTimeInPeriod(match_time) ?? 0) > 0.25 ||
-            match_time == 0
-        ) {
-            console.log(
-                getElapsedTimeInPeriod(match_time),
-                'too late, not playing'
-            )
+        if (Math.abs(getElapsedTimeInPeriod(match_time) ?? 0) > 0.25 || match_time == 0) {
+            console.log(getElapsedTimeInPeriod(match_time), 'too late, not playing')
             return
         }
         console.log('playing', period, 'sound')

@@ -20,7 +20,9 @@ startSockets(server)
 
 setTimeout(async () => {
     if ((await prisma.playoffAlliance.count()) == 0) {
-        await prisma.playoffAlliance.createMany({ data: [1, 2, 3, 4].map((i) => ({ seed: i })) })
+        await prisma.playoffAlliance.createMany({
+            data: [1, 2, 3, 4].map((i) => ({ seed: i }))
+        })
     }
 })
 // await tba.reset('match', 'alliance', 'ranking') // TODO: Remove this when teams are finalized

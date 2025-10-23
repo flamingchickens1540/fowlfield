@@ -281,8 +281,8 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         if (match.type == 'elimination') {
             notifyMatchUpdated(match)
         } else {
-	    io.emit('rankings', await buildRankings())
-	}
+            io.emit('rankings', await buildRankings())
+        }
         logger.info('Committing', id)
         setTimeout(tba.updateMatches)
 

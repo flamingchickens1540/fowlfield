@@ -9,13 +9,7 @@ const durations: { [key in MatchPeriod]: number } = {
     [MatchPeriod.POSTMATCH]: 0
 }
 
-const orderedPeriods = [
-    MatchPeriod.PREMATCH,
-    MatchPeriod.AUTO,
-    MatchPeriod.PAUSE,
-    MatchPeriod.TELEOP,
-    MatchPeriod.POSTMATCH
-]
+const orderedPeriods = [MatchPeriod.PREMATCH, MatchPeriod.AUTO, MatchPeriod.PAUSE, MatchPeriod.TELEOP, MatchPeriod.POSTMATCH]
 
 export function getPeriodDuration(period: MatchPeriod): number {
     return durations[period]
