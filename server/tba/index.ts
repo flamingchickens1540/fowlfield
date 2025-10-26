@@ -26,7 +26,7 @@ import { Match, Match_Results, Team } from '@prisma/client'
 
 const logger = createLogger('tba')
 
-const isEnabled = (config.tba.id ?? '') != '' && (config.tba.secret ?? '') != ''
+const isEnabled = config.tba.enabled && (config.tba.id ?? '') != '' && (config.tba.secret ?? '') != '' 
 
 const baseUrl = 'https://www.thebluealliance.com'
 
@@ -56,6 +56,10 @@ interface Endpoints {
 }
 
 async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]): Promise<boolean> {
+    if (!isEnabled) {
+        logger.info({endpoint}, "tba is disabled, ignoring post")
+        return
+    }
     const path = `/api/trusted/v1/event/${config.tba.event}/${endpoint}`
     const signature = crypto
         .createHash('md5')

@@ -10,6 +10,7 @@
         "signingKey": "abcdefg"
     },
     "tba": {
+        "enabled": false,
         "event": "2024orbb",
         "id": "",
         "secret": ""
