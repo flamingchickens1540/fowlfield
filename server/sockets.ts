@@ -16,14 +16,15 @@ import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
 import { getAlliances } from '~common/utils/scores'
-import { Match_AllianceResults, Tote } from '@prisma/client'
+import { Match_AllianceResults, PlayoffAlliance, Tote } from '@prisma/client'
 
 const logger = createLogger('socket')
 export let io: Server<ClientToServerEvents, ServerToClientEvents>
 
 enum SocketAccess {
     VIEWER = 'viewer',
-    NORMAL = 'normal'
+    NORMAL = 'normal',
+    NONE  = 'none'
 }
 
 const handleMatchEnd = async () => {
@@ -31,7 +32,7 @@ const handleMatchEnd = async () => {
     if (match == null) {
         return
     }
-    if (getMatchPeriod((Date.now() - match.startTime) / 1000) == MatchPeriod.POSTMATCH && match.state == 'in_progress') {
+    if (getMatchPeriod((Date.now() - (match.startTime ?? 0)) / 1000) == MatchPeriod.POSTMATCH && match.state == 'in_progress') {
         const match = await prisma.match.update({ where: { id: eventState.loadedMatch }, data: { state: 'ended' } })
         logger.info('Transitioning match', match.id, 'to completed')
         io.emit('match', match)
@@ -76,13 +77,13 @@ export default function startServer(server: http.Server) {
             socket.emit('login', { success: false })
         }
         socket.on('login', (password) => {
-            let access: SocketAccess
+            let access: SocketAccess = SocketAccess.NONE
             if (password == config.socket.password) {
                 access = SocketAccess.NORMAL
             } else if (password == config.socket.view_password) {
                 access = SocketAccess.VIEWER
             }
-            if (access != null) {
+            if (access != SocketAccess.NONE) {
                 socket.data.access = access
                 const token = jwt.sign({ access }, config.socket.signingKey)
                 socket.emit('login', { success: true, token })
@@ -106,8 +107,12 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
 
     // Send initial data
-    socket.emit('loadMatch', await matchmanager.getLoadedMatch())
-    socket.emit('preloadMatch', await matchmanager.getPreloadedMatch())
+    const loadedMatch = await matchmanager.getLoadedMatch()
+    if (loadedMatch) socket.emit('loadMatch', loadedMatch)
+
+    const preloadedMatch = await matchmanager.getPreloadedMatch()
+    if (preloadedMatch) socket.emit('preloadMatch', preloadedMatch)
+    
     socket.emit('matches', await getMatches())
     socket.emit('teams', await getTeams())
     socket.emit('alliances', await prisma.playoffAlliance.findMany({}))
@@ -122,12 +127,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
     socket.on('partialAlliance', async (data) => {
         const seed = data.seed
-        delete data.seed
+        const updateData:Partial<PlayoffAlliance> = data
+        delete updateData.seed
 
         const alliance = await prisma.playoffAlliance.upsert({
             where: { seed },
-            update: data,
-            create: { seed, ...data }
+            update: updateData,
+            create: { seed, ...updateData }
         })
         io.emit('alliance', alliance)
     })
@@ -298,7 +304,11 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
 
     socket.on('resetMatch', async (id) => {
         const match = await matchmanager.getMatch(id)
-        logger.warn('Resetting match', id)
+        if (match == null) {
+            logger.warn({id, match}, "cannot reset match")
+            return
+        }
+        logger.warn({id}, 'Resetting match')
         await prisma.match.update({
             where: { id: match.id },
             data: {
@@ -324,10 +334,13 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         })
     })
 
-    socket.on('getMatch', (id, cb) => {
-        prisma.match.findUnique({ where: { id } }).then((match) => {
-            cb(match)
-        })
+    socket.on('getMatch', async (id, cb) => {
+        const match = await prisma.match.findUnique({ where: { id } })
+        if (match == null) {
+            logger.error({id, match}, "could not find match")
+            return
+        }
+        cb(match)
     })
 
     socket.on('disconnect', () => {

@@ -18,7 +18,7 @@ export async function loadMatches() {
         eventState.loadedMatch = match.id
         eventState.preloadedMatch = match.id
     } else {
-        const match = await prisma.match.findFirst()
+        const match = (await prisma.match.findFirst())!
         eventState.loadedMatch = match.id
         eventState.preloadedMatch = match.id
     }
@@ -35,25 +35,36 @@ export function getMatch(id: string) {
 
 export async function updateMatch(data: PartialMatch) {
     const { id } = data
-    delete data.id
-    return prisma.match.update({ where: { id }, data })
+    const updateData:Partial<Match> = data
+    delete updateData.id
+    return prisma.match.update({ where: { id }, data:updateData })
 }
 
-export async function getLoadedMatch(): Promise<Match | undefined> {
+export async function getLoadedMatch(): Promise<Match | null> {
     return prisma.match.findUnique({ where: { id: eventState.loadedMatch } })
 }
 
-export async function getPreloadedMatch(): Promise<Match | undefined> {
+export async function getPreloadedMatch(): Promise<Match | null> {
     return prisma.match.findUnique({ where: { id: eventState.preloadedMatch } })
 }
 
 export async function updatePreloadedMatch(id: string) {
     eventState.preloadedMatch = id
-    io.emit('preloadMatch', await getPreloadedMatch())
+    const preloadedMatch = await getPreloadedMatch()
+    if (preloadedMatch == null) {
+        logger.error({eventState, id, preloadedMatch}, "could not find preload match")
+        return
+    }
+    io.emit('preloadMatch', preloadedMatch)
 }
 export async function updateLoadedMatch(id: string) {
     eventState.loadedMatch = id
-    io.emit('loadMatch', await getLoadedMatch())
+    const loadedMatch = await getLoadedMatch()
+    if (loadedMatch == null) {
+        logger.error({eventState, id, loadedMatch}, "could not find load match")
+        return
+    }
+    io.emit('loadMatch', loadedMatch)
 }
 
 export function getMatchMaker(): MatchMaker {
@@ -61,7 +72,7 @@ export function getMatchMaker(): MatchMaker {
 }
 
 export async function getLastFinals(): Promise<Match | null> {
-    const scheduleItem = matchMaker.getBracket().getFinalMatch()
+    const scheduleItem = matchMaker.getBracket()?.getFinalMatch()
     if (scheduleItem != null) {
         return prisma.match.findUnique({ where: { id: scheduleItem.details.matchId } })
     }

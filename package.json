@@ -4,10 +4,10 @@
         "format": "prettier -w ./",
         "frontend:dev": "vite dev",
         "frontend:build": "vite build",
-        "frontend:check": "tsc --noEmit --skipLibCheck --project svelte/tsconfig.json",
-        "backend:build": "tsx ./build-server.ts",
-        "backend:dev": "tsx --tsconfig server/tsconfig.json ./server/index.ts",
-        "backend:check": "tsc --noEmit --skipLibCheck --project server/tsconfig.json"
+        "frontend:check": "tsc --noEmit --project svelte/tsconfig.json",
+        "backend:build": "bun build server/index.ts --production --sourcemap=inline --target=bun --outfile=build/server.js",
+        "backend:dev": "bun ./server/index.ts",
+        "backend:check": "tsc --noEmit --project server/tsconfig.json"
     },
     "devDependencies": {
         "@sveltejs/vite-plugin-svelte": "^3.1.1",
@@ -27,7 +27,7 @@
         "svelte-preprocess": "^6.0.2",
         "tsx": "^4.16.5",
         "typescript-cookie": "^1.0.6",
-        "vite": "^5.3.5"
+        "vite": "^7.1.12"
     },
     "dependencies": {
         "@prisma/client": "^6.18.0",
@@ -37,13 +37,14 @@
         "axios": "^1.7.3",
         "jsonwebtoken": "^9.0.2",
         "leader-line-new": "^1.1.9",
-        "mongodb": "^6.8.0",
+        "mongodb": "^6.20.0",
         "pino": "^9.3.2",
         "pino-pretty": "^11.2.2",
-        "socket.io": "^4.7.5",
-        "socket.io-client": "^4.7.5",
+        "socket.io": "^4.8.1",
+        "socket.io-client": "^4.8.1",
         "sortablejs": "^1.15.2",
         "svelte-writable-derived": "^3.1.1",
+        "typescript": "^5.9.3",
         "vite-tsconfig-paths": "^4.3.2"
     },
     "engines": {

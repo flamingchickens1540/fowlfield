@@ -29,13 +29,13 @@ export class MatchMaker {
             }
         })
 
-        this.initElims(elimMatches.length)
+        this.bracket = new DoubleEliminationBracket(elimMatches.length)
 
         elimMatches.forEach((match) => {
             if (match.state == 'ended' || match.state == 'posted') {
                 const winner = getWinner(match)
                 if (winner != 'tie') {
-                    this.bracket.update(match.stage_index, winner)
+                    this.bracket!.update(match.stage_index, winner)
                 }
             }
         })
@@ -61,10 +61,10 @@ export class MatchMaker {
         })
     }
 
-    async advanceElimMatch(): Promise<Match> {
+    async advanceElimMatch(): Promise<Match|null> {
         if (this.bracket == null) {
             logger.error('Must initialize elims before advancing')
-            return
+            return null
         }
 
         let match = this.bracket.getNextMatch()
@@ -73,8 +73,12 @@ export class MatchMaker {
         }
         const alliances = await teammanager.getAlliances()
         logger.info({ match, alliances }, 'ELIM DATA')
-        const red = alliances.get(match.red)
-        const blue = alliances.get(match.blue)
+        const red = alliances.get(match.red!)
+        const blue = alliances.get(match.blue!)
+        if (red == null || blue == null) {
+            logger.error({red, blue, match, alliances}, "Could not get playoff alliances for match, error")
+            return null
+        }
         return prisma.match.create({
             data: {
                 id: match.details.matchId,
@@ -83,8 +87,8 @@ export class MatchMaker {
                     round: match.details.elimRound,
                     group: match.details.elimGroup,
                     instance: match.details.elimInstance,
-                    red_alliance: match.red,
-                    blue_alliance: match.blue
+                    red_alliance: match.red!,
+                    blue_alliance: match.blue!
                 },
                 type: 'elimination',
                 state: 'not_started',

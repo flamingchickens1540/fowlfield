@@ -119,10 +119,11 @@ export async function buildRankings(): Promise<RankingEntry[]> {
 
 export async function updateTeam(team: PartialTeam) {
     const id = team.id
-    delete team.id
+    const updateData:Partial<Team> = team
+    delete updateData.id
     return prisma.team.update({
         where: { id },
-        data: team
+        data: updateData
     })
 }
 
