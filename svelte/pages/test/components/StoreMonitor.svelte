@@ -3,16 +3,15 @@
     import type { ChangeEventHandler } from 'svelte/elements'
     import { safeParseInt } from '~common/utils'
 
-
     export let label: string
     export let pad: boolean = false
-    export let store: Writable<any>|Readable<any>
+    export let store: Writable<any> | Readable<any>
 
     export let type: 'checkbox' | 'number' | 'text' = 'text'
-    const readonly = !("set" in store)
+    const readonly = !('set' in store)
     const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
         const target = event.target as HTMLInputElement
-        if (!("set" in store)) {
+        if (!('set' in store)) {
             return
         }
         if (type == 'checkbox') {
@@ -25,14 +24,14 @@
     }
 </script>
 
-<div class="row" style="{pad?'margin-top:20px':''}">
+<div class="row" style={pad ? 'margin-top:20px' : ''}>
     <span>{label}</span>
     <div style="width:200px">
-    {#if type == 'checkbox'}
-        <input {readonly} {type} checked={$store} on:change={onChange} />
-    {:else}
-        <input {readonly} {type} value={$store} on:change={onChange} />
-    {/if}
+        {#if type == 'checkbox'}
+            <input {readonly} {type} checked={$store} on:change={onChange} />
+        {:else}
+            <input {readonly} {type} value={$store} on:change={onChange} />
+        {/if}
     </div>
 </div>
 

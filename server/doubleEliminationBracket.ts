@@ -26,7 +26,7 @@ export class DoubleEliminationBracket {
         this.matches[2].red = 2
         this.matches[2].blue = 3
     }
-    private recordedMatches:number[] = []
+    private recordedMatches: number[] = []
 
     update(matchNumber: number, winner: 'red' | 'blue'): boolean {
         bracketLogger.debug('recording match', matchNumber)
@@ -67,7 +67,7 @@ export class DoubleEliminationBracket {
         return true
     }
 
-    getNextMatch(): ScheduleItem|null {
+    getNextMatch(): ScheduleItem | null {
         if (this.isOver()) {
             bracketLogger.error(this, 'Cannot get next match, bracket is over')
             return null

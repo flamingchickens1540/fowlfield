@@ -61,7 +61,7 @@ export class MatchMaker {
         })
     }
 
-    async advanceElimMatch(): Promise<Match|null> {
+    async advanceElimMatch(): Promise<Match | null> {
         if (this.bracket == null) {
             logger.error('Must initialize elims before advancing')
             return null
@@ -76,7 +76,7 @@ export class MatchMaker {
         const red = alliances.get(match.red!)
         const blue = alliances.get(match.blue!)
         if (red == null || blue == null) {
-            logger.error({red, blue, match, alliances}, "Could not get playoff alliances for match, error")
+            logger.error({ red, blue, match, alliances }, 'Could not get playoff alliances for match, error')
             return null
         }
         return prisma.match.create({
@@ -104,9 +104,6 @@ export class MatchMaker {
         })
     }
 
-    initElims(currentmatch: number) {
-        this.bracket = new DoubleEliminationBracket(currentmatch)
-    }
     getBracket() {
         return this.bracket
     }

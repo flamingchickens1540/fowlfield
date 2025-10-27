@@ -25,10 +25,10 @@ setTimeout(async () => {
 })
 
 if (process.env.TBA_RESET) {
-    await tba.reset('match', 'alliance', 'ranking') 
+    await tba.reset('match', 'alliance', 'ranking')
 }
 if (process.env.TBA_SET_TEAMS) {
-    setTimeout(async () => await tba.updateEventTeams(), 1000) // TODO: Remove this when teams are finalized
+    setTimeout(async () => await tba.updateEventTeams(), 1000)
 }
 if (process.env.TBA_UPDATE) {
     await tba.updateAlliances()

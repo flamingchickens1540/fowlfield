@@ -26,7 +26,7 @@ import { Match, Match_Results, Team } from '@prisma/client'
 
 const logger = createLogger('tba')
 
-const isEnabled = config.tba.enabled && (config.tba.id ?? '') != '' && (config.tba.secret ?? '') != '' 
+const isEnabled = config.tba.enabled && (config.tba.id ?? '') != '' && (config.tba.secret ?? '') != ''
 
 const baseUrl = 'https://www.thebluealliance.com'
 
@@ -57,7 +57,7 @@ interface Endpoints {
 
 async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]): Promise<boolean> {
     if (!isEnabled) {
-        logger.info({endpoint}, "tba is disabled, ignoring post")
+        logger.info({ endpoint }, 'tba is disabled, ignoring post')
         return false
     }
     const path = `/api/trusted/v1/event/${config.tba.event}/${endpoint}`
@@ -72,18 +72,18 @@ async function post<E extends keyof Endpoints>(endpoint: E, body: Endpoints[E]):
                 'X-TBA-Auth-Sig': signature
             }
         })
-        logger.info({body, status:response.status+" "+response.statusText}, path)
+        logger.info({ body, status: response.status + ' ' + response.statusText }, path)
         if (response.status == 200) {
             return true
         }
-    } catch (e:any) {
+    } catch (e: any) {
         logger.error({ resp: e?.response?.data, body }, `Request to ${path} failed.`)
     }
     return false
 }
 
 export async function updateEventInfo(teams: Team[] = Object.values(getTeams())) {
-    const remap_teams:Record<TbaTeamNumber, TbaTeamNumber> = {}
+    const remap_teams: Record<TbaTeamNumber, TbaTeamNumber> = {}
     teams.forEach(({ id, display_number }) => {
         if (id.toString() != display_number && !display_number.endsWith('A')) {
             remap_teams[getTBATeamNumber(id)] = getTBATeamNumber(display_number as DisplayNumber)
@@ -114,7 +114,7 @@ export async function updateAlliances(): Promise<boolean> {
         orderBy: { seed: 'asc' }
     })
     const body = alliances.map((alliance) => {
-        const tbaAlliance:TbaTeamNumber[] = []
+        const tbaAlliance: TbaTeamNumber[] = []
         alliance.captain && tbaAlliance.push(getTBATeamNumber(alliance.captain))
         alliance.first_pick && tbaAlliance.push(getTBATeamNumber(alliance.first_pick))
         alliance.second_pick && tbaAlliance.push(getTBATeamNumber(alliance.second_pick))
@@ -171,16 +171,16 @@ export async function updateAwards() {
     }
     const winner = getWinner(results)
     if (results.elim_info == null) {
-        logger.warn({results}, "Cannot update awards, no elim info")
+        logger.warn({ results }, 'Cannot update awards, no elim info')
         return
     }
     const redAlliance = await prisma.playoffAlliance.findUnique({ where: { seed: results.elim_info.red_alliance } })
-    const redTeams:TbaTeamNumber[] = []
+    const redTeams: TbaTeamNumber[] = []
     const blueAlliance = await prisma.playoffAlliance.findUnique({ where: { seed: results.elim_info.blue_alliance } })
-    const blueTeams:TbaTeamNumber[] = []
+    const blueTeams: TbaTeamNumber[] = []
 
     if (redAlliance == null || blueAlliance == null) {
-        logger.warn({redAlliance, blueAlliance, results}, "Cannot update awards, no alliance info")
+        logger.warn({ redAlliance, blueAlliance, results }, 'Cannot update awards, no alliance info')
         return
     }
     for (let team of [redAlliance.captain, redAlliance.first_pick, redAlliance.second_pick, redAlliance.third_pick]) {
@@ -203,10 +203,10 @@ export async function updateAwards() {
     }
     await post('awards/update', body)
 }
-function matchToTBAMatch(match: Match): TbaMatch|null {
+function matchToTBAMatch(match: Match): TbaMatch | null {
     const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
     if (decodedMatchId == null) {
-        logger.warn({match}, "Could not decode match id, not uploading")
+        logger.warn({ match }, 'Could not decode match id, not uploading')
         return null
     }
     const { redScore, redRP, blueScore, blueRP } = getScores(match)
@@ -223,7 +223,7 @@ function matchToTBAMatch(match: Match): TbaMatch|null {
         }
     }
     return {
-        comp_level: match.type == 'qualification' ? 'qm' : (decodedMatchId[1] as TbaMatch["comp_level"]),
+        comp_level: match.type == 'qualification' ? 'qm' : (decodedMatchId[1] as TbaMatch['comp_level']),
         set_number: match.type == 'qualification' ? 1 : parseInt(decodedMatchId[2]),
         match_number: match.type == 'qualification' ? match.stage_index : parseInt(decodedMatchId[3]),
         score_breakdown: {

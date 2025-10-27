@@ -24,7 +24,7 @@ export let io: Server<ClientToServerEvents, ServerToClientEvents>
 enum SocketAccess {
     VIEWER = 'viewer',
     NORMAL = 'normal',
-    NONE  = 'none'
+    NONE = 'none'
 }
 
 const handleMatchEnd = async () => {
@@ -112,7 +112,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
 
     const preloadedMatch = await matchmanager.getPreloadedMatch()
     if (preloadedMatch) socket.emit('preloadMatch', preloadedMatch)
-    
+
     socket.emit('matches', await getMatches())
     socket.emit('teams', await getTeams())
     socket.emit('alliances', await prisma.playoffAlliance.findMany({}))
@@ -127,7 +127,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
     socket.on('partialAlliance', async (data) => {
         const seed = data.seed
-        const updateData:Partial<PlayoffAlliance> = data
+        const updateData: Partial<PlayoffAlliance> = data
         delete updateData.seed
 
         const alliance = await prisma.playoffAlliance.upsert({
@@ -287,8 +287,8 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         if (match.type == 'elimination') {
             notifyMatchUpdated(match)
         } else {
-	    io.emit('rankings', await buildRankings())
-	}
+            io.emit('rankings', await buildRankings())
+        }
         logger.info('Committing', id)
         setTimeout(tba.updateMatches)
 
@@ -305,10 +305,10 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.on('resetMatch', async (id) => {
         const match = await matchmanager.getMatch(id)
         if (match == null) {
-            logger.warn({id, match}, "cannot reset match")
+            logger.warn({ id, match }, 'cannot reset match')
             return
         }
-        logger.warn({id}, 'Resetting match')
+        logger.warn({ id }, 'Resetting match')
         await prisma.match.update({
             where: { id: match.id },
             data: {
@@ -337,7 +337,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.on('getMatch', async (id, cb) => {
         const match = await prisma.match.findUnique({ where: { id } })
         if (match == null) {
-            logger.error({id, match}, "could not find match")
+            logger.error({ id, match }, 'could not find match')
             return
         }
         cb(match)

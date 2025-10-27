@@ -35,9 +35,9 @@ export function getMatch(id: string) {
 
 export async function updateMatch(data: PartialMatch) {
     const { id } = data
-    const updateData:Partial<Match> = data
+    const updateData: Partial<Match> = data
     delete updateData.id
-    return prisma.match.update({ where: { id }, data:updateData })
+    return prisma.match.update({ where: { id }, data: updateData })
 }
 
 export async function getLoadedMatch(): Promise<Match | null> {
@@ -52,7 +52,7 @@ export async function updatePreloadedMatch(id: string) {
     eventState.preloadedMatch = id
     const preloadedMatch = await getPreloadedMatch()
     if (preloadedMatch == null) {
-        logger.error({eventState, id, preloadedMatch}, "could not find preload match")
+        logger.error({ eventState, id, preloadedMatch }, 'could not find preload match')
         return
     }
     io.emit('preloadMatch', preloadedMatch)
@@ -61,7 +61,7 @@ export async function updateLoadedMatch(id: string) {
     eventState.loadedMatch = id
     const loadedMatch = await getLoadedMatch()
     if (loadedMatch == null) {
-        logger.error({eventState, id, loadedMatch}, "could not find load match")
+        logger.error({ eventState, id, loadedMatch }, 'could not find load match')
         return
     }
     io.emit('loadMatch', loadedMatch)

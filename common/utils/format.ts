@@ -5,10 +5,7 @@ export function formatDuration(duration: number) {
 }
 
 export function roundToPlaces(value: number, places: number): number
-export function roundToPlaces(
-    value: number | null,
-    places: number
-): number | null {
+export function roundToPlaces(value: number | null, places: number): number | null {
     if (value == null) {
         return null
     }
