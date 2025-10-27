@@ -1,7 +1,4 @@
-<div class=estop-container>
-    This product has been discontinued
-</div>
-
+<div class="estop-container">This product has been discontinued</div>
 
 <style lang="scss">
     :global(:root) {
@@ -10,25 +7,25 @@
         overscroll-behavior-y: none;
     }
     :global(body) {
-        margin:0 !important;
-        padding:0;
+        margin: 0 !important;
+        padding: 0;
     }
 
-
     .estop-container {
-        position:absolute;
-        left:0;
-        right:0;
-        top:0;
-        bottom:0;   
-        display:grid;
-        grid-auto-flow:column;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        display: grid;
+        grid-auto-flow: column;
         grid-template-columns: 50vw 50vw;
         grid-template-rows: auto auto auto;
     }
-    .red-estop-box, .blue-estop-box {
-        border:1px solid white;
-        margin:5px;
+    .red-estop-box,
+    .blue-estop-box {
+        border: 1px solid white;
+        margin: 5px;
     }
     .red-estop-box {
         background-color: var(--red);
@@ -52,5 +49,4 @@
     //         bottom:0
     //     }
     // }
-
 </style>

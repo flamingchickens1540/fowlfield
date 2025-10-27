@@ -11,28 +11,42 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - uses: oven-sh/setup-bun@v2
               with:
-                  node-version: 21
-                  cache: 'npm'
+                  bun-version: latest
+            - uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                      ./node_modules
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun
             - name: Install Packages
-              run: npm ci
+              run: bun install --frozen-lockfile
             - name: Check
-              run: npm run backend:check
+              run: bun run backend:check
             - name: Build
-              run: npm run backend:build
+              run: bun run backend:build
     frontend:
         name: 'Build Frontend'
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - uses: oven-sh/setup-bun@v2
               with:
-                  node-version: 21
-                  cache: 'npm'
+                  bun-version: latest
+            - uses: actions/cache@v4
+              with:
+                  path: |
+                      ~/.bun/install/cache
+                      ./node_modules
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  restore-keys: |
+                      ${{ runner.os }}-bun
             - name: Install Packages
-              run: npm ci
+              run: bun install --frozen-lockfile
             - name: Check
-              run: npm run frontend:check
+              run: bun run frontend:check
             - name: Build
-              run: npm run frontend:build
+              run: bun run frontend:build

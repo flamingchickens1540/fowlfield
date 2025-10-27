@@ -23,11 +23,18 @@ setTimeout(async () => {
         await prisma.playoffAlliance.createMany({ data: [1, 2, 3, 4].map((i) => ({ seed: i })) })
     }
 })
-// await tba.reset('match', 'alliance', 'ranking') // TODO: Remove this when teams are finalized
-setTimeout(async () => await tba.updateEventTeams(), 1000)
-await tba.updateAlliances()
-await tba.updateMatches()
-await tba.updateRankings()
+
+if (process.env.TBA_RESET) {
+    await tba.reset('match', 'alliance', 'ranking')
+}
+if (process.env.TBA_SET_TEAMS) {
+    setTimeout(async () => await tba.updateEventTeams(), 1000)
+}
+if (process.env.TBA_UPDATE) {
+    await tba.updateAlliances()
+    await tba.updateMatches()
+    await tba.updateRankings()
+}
 
 app.use(express.static('public'))
 app.use(express.static('dist'))

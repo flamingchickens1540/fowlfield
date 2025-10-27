@@ -9,43 +9,42 @@
     import AllianceDisplay from './views/AllianceDisplay.svelte'
     import Blank from './views/Blank.svelte'
 
-
-    const isAlliance = window.location.search.includes("alliance")
+    const isAlliance = window.location.search.includes('alliance')
     const shown = derived([matchData.type, matchData.state, eventData.atLunch], ([$type, $state, $atLunch]) => {
         if ($atLunch) {
-            return "msg"
+            return 'msg'
         } else {
             if ($state == MatchState.POSTED) {
-                return $type == "elimination" ? "playoffResults" : "results"
+                return $type == 'elimination' ? 'playoffResults' : 'results'
             } else if ($state == MatchState.COMPLETE) {
-                return "blank"
+                return 'blank'
             } else {
-                return "match"
+                return 'match'
             }
         }
-    });
+    })
 </script>
 
 {#if isAlliance}
     <AllianceDisplay></AllianceDisplay>
 {:else}
-    <div style="display:{$shown === 'msg' ? 'contents': 'none'}">
+    <div style="display:{$shown === 'msg' ? 'contents' : 'none'}">
         <Message></Message>
     </div>
 
-    <div style="display:{$shown === 'results' ? 'contents': 'none'}">
+    <div style="display:{$shown === 'results' ? 'contents' : 'none'}">
         <Results></Results>
     </div>
 
-    <div style="display:{$shown === 'playoffResults' ? 'contents': 'none'}">
+    <div style="display:{$shown === 'playoffResults' ? 'contents' : 'none'}">
         <PlayoffResults></PlayoffResults>
     </div>
 
-    <div style="display:{$shown === 'match' ? 'contents': 'none'}">
+    <div style="display:{$shown === 'match' ? 'contents' : 'none'}">
         <Match></Match>
     </div>
 
-    <div style="display:{$shown === 'blank' ? 'contents': 'none'}">
+    <div style="display:{$shown === 'blank' ? 'contents' : 'none'}">
         <Blank></Blank>
     </div>
 {/if}

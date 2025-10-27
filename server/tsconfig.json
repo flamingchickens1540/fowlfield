@@ -8,7 +8,10 @@
         "moduleResolution": "bundler",
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "target": "es2022",
-        "module": "es2022"
+        "skipLibCheck": true,
+        "noEmit": true,
+        "strict": true,
+        "target": "esnext",
+        "module": "esnext"
     }
 }
