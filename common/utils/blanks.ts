@@ -15,7 +15,7 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
         auto_park_robot1: false,
         auto_park_robot2: false,
         auto_park_robot3: false,
-        foul_points: 0,
+        foul_points: 0
     }
 }
 

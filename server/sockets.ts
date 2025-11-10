@@ -161,7 +161,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('match', match)
     })
 
-    
     socket.on('partialTeam', async (data: PartialTeam) => {
         logger.debug('receiving team', data)
         if (!data.id) {

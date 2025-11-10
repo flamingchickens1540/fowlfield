@@ -32,21 +32,20 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
     if (breakdown == null) {
         return points
     }
-    for (const alliance_data of [{ points: points.red, breakdown: breakdown.red }, { points: points.blue, breakdown: breakdown.blue }]) {
-        const { points, breakdown:alliance_breakdown } = alliance_data
+    for (const alliance_data of [
+        { points: points.red, breakdown: breakdown.red },
+        { points: points.blue, breakdown: breakdown.blue }
+    ]) {
+        const { points, breakdown: alliance_breakdown } = alliance_data
         points.auto_carrots += 5 * alliance_breakdown.feeding_station_auto // 5 points per carrot in feeding station
-        points.auto_carrots += 1 * alliance_breakdown.grass_auto           // 1 point per carrot in the grass
+        points.auto_carrots += 1 * alliance_breakdown.grass_auto // 1 point per carrot in the grass
 
-        points.auto_park += 5 * countTrue(
-            alliance_breakdown.auto_park_robot1,
-            alliance_breakdown.auto_park_robot2,
-            alliance_breakdown.auto_park_robot3
-        ) // 5 points for robot partially in the carrot patch at end of auto
+        points.auto_park += 5 * countTrue(alliance_breakdown.auto_park_robot1, alliance_breakdown.auto_park_robot2, alliance_breakdown.auto_park_robot3) // 5 points for robot partially in the carrot patch at end of auto
 
         points.tele_carrots += 10 * alliance_breakdown.feeding_station_tele
         points.tele_carrots += 1 * alliance_breakdown.grass_tele
         points.tele_hits += 5 * alliance_breakdown.total_hits
-        
+
         points.tele_bunnies += 10 * alliance_breakdown.endgame_bunnies
         points.foul = alliance_breakdown.foul_points
         if (breakdown.cabbages_in_patch) {

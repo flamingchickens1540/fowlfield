@@ -115,40 +115,40 @@ export interface TbaMatch {
 }
 
 export type TbaScoreBreakdown = {
-        "adjustPoints": number,
-      "algaePoints": number,
-      "autoBonusAchieved": boolean,
-      "autoCoralCount": number,
-      "autoCoralPoints": number,
-      "autoLineRobot1": "Yes"|"No",
-      "autoLineRobot2": "Yes"|"No",
-      "autoLineRobot3": "Yes"|"No",
-      "autoMobilityPoints": number,
-      "autoPoints": number,
-      "autoReef": never
-      "bargeBonusAchieved": boolean,
-      "coopertitionCriteriaMet": boolean,
-      "coralBonusAchieved": boolean,
-      "endGameBargePoints": number,
-      "endGameRobot1": never,
-      "endGameRobot2": never,
-      "endGameRobot3": never,
-      "foulCount": number,
-      "foulPoints": number,
-      "g206Penalty": boolean,
-      "g410Penalty": boolean,
-      "g418Penalty": boolean,
-      "g428Penalty": boolean,
-      "netAlgaeCount": number,
-      "rp": number,
-      "techFoulCount": number,
-      "teleopCoralCount": number,
-      "teleopCoralPoints": number,
-      "teleopPoints": number,
-      "teleopReef": never,
-      "totalPoints": number,
-      "wallAlgaeCount": number
-    }
+    adjustPoints: number
+    algaePoints: number
+    autoBonusAchieved: boolean
+    autoCoralCount: number
+    autoCoralPoints: number
+    autoLineRobot1: 'Yes' | 'No'
+    autoLineRobot2: 'Yes' | 'No'
+    autoLineRobot3: 'Yes' | 'No'
+    autoMobilityPoints: number
+    autoPoints: number
+    autoReef: never
+    bargeBonusAchieved: boolean
+    coopertitionCriteriaMet: boolean
+    coralBonusAchieved: boolean
+    endGameBargePoints: number
+    endGameRobot1: never
+    endGameRobot2: never
+    endGameRobot3: never
+    foulCount: number
+    foulPoints: number
+    g206Penalty: boolean
+    g410Penalty: boolean
+    g418Penalty: boolean
+    g428Penalty: boolean
+    netAlgaeCount: number
+    rp: number
+    techFoulCount: number
+    teleopCoralCount: number
+    teleopCoralPoints: number
+    teleopPoints: number
+    teleopReef: never
+    totalPoints: number
+    wallAlgaeCount: number
+}
 
 export class TbaAlliance {
     teams: TbaTeamNumber[] = []
