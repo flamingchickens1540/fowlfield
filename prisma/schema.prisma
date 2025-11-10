@@ -57,41 +57,29 @@ model Match {
   @@unique([stage_index, type])
 }
 
-type Totes {
-  tote1  Tote
-  tote2  Tote
-  tote3  Tote
-  tote4  Tote
-  tote5  Tote
-  tote6  Tote
-  tote7  Tote
-  tote8  Tote
-  tote9  Tote
-  tote10 Tote
-  tote11 Tote
-  tote12 Tote
-}
-
-type Tote {
-  red_balloons  Int // The number of red balloons in the tote
-  blue_balloons Int // The number of blue balloons in the tote
-  bunnies       Int // The number of bunnies in the tote at the end of auto
-}
-
 type Match_Results {
   red          Match_AllianceResults
   blue         Match_AllianceResults
-  totes        Totes
-  corral_empty Boolean
+  cabbages_in_patch Boolean // Whether both cabages are in the carrot patch at the end of the match (coopertition)
 }
 
 type Match_AllianceResults {
   card_robot1       Card // The card for the first robot on the alliance
   card_robot2       Card // The card for the second robot on the alliance
   card_robot3       Card // The card for the third robot on the alliance
-  zone_bunnies      Int // The number of bunnies in the alliance's low zone at the end of the match
-  zone_balloons_own Int // The number of own balloons in the alliance's low zone at the end of the match
-  zone_balloons_opp Int // The number of opponent ballons in the alliance's low zone at the end of the match
+  
+  feeding_station_auto      Int // The number of carrots in the feeding station at the end of auto
+  feeding_station_tele      Int // The number of carrots in the feeding station at the end of the match (this includes carrots placed during auto)
+  grass_auto                Int // The number of carrots in the grass at the end of auto
+  grass_tele                Int // The number of carrots in the grass at the end of the match (this includes carrots placed during auto)
+  endgame_bunnies           Int // The number of bunnies in the petting zoo at the end of the match
+
+  total_hits                Int // The number of carrots that successfully hit opponent robots
+
+  auto_park_robot1       Boolean // Whether the first robot ends auto partially inside the carrot patch
+  auto_park_robot2       Boolean // Whether the second robot ends auto partially inside the carrot patch
+  auto_park_robot3       Boolean // Whether the third robot ends auto partially inside the carrot patch
+
   foul_points       Int // The number a points an alliance earns from fouls
 }
 

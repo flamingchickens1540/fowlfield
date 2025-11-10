@@ -115,58 +115,40 @@ export interface TbaMatch {
 }
 
 export type TbaScoreBreakdown = {
-    adjustPoints: number
-    autoAmpNoteCount: number
-    autoAmpNotePoints: number
-    autoLeavePoints: number
-    autoLineRobot1: 'Yes' | 'No'
-    autoLineRobot2: 'Yes' | 'No'
-    autoLineRobot3: 'Yes' | 'No'
-    autoPoints: number
-    autoSpeakerNoteCount: number
-    autoSpeakerNotePoints: number
-    autoTotalNotePoints: number
-    coopNotePlayed: boolean
-    coopertitionCriteriaMet: boolean
-    endGameHarmonyPoints: number
-    endGameNoteInTrapPoints: number
-    endGameOnStagePoints: number
-    endGameParkPoints: number
-    endGameRobot1: never //I don't know what the valid values are here and I don't to look
-    endGameRobot2: never
-    endGameRobot3: never
-    endGameSpotLightBonusPoints: number
-    endGameTotalStagePoints: number
-    ensembleBonusAchieved: boolean
-    ensembleBonusOnStageRobotsThreshold: number
-    ensembleBonusStagePointsThreshold: number
-    foulCount: number
-    foulPoints: number
-    g206Penalty: boolean
-    g408Penalty: boolean
-    g424Penalty: boolean
-    melodyBonusAchieved: boolean
-    melodyBonusThreshold: number
-    melodyBonusThresholdCoop: number
-    melodyBonusThresholdNonCoop: number
-    micCenterStage: boolean
-    micStageLeft: boolean
-    micStageRight: boolean
-    rp: number
-    techFoulCount: number
-    teleopAmpNoteCount: number
-    teleopAmpNotePoints: number
-    teleopPoints: number
-    teleopSpeakerNoteAmplifiedCount: number
-    teleopSpeakerNoteAmplifiedPoints: number
-    teleopSpeakerNoteCount: number
-    teleopSpeakerNotePoints: number
-    teleopTotalNotePoints: number
-    totalPoints: number
-    trapCenterStage: boolean
-    trapStageLeft: boolean
-    trapStageRight: boolean
-}
+        "adjustPoints": number,
+      "algaePoints": number,
+      "autoBonusAchieved": boolean,
+      "autoCoralCount": number,
+      "autoCoralPoints": number,
+      "autoLineRobot1": "Yes"|"No",
+      "autoLineRobot2": "Yes"|"No",
+      "autoLineRobot3": "Yes"|"No",
+      "autoMobilityPoints": number,
+      "autoPoints": number,
+      "autoReef": never
+      "bargeBonusAchieved": boolean,
+      "coopertitionCriteriaMet": boolean,
+      "coralBonusAchieved": boolean,
+      "endGameBargePoints": number,
+      "endGameRobot1": never,
+      "endGameRobot2": never,
+      "endGameRobot3": never,
+      "foulCount": number,
+      "foulPoints": number,
+      "g206Penalty": boolean,
+      "g410Penalty": boolean,
+      "g418Penalty": boolean,
+      "g428Penalty": boolean,
+      "netAlgaeCount": number,
+      "rp": number,
+      "techFoulCount": number,
+      "teleopCoralCount": number,
+      "teleopCoralPoints": number,
+      "teleopPoints": number,
+      "teleopReef": never,
+      "totalPoints": number,
+      "wallAlgaeCount": number
+    }
 
 export class TbaAlliance {
     teams: TbaTeamNumber[] = []

@@ -1,22 +1,22 @@
-import { type ClientToServerEvents, MatchPeriod, type PartialMatch, PartialTeam, type ServerToClientEvents, ToteKey } from '~common/types'
+import { instrument } from '@socket.io/admin-ui'
 import * as http from 'http'
 import { Server, Socket } from 'socket.io'
 import config from '~common/config'
+import { type ClientToServerEvents, MatchPeriod, type PartialMatch, PartialTeam, type ServerToClientEvents } from '~common/types'
+import { getMatchPeriod } from '~common/utils/match_timer'
+import { createLogger } from './logger'
 import * as matchmanager from './managers/matchmanager'
 import { getMatches, notifyMatchUpdated } from './managers/matchmanager'
-import { getMatchPeriod } from '~common/utils/match_timer'
 import * as teammanager from './managers/teammanager'
 import { buildRankings, getTeams } from './managers/teammanager'
-import { createLogger } from './logger'
-import { instrument } from '@socket.io/admin-ui'
 
-import * as tba from './tba'
-import { getBlankMatchScoreBreakdown } from '~common/utils/blanks'
+import { PlayoffAlliance } from '@prisma/client'
 import jwt from 'jsonwebtoken'
 import prisma from '~/managers/db'
 import { eventState } from '~/managers/settings'
+import { getBlankMatchScoreBreakdown } from '~common/utils/blanks'
 import { getAlliances } from '~common/utils/scores'
-import { Match_AllianceResults, PlayoffAlliance, Tote } from '@prisma/client'
+import * as tba from './tba'
 
 const logger = createLogger('socket')
 export let io: Server<ClientToServerEvents, ServerToClientEvents>
@@ -161,37 +161,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         io.emit('match', match)
     })
 
-    socket.on('toteData', async (matchid: string, key: ToteKey, data: Partial<Tote>) => {
-        const match = await prisma.match.update({
-            where: {
-                id: matchid
-            },
-            data: {
-                scores: {
-                    update: {
-                        totes: { update: { [key]: { update: data } } }
-                    }
-                }
-            }
-        })
-        io.emit('match', match)
-    })
-    socket.on('zoneData', async (matchid: string, isRed: boolean, data: Partial<Match_AllianceResults>) => {
-        const match = await prisma.match.update({
-            where: {
-                id: matchid
-            },
-            data: {
-                scores: {
-                    update: {
-                        [isRed ? 'red' : 'blue']: { update: data }
-                    }
-                }
-            }
-        })
-        io.emit('match', match)
-    })
-
+    
     socket.on('partialTeam', async (data: PartialTeam) => {
         logger.debug('receiving team', data)
         if (!data.id) {
