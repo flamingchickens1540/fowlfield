@@ -209,4 +209,4 @@ class TeamQueue {
 
 		this.waiting_teams.splice(i);
 	}
-}
+
