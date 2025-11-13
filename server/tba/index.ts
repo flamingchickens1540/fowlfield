@@ -215,9 +215,9 @@ function matchToTBAMatch(match: Match): TbaMatch | null {
         const totalPoints = sumBreakdownPoints(points)
         return {
             rp,
-            teleopPoints: points.low_zone_balloon + points.tote_balloons,
-            autoPoints: points.low_zone_bunny,
-            endGameHarmonyPoints: points.empty_corral,
+            teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
+            autoPoints: points.auto_carrots + points.auto_park,
+            coopertitionCriteriaMet: points.coopertition > 0,
             totalPoints: totalPoints,
             adjustPoints: points.foul
         }

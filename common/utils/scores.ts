@@ -2,19 +2,23 @@ import { Match, Match_Results } from '@prisma/client'
 import { ToteKey } from '../types'
 
 export type PointsBreakdown = {
-    tote_balloons: number
-    empty_corral: number
-    low_zone_bunny: number
-    low_zone_balloon: number
+    auto_carrots: number
+    auto_park: number
+    coopertition: number
+    tele_carrots: number
+    tele_bunnies: number
+    tele_hits: number
     foul: number
 }
 
 function getBlankPointsBreakdown(): PointsBreakdown {
     return {
-        tote_balloons: 0,
-        empty_corral: 0,
-        low_zone_bunny: 0,
-        low_zone_balloon: 0,
+        auto_carrots: 0,
+        auto_park: 0,
+        coopertition: 0,
+        tele_carrots: 0,
+        tele_bunnies: 0,
+        tele_hits: 0,
         foul: 0
     }
 }
@@ -28,27 +32,25 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
     if (breakdown == null) {
         return points
     }
-    points.red.low_zone_balloon += 1 * breakdown.red.zone_balloons_own // 1 point per balloon in low zone
-    points.red.low_zone_balloon += 1 * breakdown.blue.zone_balloons_opp // 1 point per balloon in low zone
+    for (const alliance_data of [
+        { points: points.red, breakdown: breakdown.red },
+        { points: points.blue, breakdown: breakdown.blue }
+    ]) {
+        const { points, breakdown: alliance_breakdown } = alliance_data
+        points.auto_carrots += 5 * alliance_breakdown.feeding_station_auto // 5 points per carrot in feeding station
+        points.auto_carrots += 1 * alliance_breakdown.grass_auto // 1 point per carrot in the grass
 
-    points.blue.low_zone_balloon += 1 * breakdown.blue.zone_balloons_own // 1 point per balloon in low zone
-    points.blue.low_zone_balloon += 1 * breakdown.red.zone_balloons_opp // 1 point per balloon in low zone
+        points.auto_park += 5 * countTrue(alliance_breakdown.auto_park_robot1, alliance_breakdown.auto_park_robot2, alliance_breakdown.auto_park_robot3) // 5 points for robot partially in the carrot patch at end of auto
 
-    points.red.low_zone_bunny += 6 * breakdown.red.zone_bunnies // 6 points per bunny in low zone
-    points.blue.low_zone_bunny += 6 * breakdown.blue.zone_bunnies // 6 points per bunny in low zone
+        points.tele_carrots += 10 * alliance_breakdown.feeding_station_tele
+        points.tele_carrots += 1 * alliance_breakdown.grass_tele
+        points.tele_hits += 5 * alliance_breakdown.total_hits
 
-    for (const id in breakdown.totes) {
-        const tote = breakdown.totes[id as ToteKey]
-        const multiplier = 3 * 2 ** tote.bunnies // 3x2^B points per balloon in tote with B bunnies
-        points.red.tote_balloons += tote.red_balloons * multiplier
-        points.blue.tote_balloons += tote.blue_balloons * multiplier
-    }
-    points.blue.foul = breakdown.blue.foul_points
-    points.red.foul = breakdown.red.foul_points
-    if (breakdown.corral_empty) {
-        // 20 point coopertition bonus
-        points.red.empty_corral = 20
-        points.blue.empty_corral = 20
+        points.tele_bunnies += 10 * alliance_breakdown.endgame_bunnies
+        points.foul = alliance_breakdown.foul_points
+        if (breakdown.cabbages_in_patch) {
+            points.coopertition = 20
+        }
     }
 
     return points

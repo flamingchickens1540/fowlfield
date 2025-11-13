@@ -69,7 +69,7 @@ export async function getMatchStats(): Promise<{
             }
 
             stats[team].avg_score += scores.redScore
-            stats[team].avg_coop += match.scores.corral_empty ? 1 : 0
+            stats[team].avg_coop += match.scores.cabbages_in_patch ? 1 : 0
         })
         getBlueAlliance(match).forEach(({ team, card }) => {
             if (team == 0) return
@@ -91,7 +91,7 @@ export async function getMatchStats(): Promise<{
                 stats[team].dq++
             }
             stats[team].avg_score += scores.blueScore
-            stats[team].avg_coop += match.scores.corral_empty ? 1 : 0
+            stats[team].avg_coop += match.scores.cabbages_in_patch ? 1 : 0
         })
     })
 
