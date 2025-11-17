@@ -42,5 +42,7 @@
             '';
           };
       });
+
+      formatter = forAllSystems (pkgs: pkgs.nixfmt-tree);
     };
 }
