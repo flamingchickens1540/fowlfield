@@ -31,13 +31,16 @@
             };
             buildInputs = [
               mongodb-ce
+              mongosh
               nodejs
+              bun
               prettier
               prisma
               openssl
             ];
             shellHook = ''
               [ -d .dev_db ] || mkdir .dev_db
+
               alias db="mongod --dbpath ./.dev_db"
             '';
           };
