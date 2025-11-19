@@ -24,6 +24,9 @@ jobs:
               run: bun install
             - name: Prettier
               run: bun run format
+            - uses: cachix/install-nix-action@v31
+            - name: Nix Fmt
+              run: nix fmt -- --ci
             - uses: stefanzweifel/git-auto-commit-action@v4
               with:
                   commit_message: 'style: format files'
