@@ -51,6 +51,7 @@ export type SocketWritable<V> = WritableGettableStore<V> & {
 export type SocketWritableOf<T> = { [key in keyof T]: SocketWritable<T[key]> }
 
 export function createPropertyStore<T, K extends keyof T>(parent: Writable<T>, key: K): WritableGettableStore<T[K]> {
+
     return gettable(
         writableDerived(
             parent,
@@ -62,6 +63,7 @@ export function createPropertyStore<T, K extends keyof T>(parent: Writable<T>, k
         )
     )
 }
+
 export function createSecondOrderPropertyStore<T, K extends keyof T, L extends keyof T[K]>(parent: Writable<T>, keyA: K, keyB: L): WritableGettableStore<T[K][L]> {
     return gettable(
         writableDerived(

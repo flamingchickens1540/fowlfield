@@ -18,29 +18,39 @@
     <tbody>
         <tr></tr>
         <tr>
-            <th>Low-Zone Bunny</th>
-            <td>{$breakdown.red.low_zone_bunny}</td>
-            <td>{$breakdown.blue.low_zone_bunny}</td>
+            <th>Auto Carrots</th>
+            <td>{$breakdown.red.auto_carrots}</td>
+            <td>{$breakdown.blue.auto_carrots}</td>
         </tr>
         <tr>
-            <th>Low-Zone Balloon</th>
-            <td>{$breakdown.red.low_zone_balloon}</td>
-            <td>{$breakdown.blue.low_zone_balloon}</td>
+            <th>Auto Park</th>
+            <td>{$breakdown.red.auto_park}</td>
+            <td>{$breakdown.blue.auto_park}</td>
         </tr>
         <tr>
-            <th>Tote Balloons</th>
-            <td>{$breakdown.red.tote_balloons}</td>
-            <td>{$breakdown.blue.tote_balloons}</td>
+            <th>Bunnies</th>
+            <td>{$breakdown.red.tele_bunnies}</td>
+            <td>{$breakdown.blue.tele_bunnies}</td>
         </tr>
         <tr>
-            <th>Fouls</th>
+            <th>Carrots</th>
+            <td>{$breakdown.red.tele_carrots}</td>
+            <td>{$breakdown.blue.tele_carrots}</td>
+        </tr>
+        <tr>
+            <th>Hits</th>
+            <td>{$breakdown.red.tele_hits}</td>
+            <td>{$breakdown.blue.tele_hits}</td>
+        </tr>
+        <tr>
+            <th>Foul</th>
             <td>{$breakdown.red.foul}</td>
             <td>{$breakdown.blue.foul}</td>
         </tr>
         <tr>
             <th>Coopertition</th>
-            <td>{$breakdown.red.empty_corral}</td>
-            <td>{$breakdown.blue.empty_corral}</td>
+            <td>{$breakdown.red.coopertition}</td>
+            <td>{$breakdown.blue.coopertition}</td>
         </tr>
         <tr>
             <th>Total</th>

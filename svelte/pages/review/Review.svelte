@@ -4,25 +4,22 @@
     import { createPropertyStore, createSecondOrderPropertyStore } from '~/lib/socketStore'
     import Field from '~/pages/review/components/Field.svelte'
     import FieldCheckbox from '~/pages/review/components/FieldCheckbox.svelte'
+    import { titleCaseWord } from '~common/utils/format'
+    import StationSuffixedField from './components/FieldNumberRobot.svelte'
+    import FieldCheckboxRobot from './components/FieldCheckboxRobot.svelte'
 
-    const { redScore, blueScore, scores, id } = matchData
+    const { redScore, blueScore, scores, id, red1, red2, red3, blue1, blue2, blue3 } = matchData
     scores.setWritable()
-    const isCorralEmpty = createPropertyStore(scores, 'corral_empty')
-    const blueLowZoneBalloonOwn = createSecondOrderPropertyStore(scores, 'blue', 'zone_balloons_own')
-    const redLowZoneBalloonOpp = createSecondOrderPropertyStore(scores, 'blue', 'zone_balloons_opp')
-    const redLowZoneBalloonOwn = createSecondOrderPropertyStore(scores, 'red', 'zone_balloons_own')
-    const blueLowZoneBalloonOpp = createSecondOrderPropertyStore(scores, 'red', 'zone_balloons_opp')
-    const blueLowZoneBunny = createSecondOrderPropertyStore(scores, 'blue', 'zone_bunnies')
-
-    const redLowZoneBunny = createSecondOrderPropertyStore(scores, 'red', 'zone_bunnies')
+    const metCoopertition = createPropertyStore(scores, 'cabbages_in_patch')
     const redFouls = createSecondOrderPropertyStore(scores, 'red', 'foul_points')
     const blueFouls = createSecondOrderPropertyStore(scores, 'blue', 'foul_points')
+    const alliances = ["red", "blue"] as const
 </script>
 
 <main>
     <h1>Match Review - {$id}</h1>
     <div>
-        <FieldCheckbox label="Is Corral Empty?" store={isCorralEmpty}></FieldCheckbox>
+        <FieldCheckbox label="Cabbages in Patch?" store={metCoopertition}></FieldCheckbox>
     </div>
     <div class="reviewcontainer">
         <div>
@@ -33,18 +30,38 @@
         </div>
     </div>
     <div class="reviewcontainer">
+        {#each alliances as alliance}
         <div>
-            <h2>Red Low Zone</h2>
-            <Field label="Balloons (own zone)" store={redLowZoneBalloonOwn}></Field>
-            <Field label="Balloons (opp zone)" store={redLowZoneBalloonOpp}></Field>
-            <Field label="Auto Bunnies" store={redLowZoneBunny}></Field>
+            <h2>{titleCaseWord(alliance)} Auto</h2>
+            <Field label="Grass Carrots" store={createSecondOrderPropertyStore(scores, alliance, "grass_auto")}></Field>
+            <Field label="FS Carrots" store={createSecondOrderPropertyStore(scores, alliance, "feeding_station_auto")}></Field>
+            <FieldCheckboxRobot label="Park 1" alliance={alliance} stationnum={1}></FieldCheckboxRobot>
+            <FieldCheckboxRobot label="Park 2" alliance={alliance} stationnum={2}></FieldCheckboxRobot>
+            <FieldCheckboxRobot label="Park 3" alliance={alliance} stationnum={3}></FieldCheckboxRobot>
         </div>
+        {/each}
+    </div>
+
+    <div class="reviewcontainer">
+        {#each alliances as alliance}
         <div>
-            <h2>Blue Low Zone</h2>
-            <Field label="Balloons (own zone)" store={blueLowZoneBalloonOwn}></Field>
-            <Field label="Balloons (opp zone)" store={blueLowZoneBalloonOpp}></Field>
-            <Field label="Auto Bunnies" store={blueLowZoneBunny}></Field>
+            <h2>{titleCaseWord(alliance)} Endgame</h2>
+            <Field label="Grass Carrots" store={createSecondOrderPropertyStore(scores, alliance, "grass_tele")}></Field>
+            <Field label="FS Carrots" store={createSecondOrderPropertyStore(scores, alliance, "feeding_station_tele")}></Field>
+            <Field label="PZ Bunnies" store={createSecondOrderPropertyStore(scores, alliance, "endgame_bunnies")}></Field>
         </div>
+        {/each}
+    </div>
+
+    <div class="reviewcontainer">
+        {#each alliances as alliance}
+        <div>
+            <h2>Carrot Hits for {titleCaseWord(alliance)}</h2>
+            <StationSuffixedField label="Opponent 1" alliance={alliance == "red" ? "blue" : "red"} stationnum={1}></StationSuffixedField>
+            <StationSuffixedField label="Opponent 2" alliance={alliance == "red" ? "blue" : "red"} stationnum={2}></StationSuffixedField>
+            <StationSuffixedField label="Opponent 3" alliance={alliance == "red" ? "blue" : "red"} stationnum={3}></StationSuffixedField>
+        </div>
+        {/each}
     </div>
 
     <div class="reviewcontainer">

@@ -193,9 +193,11 @@ export function updateStoredMatch(data: Match) {
         list[data.id] = data
         return list
     })
-    Object.entries(matchDataPrivate).forEach(([key, store]) => {
-        ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
-    })
+    if (data.id == (loadTrack == 'load' ? loadedMatch.get() : preloadedMatch.get())) {
+        Object.entries(matchDataPrivate).forEach(([key, store]) => {
+            ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
+        })
+    }
 }
 
 export function updateStoredEventinfo(data: EventInfo) {

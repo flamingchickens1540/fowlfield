@@ -48,7 +48,7 @@ export default function startServer(server: http.Server) {
     })
 
     if (process.env.NODE_ENV !== 'production') {
-        logger.info('starting admin server')
+        logger.info({}, 'starting admin server')
         instrument(io, {
             auth: {
                 type: 'basic',
@@ -95,15 +95,15 @@ export default function startServer(server: http.Server) {
     })
 
     setInterval(handleMatchEnd, 5000) // just in case
-
+    logger.info({}, 'Started sockets')
     return
 }
 
 async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
-    logger.info('new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
+    logger.info({}, 'new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
 
     socket.onAny((event, ...args) => {
-        logger.debug(['received', event, ...args].join(' '))
+        logger.debug({ ...args }, ['received', event, ...args].join(' '))
     })
 
     // Send initial data

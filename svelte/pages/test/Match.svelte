@@ -26,7 +26,7 @@
             <StoreMonitor label="red2" type="number" store={matchData.red2.setWritable()} />
             <StoreMonitor label="red3" type="number" store={matchData.red3.setWritable()} />
 
-            <StoreMonitor label="corral_empty" type="checkbox" store={createPropertyStore(matchData.scores, 'corral_empty')} />
+            <StoreMonitor label="corral_empty" type="checkbox" store={createPropertyStore(matchData.scores, "cabbages_in_patch")} />
 
             <StoreMonitor pad label="Blue Score" type="number" store={matchData.blueScore} />
             <StoreMonitor label="Red Score" type="number" store={matchData.redScore} />
@@ -36,8 +36,19 @@
                 <StoreMonitor label="Robot 1 Card" type="text" store={createPropertyStore(scores, 'card_robot1')} />
                 <StoreMonitor label="Robot 2 Card" type="text" store={createPropertyStore(scores, 'card_robot2')} />
                 <StoreMonitor label="Robot 3 Card" type="text" store={createPropertyStore(scores, 'card_robot3')} />
-                <StoreMonitor label="Zone Balloons" type="number" store={createPropertyStore(scores, 'zone_balloons')} />
-                <StoreMonitor label="Zone Bunnies" type="number" store={createPropertyStore(scores, 'zone_bunnies')} />
+                <StoreMonitor label="Feeding Station (auto)" type="number" store={createPropertyStore(scores, "feeding_station_auto")} />
+                <StoreMonitor label="Feeding Station (tele)" type="number" store={createPropertyStore(scores, "feeding_station_tele")} />
+                <StoreMonitor label="Grass (auto)" type="number" store={createPropertyStore(scores, "grass_auto")} />
+                <StoreMonitor label="Grass (tele)" type="number" store={createPropertyStore(scores, "grass_tele")} />
+                <StoreMonitor label="Bunnies" type="number" store={createPropertyStore(scores, "endgame_bunnies")} />
+                <StoreMonitor label="Fouls" type="number" store={createPropertyStore(scores, "foul_points")} />
+                <StoreMonitor label="Park (1)" type="checkbox" store={createPropertyStore(scores, "auto_park_robot1")} />
+                <StoreMonitor label="Park (2)" type="checkbox" store={createPropertyStore(scores, "auto_park_robot2")} />
+                <StoreMonitor label="Park (3)" type="checkbox" store={createPropertyStore(scores, "auto_park_robot3")} />
+                <StoreMonitor label="Hits (1)" type="number" store={createPropertyStore(scores, "hits_robot1")} />
+                <StoreMonitor label="Hits (2)" type="number" store={createPropertyStore(scores, "hits_robot2")} />
+                <StoreMonitor label="Hits (3)" type="number" store={createPropertyStore(scores, "hits_robot3")} />
+                
             </div>
         {/each}
     </div>
