@@ -8,6 +8,7 @@
 /dist
 /build
 /.dev_db
+/.direnv
 prisma/*.db
 .env
 server/dev
