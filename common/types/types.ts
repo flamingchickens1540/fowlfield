@@ -49,3 +49,5 @@ export enum MatchSound {
     END = 'end',
     ABORT = 'abort'
 }
+
+export type MatchPropertyKey<K extends keyof Match, L extends keyof Match[K], M extends keyof Match[K][L]> = [K] | [K, L] | [K, L, M]

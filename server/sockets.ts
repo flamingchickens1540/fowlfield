@@ -103,7 +103,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     logger.info({}, 'new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
 
     socket.onAny((event, ...args) => {
-        logger.debug({ ...args }, ['received', event, ...args].join(' '))
+        logger.debug({ ...args }, ['received', event].join(' '))
     })
 
     // Send initial data
@@ -313,11 +313,32 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     })
 
     socket.on('disconnect', () => {
-        logger.info('disconnected', socket.id, socket.handshake.auth.role)
+        logger.info({}, 'disconnected', socket.id, socket.handshake.auth.role)
     })
 
     function alert(...message: string[]) {
         logger.warn('ALERT', ...message)
         socket.emit('alert', message.join(' '))
     }
+
+    socket.on('updateMatchScores', async (id, key, v) => {
+        logger.debug({ id, key, v }, 'receiving update match')
+        if (id != eventState.loadedMatch) {
+            logger.warn({ loaded: eventState.loadedMatch, found: id }, 'not updating non-loaded match scores')
+        }
+        const data = {
+            scores: {
+                update: {
+                    [key[0]]: {
+                        update: {
+                            [key[1]]: v
+                        }
+                    }
+                }
+            }
+        }
+        logger.info({ id, key, v }, 'updating')
+        const match = await prisma.match.update({ where: { id }, data })
+        io.emit('match', match)
+    })
 }
