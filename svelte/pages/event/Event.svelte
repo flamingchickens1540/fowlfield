@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { eventData, teamList } from '~/lib/store'
+    import { eventData, loadedMatch, preloadedMatch, teamList } from '~/lib/store'
     import TeamEntry from './components/TeamEntry.svelte'
     import type { Team } from '@prisma/client'
     import socket from '~/lib/socket'
@@ -36,10 +36,11 @@
         }
     )
     const teams = derived(teamList, ($teams) => Object.values($teams).sort((a, b) => a.display_number.get().localeCompare(b.display_number.get(), undefined, { numeric: true, sensitivity: 'base' })))
+    const teamCount = derived(teams, ($list) => $list.length)
 </script>
 
 <main>
-    <h1>Teams</h1>
+    <h1>Teams ({$teamCount})</h1>
     <div id="teamlist">
         <div class="tableheader">
             <div class="tableitem">Number</div>
@@ -64,17 +65,26 @@
         </div>
     </div>
     <h1>Other</h1>
-    <div id="lunchinput">
+    <div class="other-item">
         <span>Lunch</span>
         <input type="time" step="300" bind:value={$lunchReturnPretty} />
         <button on:click={() => ($atLunch = !$atLunch)}>{$atLunch ? 'Stop Lunch' : 'Start Lunch'}</button>
+    </div>
+    <div class="other-item">
+        <span>Loaded</span>
+        <span>{$loadedMatch}</span>
+    </div>
+    <div class="other-item">
+        <span>Preloaded</span>
+        <span>{$preloadedMatch}</span>
     </div>
     <br />
 </main>
 
 <style lang="scss">
-    #lunchinput {
+    .other-item {
         width: 40%;
+        margin: 5px;
         margin-left: auto;
         margin-right: auto;
         // border: 1px solid white;
