@@ -146,20 +146,20 @@
     <!-- Red Score Breakdown -->
     <div class="_200">{$redScore}</div>
     <div class="total">TOTAL</div>
-    <div class="_100">{$breakdown.red.tote_balloons}</div>
-    <div class="hybrid">TOTES</div>
-    <div class="_95">{$breakdown.red.low_zone_balloon + $breakdown.red.low_zone_bunny}</div>
-    <div class="teleop">LOWZONE</div>
+    <div class="_100">{$breakdown.red.auto_carrots + $breakdown.red.tele_carrots}</div>
+    <div class="hybrid">CARROTS</div>
+    <div class="_95">{$breakdown.red.tele_bunnies}</div>
+    <div class="teleop">BUNNIES</div>
     <div class="_5">{$breakdown.red.foul}</div>
     <div class="fouls">FOULS</div>
 
     <!-- Blue Score Breakdown -->
     <div class="_190">{$blueScore}</div>
     <div class="total2">TOTAL</div>
-    <div class="_952">{$breakdown.blue.tote_balloons}</div>
-    <div class="hybrid2">TOTES</div>
-    <div class="_52">{$breakdown.blue.low_zone_balloon + $breakdown.blue.low_zone_bunny}</div>
-    <div class="teleop2">LOWZONE</div>
+    <div class="_952">{$breakdown.blue.auto_carrots + $breakdown.blue.tele_carrots}</div>
+    <div class="hybrid2">CARROTS</div>
+    <div class="_52">{$breakdown.blue.tele_bunnies}</div>
+    <div class="teleop2">BUNNIES</div>
     <div class="_90">{$breakdown.blue.foul}</div>
     <div class="fouls2">FOULS</div>
 
