@@ -3,8 +3,8 @@ export type TbaEventInfo = {
     playoff_type?: TbaPlayoffType
     webcasts?: { url: string }[]
     remap_teams: Record<string, string>
-    timezone?:string
-    disable_sync?:never
+    timezone?: string
+    disable_sync?: never
 }
 
 export type TbaAward = {
