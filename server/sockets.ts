@@ -322,7 +322,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     }
 
     socket.on('updateMatchScores', async (id, key, v) => {
-        logger.debug({ id, key, v }, 'receiving update match')
         if (id != eventState.loadedMatch) {
             logger.warn({ loaded: eventState.loadedMatch, found: id }, 'not updating non-loaded match scores')
         }
@@ -337,7 +336,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
                 }
             }
         }
-        logger.info({ id, key, v }, 'updating')
+        logger.info({ id, [key.join('.')]: v }, 'updating')
         const match = await prisma.match.update({ where: { id }, data })
         io.emit('match', match)
     })

@@ -56,5 +56,5 @@ export interface ClientToServerEvents {
     commitAlliances(cb: (ok: boolean) => void): void
 
     getMatch(id: string, cb: (match: Match) => void): void
-    updateMatchScores<A extends "red"|"blue", K extends keyof Match["scores"][A]>(id:string, key:[A,K], value:Match["scores"][A][K]):void
+    updateMatchScores<K extends keyof Match["scores"][A], A extends "red"|"blue">(id:string, key:[A,K], value:Match["scores"][A][K]):void
 }
