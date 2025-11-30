@@ -21,6 +21,28 @@ export function getBlankAllianceScoreBreakdown(): Match_AllianceResults {
     }
 }
 
+export function getRandomizedAllianceScoreBreakdown(): Match_AllianceResults {
+    const fs_auto = Math.round(Math.random() * 3)
+    const grass_auto = Math.round(Math.random() * 8 + 2)
+    return {
+        card_robot1: 'none',
+        card_robot2: 'none',
+        card_robot3: 'none',
+        feeding_station_auto: fs_auto,
+        feeding_station_tele: Math.round(fs_auto + Math.random() * 15),
+        grass_auto: grass_auto,
+        grass_tele: Math.round(fs_auto + Math.random() * 30),
+        endgame_bunnies: Math.round(Math.random() * 2),
+        hits_robot1: Math.round(Math.random() * 10),
+        hits_robot2: Math.round(Math.random() * 10),
+        hits_robot3: Math.round(Math.random() * 10),
+        auto_park_robot1: Math.random() > 0.5,
+        auto_park_robot2: Math.random() > 0.5,
+        auto_park_robot3: Math.random() > 0.5,
+        foul_points: Math.random() > 0.8 ? 5 * Math.round(Math.random() * 5) : 0
+    }
+}
+
 export function getBlankMatchScoreBreakdown(): Match_Results {
     return {
         cabbages_in_patch: false,

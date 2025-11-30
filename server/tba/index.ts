@@ -227,11 +227,21 @@ function matchToTBAMatch(match: Match): TbaMatch | null {
         const totalPoints = sumBreakdownPoints(points)
         return {
             rp,
-            // teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
-            // autoPoints: points.auto_carrots + points.auto_park,
-            // coopertitionCriteriaMet: points.coopertition > 0,
-            totalPoints: totalPoints
-            // adjustPoints: points.foul
+            autoLineRobot1: results[alliance].auto_park_robot1 ? 'Yes' : 'No',
+            autoLineRobot2: results[alliance].auto_park_robot2 ? 'Yes' : 'No',
+            autoLineRobot3: results[alliance].auto_park_robot3 ? 'Yes' : 'No',
+            autoMobilityPoints: points.auto_park,
+            autoCoralCount: results[alliance].grass_auto + results[alliance].feeding_station_auto,
+            autoCoralPoints: points.auto_carrots,
+            autoPoints: points.auto_carrots + points.auto_park,
+            algaePoints: points.tele_hits,
+            endGameBargePoints: points.tele_bunnies,
+            teleopCoralCount: results[alliance].grass_tele + results[alliance].feeding_station_tele,
+            teleopCoralPoints: points.tele_carrots,
+            coopertitionCriteriaMet: points.coopertition > 0,
+            teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
+            totalPoints: totalPoints,
+            adjustPoints: points.foul
         }
     }
     return {

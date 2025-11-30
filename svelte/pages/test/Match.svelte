@@ -2,6 +2,8 @@
     import matchData from '~/lib/store'
     import StoreMonitor from '~/pages/test/components/StoreMonitor.svelte'
     import { createPropertyStore } from '~/lib/socketStore'
+    import { getRandomizedAllianceScoreBreakdown } from '~common/utils/blanks'
+    import { MatchState } from '~common/types'
 
     matchData.scores.setWritable()
     const redScores = createPropertyStore(matchData.scores, 'red')
@@ -12,11 +14,11 @@
     <div class="grid">
         <div class="col">
             <StoreMonitor label="ID" type="text" store={matchData.id} />
-            <StoreMonitor label="Type" type="text" store={matchData.type.setWritable()} />
+            <StoreMonitor label="Type" type="dropdown" options={['elimination', 'qualification']} store={matchData.type.setWritable()} />
             <StoreMonitor label="Stage Index" type="number" store={matchData.stage_index.setWritable()} />
 
             <StoreMonitor pad label="Start Time" type="number" store={matchData.startTime.setWritable()} />
-            <StoreMonitor label="State" type="text" store={matchData.state.setWritable()} />
+            <StoreMonitor label="State" type="dropdown" options={Object.values(MatchState)} store={matchData.state.setWritable()} />
             <StoreMonitor label="Stage Index" type="number" store={matchData.stage_index.setWritable()} />
 
             <StoreMonitor pad label="blue1" type="number" store={matchData.blue1.setWritable()} />
@@ -26,10 +28,19 @@
             <StoreMonitor label="red2" type="number" store={matchData.red2.setWritable()} />
             <StoreMonitor label="red3" type="number" store={matchData.red3.setWritable()} />
 
-            <StoreMonitor label="corral_empty" type="checkbox" store={createPropertyStore(matchData.scores, 'cabbages_in_patch')} />
+            <StoreMonitor label="cabbages_in_patch" type="checkbox" store={createPropertyStore(matchData.scores, 'cabbages_in_patch')} />
 
             <StoreMonitor pad label="Blue Score" type="number" store={matchData.blueScore} />
             <StoreMonitor label="Red Score" type="number" store={matchData.redScore} />
+            <button
+                on:click={() => {
+                    matchData.scores.update((s) => {
+                        s.blue = getRandomizedAllianceScoreBreakdown()
+                        s.red = getRandomizedAllianceScoreBreakdown()
+                        s.cabbages_in_patch = Math.random() > 0.7
+                        return s
+                    })
+                }}>Randomize Scores</button>
         </div>
         {#each [{ scores: redScores, color: 'var(--bgred)' }, { scores: blueScores, color: 'var(--bgblue)' }] as { scores, color }}
             <div class="col" style="--bgcolor:{color}">

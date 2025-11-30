@@ -18,7 +18,7 @@
     $: total = calculateTotalPoints(match?.scores)
     $: redscore = total.red
     $: bluescore = total.blue
-    $: winner = match?.state != 'posted' || redscore == bluescore ? 'none' : redscore > bluescore ? 'red' : 'blue' //TODO: check ties
+    $: winner = match?.state != 'posted' || isFinals || redscore == bluescore ? 'none' : redscore > bluescore ? 'red' : 'blue' //TODO: check ties
     $: redFeed = matchInfo?.red != null ? $matchList[schedule[matchInfo.red.match].matchId] : null
     $: blueFeed = matchInfo?.blue != null ? $matchList[schedule[matchInfo.blue.match].matchId] : null
     console.log({ id, matchInfo })
@@ -70,6 +70,23 @@
     }
     $: redLabel = getAllianceLabel([match?.elim_info?.red_alliance, redFeedAlliance?.alliance, matchInfo?.red])
     $: blueLabel = getAllianceLabel([match?.elim_info?.blue_alliance, blueFeedAlliance?.alliance, matchInfo?.blue])
+
+    $: isFinals = match?.elim_info?.round == 1
+    $: redFinalsWins = countAllianceWins([$matchList['f1m1'], $matchList['f1m2'], $matchList['f1m3']], 'red')
+    $: blueFinalsWins = countAllianceWins([$matchList['f1m1'], $matchList['f1m2'], $matchList['f1m3']], 'blue')
+
+    function countAllianceWins(matches: (Match | undefined)[], alliance: 'red' | 'blue'): number {
+        let total = 0
+        matches
+            .filter((m) => m != null)
+            .forEach((m) => {
+                if (getScores(m).winner == alliance) {
+                    total++
+                }
+            })
+        return total
+    }
+    $: showScoreBox = isFinals || winner != 'none'
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -77,7 +94,7 @@
     <span class="title">{title}</span>
     <div class={`red cap ${!redLabel.assigned ? 'italic' : ''}`}>{redLabel.label}</div>
     <div class={`blue cap round-l ${!blueLabel.assigned ? 'italic' : ''}`}>{blueLabel.label}</div>
-    <div class={`red teams ${winner == 'none' ? 'span2' : ''}`}>
+    <div class={`red teams ${!showScoreBox ? 'span2' : ''}`}>
         {#if redLabel.assigned}
             <span>{$teamList[match?.red1 ?? redFeedAlliance?.teams[0]]?.display_number.get() ?? ''}</span>
             <span>{$teamList[match?.red2 ?? redFeedAlliance?.teams[1]]?.display_number.get() ?? ''}</span>
@@ -86,7 +103,7 @@
             <span class="italic">{redLabel.note}</span>
         {/if}
     </div>
-    <div class={`blue teams ${winner == 'none' ? 'span2' : ''}`}>
+    <div class={`blue teams ${!showScoreBox ? 'span2' : ''}`}>
         {#if blueLabel.assigned}
             <span>{$teamList[match?.blue1 ?? blueFeedAlliance?.teams[0]]?.display_number.get() ?? ''}</span>
             <span>{$teamList[match?.blue2 ?? blueFeedAlliance?.teams[1]]?.display_number.get() ?? ''}</span>
@@ -95,9 +112,9 @@
             <span class="italic">{blueLabel.note}</span>
         {/if}
     </div>
-    {#if winner != 'none'}
-        <div class="red cap">{redscore}</div>
-        <div class="blue cap round-r">{bluescore}</div>
+    {#if showScoreBox}
+        <div class="red cap">{isFinals ? redFinalsWins : redscore}</div>
+        <div class="blue cap round-r">{isFinals ? blueFinalsWins : bluescore}</div>
     {/if}
 </div>
 

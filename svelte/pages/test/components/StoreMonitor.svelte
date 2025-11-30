@@ -7,10 +7,12 @@
     export let pad: boolean = false
     export let store: Writable<any> | Readable<any>
 
-    export let type: 'checkbox' | 'number' | 'text' = 'text'
+    export let type: 'checkbox' | 'number' | 'text' | 'dropdown' = 'text'
+    export let options: string[] = []
     const readonly = !('set' in store)
-    const onChange: ChangeEventHandler<HTMLInputElement> = (event) => {
+    const onChange: ChangeEventHandler<HTMLInputElement | HTMLSelectElement> = (event) => {
         const target = event.target as HTMLInputElement
+        console.log({ event, target })
         if (!('set' in store)) {
             return
         }
@@ -29,6 +31,12 @@
     <div style="width:200px">
         {#if type == 'checkbox'}
             <input {readonly} {type} checked={$store} on:change={onChange} />
+        {:else if type == 'dropdown'}
+            <select value={$store} on:change={onChange}>
+                {#each options as opt}
+                    <option value={opt}>{opt}</option>
+                {/each}
+            </select>
         {:else}
             <input {readonly} {type} value={$store} on:change={onChange} />
         {/if}
@@ -40,13 +48,15 @@
         span {
             font-weight: bold;
         }
-        input {
+        input,
+        select {
             width: 90%;
             outline-color: rgba(183, 183, 183, 0.3);
             background-color: #404040a0;
             accent-color: rgba(183, 183, 183, 0.63);
             padding: 5px;
             border-radius: 5px;
+            box-sizing: border-box;
             &[type='checkbox'] {
                 zoom: 1.5;
             }
