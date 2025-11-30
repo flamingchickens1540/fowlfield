@@ -92,9 +92,8 @@ export async function updateEventInfo(teams: Team[] = Object.values(getTeams()))
 
     const body: TbaEventInfo = {
         first_code: null,
-        webcasts: [
-            // { url: "https://team1540.org/bunnybots" }
-        ],
+        webcasts: [{ url: 'https://www.youtube.com/live/kCvKrodbJr8' }],
+        timezone: 'America/Los_Angeles',
         playoff_type: TbaPlayoffType.DOUBLE_ELIM_4_TEAM,
         remap_teams
     }
@@ -154,12 +153,12 @@ export async function updateRankings() {
         RP: ranking.match_stats.rp,
         Coop: ranking.match_stats.avg_coop,
         Match: ranking.match_stats.avg_score,
-        Auto: -1,
-        Stage: -1
+        Auto: ranking.match_stats.avg_auto,
+        Barge: -1
     }))
 
     const body: TbaRankings = {
-        breakdowns: ['RP', 'Coop', 'Match', 'Auto', 'Stage'],
+        breakdowns: ['RP', 'Coop', 'Match', 'Auto', 'Barge'],
         rankings: tba_rankings
     }
     await post('rankings/update', body)

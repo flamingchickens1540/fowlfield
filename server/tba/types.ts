@@ -2,7 +2,9 @@ export type TbaEventInfo = {
     first_code?: string | null
     playoff_type?: TbaPlayoffType
     webcasts?: { url: string }[]
-    remap_teams: { [key: string]: string }
+    remap_teams: Record<string, string>
+    timezone?:string
+    disable_sync?:never
 }
 
 export type TbaAward = {

@@ -29,6 +29,7 @@ export interface TeamMatchStats {
     dq: number
     avg_coop: number
     avg_score: number
+    avg_auto:number
 }
 
 export interface ExtendedTeam extends Team {
