@@ -33,10 +33,10 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
         return points
     }
     for (const alliance_data of [
-        { points: points.red, breakdown: breakdown.red },
-        { points: points.blue, breakdown: breakdown.blue }
+        { points: points.red, alliance_breakdown: breakdown.red, opponent_breakdown: breakdown.blue },
+        { points: points.blue, alliance_breakdown: breakdown.blue, opponent_breakdown: breakdown.red }
     ]) {
-        const { points, breakdown: alliance_breakdown } = alliance_data
+        const { points, alliance_breakdown, opponent_breakdown } = alliance_data
         points.auto_carrots += 5 * alliance_breakdown.feeding_station_auto // 5 points per carrot in feeding station
         points.auto_carrots += 1 * alliance_breakdown.grass_auto // 1 point per carrot in the grass
 
@@ -44,7 +44,7 @@ export function calculatePointsBreakdown(breakdown: Match_Results): { red: Point
 
         points.tele_carrots += 10 * alliance_breakdown.feeding_station_tele
         points.tele_carrots += 1 * alliance_breakdown.grass_tele
-        points.tele_hits += 5 * alliance_breakdown.total_hits
+        points.tele_hits += 5 * sum((v) => v, opponent_breakdown.hits_robot1, opponent_breakdown.hits_robot2, opponent_breakdown.hits_robot3)
 
         points.tele_bunnies += 10 * alliance_breakdown.endgame_bunnies
         points.foul = alliance_breakdown.foul_points
@@ -93,14 +93,25 @@ export function getScores(match: Match) {
     const redScore = sumBreakdownPoints(breakdown.red)
     const blueScore = sumBreakdownPoints(breakdown.blue)
     const winner = getResult({ red: redScore, blue: blueScore })
+
+    /*
+2025:
+    Winning Alliance Qualification Points = W + L/2
+Loser Qualification Points = L
+Tie Qualification Points = T + T/4     
+
+Where W is the winner’s score, L is the loser’s score, and T is either team’s score in the event of a tie.
+
+    */
     let redRP = redScore
     let blueRP = blueScore
     if (winner == 'red') {
-        // If red wins, redRp = redScore, blueRp = blueScore/2
-        blueRP /= 2
+        redRP += blueScore / 2
     } else if (winner == 'blue') {
-        // If blue wins, blueRp = blueScore, redRp = redScore/2
-        redRP /= 2
+        blueRP += redScore / 2
+    } else {
+        redRP += redScore / 4
+        blueRP += blueScore / 4
     }
     return {
         redBreakdown: breakdown.red,

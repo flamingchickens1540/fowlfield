@@ -46,6 +46,7 @@ export type SocketWritable<V> = WritableGettableStore<V> & {
     setLocal(value: V): void
     subscribeLocal(run: Subscriber<V>, invalidate?: ((value?: V | undefined) => void) | undefined): Unsubscriber
     setWritable(isWritable?: boolean): SocketWritable<V>
+    areUpdatesBlocked(): boolean
     getProperty<K extends keyof V>(key: K): WritableGettableStore<V[K]>
 }
 export type SocketWritableOf<T> = { [key in keyof T]: SocketWritable<T[key]> }
@@ -62,6 +63,7 @@ export function createPropertyStore<T, K extends keyof T>(parent: Writable<T>, k
         )
     )
 }
+
 export function createSecondOrderPropertyStore<T, K extends keyof T, L extends keyof T[K]>(parent: Writable<T>, keyA: K, keyB: L): WritableGettableStore<T[K][L]> {
     return gettable(
         writableDerived(
@@ -74,18 +76,38 @@ export function createSecondOrderPropertyStore<T, K extends keyof T, L extends k
         )
     )
 }
-const blankMatch = getBlankMatch()
+
+export function createSecondOrderSocketPropertyStore<A extends 'red' | 'blue', L extends keyof Match['scores']['red' | 'blue']>(
+    parentStore: SocketWritable<Match['scores']>,
+    alliance: A,
+    key: L
+): WritableGettableStore<Match['scores'][A][L]> {
+    parentStore.setWritable(false)
+    return gettable(
+        writableDerived(
+            parentStore,
+            (value) => value[alliance][key],
+            (value, parent) => {
+                parent[alliance][key] = value
+                if (parentStore.areUpdatesBlocked()) return parent
+                console.info('Sending MS', { alliance, key, value })
+                socket.emit('updateMatchScores', matchData.id.get(), [alliance, key], value)
+                return parent
+            }
+        )
+    )
+}
+
 export function createFowlMatchStore<K extends keyof Match, V extends Match[K]>(key: K): SocketWritable<V> {
-    return createSocketStore('partialMatch', blankMatch, key, () => ({ id: matchData.id.get() }))
+    return createSocketStore('partialMatch', getBlankMatch(), key, () => ({ id: matchData.id.get() }))
 }
 
 export function createFowlTeamStore<K extends keyof Team, V extends Team[K]>(team: Team, key: K): SocketWritable<V> {
     return createSocketStore('partialTeam', team, key, () => ({ id: team.id }))
 }
 
-const blankEvent = getBlankEvent()
 export function createFowlEventStore<K extends keyof EventInfo, V extends EventInfo[K]>(key: K): SocketWritable<V> {
-    return createSocketStore('partialEvent', blankEvent, key, () => ({}))
+    return createSocketStore('partialEvent', getBlankEvent(), key, () => ({}))
 }
 
 export function createFowlAllianceStore<K extends keyof PlayoffAlliance, V extends PlayoffAlliance[K]>(alliance: PlayoffAlliance, key: K): SocketWritable<V> {
@@ -143,7 +165,9 @@ export function createSocketStore<Event extends keyof ClientToServerEvents, P ex
             }
             blockUpdates = false
         },
-
+        areUpdatesBlocked(): boolean {
+            return blockUpdates
+        },
         setWritable(isWritable: boolean = true) {
             isStoreWritable = isWritable
             return this

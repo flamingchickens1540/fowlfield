@@ -92,9 +92,8 @@ export async function updateEventInfo(teams: Team[] = Object.values(getTeams()))
 
     const body: TbaEventInfo = {
         first_code: null,
-        webcasts: [
-            // { url: "https://team1540.org/bunnybots" }
-        ],
+        webcasts: [{ url: 'https://www.youtube.com/live/kCvKrodbJr8' }],
+        timezone: 'America/Los_Angeles',
         playoff_type: TbaPlayoffType.DOUBLE_ELIM_4_TEAM,
         remap_teams
     }
@@ -140,6 +139,7 @@ export async function removeMatches(...ids: MatchID[]) {
 }
 
 export async function updateRankings() {
+    // return logger.warn({}, 'Ranking update disabled!')
     const rankings = await buildRankings()
     const tba_rankings: TbaRanking[] = rankings.map((ranking, index) => ({
         team_key: getTBATeamNumber(ranking.team),
@@ -153,12 +153,12 @@ export async function updateRankings() {
         RP: ranking.match_stats.rp,
         Coop: ranking.match_stats.avg_coop,
         Match: ranking.match_stats.avg_score,
-        Auto: -1,
-        Stage: -1
+        Auto: ranking.match_stats.avg_auto,
+        Barge: -1
     }))
 
     const body: TbaRankings = {
-        breakdowns: ['RP', 'Coop', 'Match', 'Auto', 'Stage'],
+        breakdowns: ['RP', 'Coop', 'Match', 'Auto', 'Barge'],
         rankings: tba_rankings
     }
     await post('rankings/update', body)
@@ -204,28 +204,49 @@ export async function updateAwards() {
     await post('awards/update', body)
 }
 function matchToTBAMatch(match: Match): TbaMatch | null {
-    const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
-    if (decodedMatchId == null) {
-        logger.warn({ match }, 'Could not decode match id, not uploading')
-        return null
+    let matchIdInfo: Pick<TbaMatch, 'comp_level' | 'set_number' | 'match_number'>
+    if (match.type == 'qualification') {
+        matchIdInfo = { comp_level: 'qm', set_number: 1, match_number: match.stage_index }
+    } else {
+        const decodedMatchId = /(sf|qf|f)(\d+)m(\d+)/.exec(match.id)
+        if (decodedMatchId == null) {
+            logger.warn({ match }, 'Could not decode match id, not uploading')
+            return null
+        }
+        matchIdInfo = {
+            comp_level: decodedMatchId[1] as TbaMatch['comp_level'],
+            set_number: parseInt(decodedMatchId[2]),
+            match_number: parseInt(decodedMatchId[3])
+        }
     }
+
     const { redScore, redRP, blueScore, blueRP } = getScores(match)
     const getTBAScoreBreakdown = ({ results, alliance, rp }: { results: Match_Results; alliance: 'red' | 'blue'; rp: number }): Partial<TbaScoreBreakdown> => {
         const points = calculatePointsBreakdown(results)[alliance]
         const totalPoints = sumBreakdownPoints(points)
         return {
             rp,
-            teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
+            autoLineRobot1: results[alliance].auto_park_robot1 ? 'Yes' : 'No',
+            autoLineRobot2: results[alliance].auto_park_robot2 ? 'Yes' : 'No',
+            autoLineRobot3: results[alliance].auto_park_robot3 ? 'Yes' : 'No',
+            autoMobilityPoints: points.auto_park,
+            autoCoralCount: results[alliance].grass_auto + results[alliance].feeding_station_auto,
+            autoCoralPoints: points.auto_carrots,
             autoPoints: points.auto_carrots + points.auto_park,
+            algaePoints: points.tele_hits,
+            endGameBargePoints: points.tele_bunnies,
+            teleopCoralCount: results[alliance].grass_tele + results[alliance].feeding_station_tele,
+            teleopCoralPoints: points.tele_carrots,
             coopertitionCriteriaMet: points.coopertition > 0,
+            teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
             totalPoints: totalPoints,
             adjustPoints: points.foul
         }
     }
     return {
-        comp_level: match.type == 'qualification' ? 'qm' : (decodedMatchId[1] as TbaMatch['comp_level']),
-        set_number: match.type == 'qualification' ? 1 : parseInt(decodedMatchId[2]),
-        match_number: match.type == 'qualification' ? match.stage_index : parseInt(decodedMatchId[3]),
+        comp_level: matchIdInfo.comp_level,
+        set_number: matchIdInfo.set_number,
+        match_number: matchIdInfo.match_number,
         score_breakdown: {
             red: getTBAScoreBreakdown({
                 results: match.scores,

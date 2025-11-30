@@ -96,3 +96,11 @@ export const schedule: Readonly<{
         elimInstance: 3
     }
 }
+
+export function getScheduleItem(id: string): DoubleEliminationMatch | null {
+    const match = id.match(/(f|sf)(\d+)m(\d+)/)
+    if (!match) return null
+    const [_, type, round, instance] = match
+
+    return schedule[type == 'f' ? 5 + parseInt(instance) : parseInt(round)]
+}

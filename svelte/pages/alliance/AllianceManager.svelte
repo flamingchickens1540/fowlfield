@@ -1,18 +1,7 @@
 <script lang="ts">
     import AllianceItem from './components/AllianceItem.svelte'
     import socket, { awaitLoaded } from '~//lib/socket'
-    import { onMount } from 'svelte'
     import { teamList } from '~/lib/store'
-
-    let tbabutton: HTMLButtonElement
-
-    onMount(() => {
-        tbabutton.addEventListener('click', () => {
-            socket.emit('commitAlliances', (success) => {
-                console.log(success)
-            })
-        })
-    })
 </script>
 
 <datalist id="teams">
@@ -38,7 +27,13 @@
     {/await}
 </div>
 
-<button bind:this={tbabutton}>Publish to TBA</button>
+<button
+    on:click={() => {
+        socket.emit('commitAlliances', (success) => {
+            console.log(success)
+        })
+    }}>Publish to TBA</button
+>
 
 <style lang="scss">
     button {

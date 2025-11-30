@@ -39,7 +39,8 @@ export async function getMatchStats(): Promise<{
             rp: 0,
             dq: 0,
             avg_coop: 0,
-            avg_score: 0
+            avg_score: 0,
+            avg_auto: 0
         }
     })
     const matches = await prisma.match.findMany()
@@ -70,6 +71,7 @@ export async function getMatchStats(): Promise<{
 
             stats[team].avg_score += scores.redScore
             stats[team].avg_coop += match.scores.cabbages_in_patch ? 1 : 0
+            stats[team].avg_auto += scores.redBreakdown.auto_carrots + scores.redBreakdown.auto_park
         })
         getBlueAlliance(match).forEach(({ team, card }) => {
             if (team == 0) return
@@ -92,6 +94,7 @@ export async function getMatchStats(): Promise<{
             }
             stats[team].avg_score += scores.blueScore
             stats[team].avg_coop += match.scores.cabbages_in_patch ? 1 : 0
+            stats[team].avg_auto += scores.blueBreakdown.auto_carrots + scores.blueBreakdown.auto_park
         })
     })
 
@@ -99,6 +102,7 @@ export async function getMatchStats(): Promise<{
         if (stat.count != 0) {
             stat.avg_score /= stat.count
             stat.avg_coop /= stat.count
+            stat.avg_auto /= stat.count
         }
     })
 

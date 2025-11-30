@@ -29,6 +29,7 @@ export interface TeamMatchStats {
     dq: number
     avg_coop: number
     avg_score: number
+    avg_auto: number
 }
 
 export interface ExtendedTeam extends Team {
@@ -49,3 +50,5 @@ export enum MatchSound {
     END = 'end',
     ABORT = 'abort'
 }
+
+export type MatchPropertyKey<K extends keyof Match, L extends keyof Match[K], M extends keyof Match[K][L]> = [K] | [K, L] | [K, L, M]
