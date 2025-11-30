@@ -7,8 +7,8 @@
     import { createSecondOrderPropertyStore } from '~/lib/socketStore'
 
     export let label: string
-    export let alliance:"red"|"blue"
-    export let stationnum:1|2|3
+    export let alliance: 'red' | 'blue'
+    export let stationnum: 1 | 2 | 3
     const station = `${alliance}${stationnum}` as RobotPosition
 
     const robot = derived([matchData[station], teamList], ([robot, teamList]) => teamList[robot]?.display_number.get() ?? '  _____  ')
@@ -34,18 +34,18 @@
         }
         div {
             flex-grow: 2;
-        input {
-            width: 90%;
-            outline-color: rgba(183, 183, 183, 0.3);
-            background-color: #404040a0;
-            accent-color: rgba(183, 183, 183, 0.63);
-            padding: 5px;
-            border-radius: 5px;
-            font-size: 2rem;
-            text-align: center;
-            scale: 3;
+            input {
+                width: 90%;
+                outline-color: rgba(183, 183, 183, 0.3);
+                background-color: #404040a0;
+                accent-color: rgba(183, 183, 183, 0.63);
+                padding: 5px;
+                border-radius: 5px;
+                font-size: 2rem;
+                text-align: center;
+                scale: 3;
+            }
         }
-    }
         padding: 5px 100px;
         display: flex;
         flex-flow: row nowrap;

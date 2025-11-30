@@ -13,6 +13,6 @@ export function roundToPlaces(value: number | null, places: number): number | nu
     return Math.round(value * pad) / pad
 }
 
-export function titleCaseWord(v:string) {
-    return v.slice(0,1).toUpperCase() + v.slice(1).toLowerCase()
+export function titleCaseWord(v: string) {
+    return v.slice(0, 1).toUpperCase() + v.slice(1).toLowerCase()
 }

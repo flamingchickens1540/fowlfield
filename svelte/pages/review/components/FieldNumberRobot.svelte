@@ -7,8 +7,8 @@
     import { createSecondOrderPropertyStore } from '~/lib/socketStore'
 
     export let label: string
-    export let alliance:"red"|"blue"
-    export let stationnum:1|2|3
+    export let alliance: 'red' | 'blue'
+    export let stationnum: 1 | 2 | 3
     const station = `${alliance}${stationnum}` as RobotPosition
 
     const robot = derived([matchData[station], teamList], ([robot, teamList]) => teamList[robot]?.display_number.get() ?? '  _____  ')
@@ -49,6 +49,5 @@
         align-items: center;
         background-color: var(--bgcolor, #4a4a4a);
         border: solid #a0a0a0 1px;
-        
     }
 </style>
