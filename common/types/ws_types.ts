@@ -1,4 +1,4 @@
-import { EventInfo, MatchSound, PartialAlliance, PartialMatch, PartialTeam, RankingEntry, ToteKey } from '.'
+import { EventInfo, MatchPropertyKey, MatchSound, PartialAlliance, PartialMatch, PartialTeam, RankingEntry, ToteKey } from '.'
 import { Match, Match_AllianceResults, PlayoffAlliance, Team } from '@prisma/client'
 
 export interface ServerToClientEvents {
@@ -56,4 +56,5 @@ export interface ClientToServerEvents {
     commitAlliances(cb: (ok: boolean) => void): void
 
     getMatch(id: string, cb: (match: Match) => void): void
+    updateMatchScores<K extends keyof Match['scores'][A], A extends 'red' | 'blue'>(id: string, key: [A, K], value: Match['scores'][A][K]): void
 }

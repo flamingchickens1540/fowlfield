@@ -6,11 +6,12 @@ import { Match } from '@prisma/client'
 import { eventState } from '~/managers/settings'
 import { io } from '~/sockets'
 
-const logger = createLogger('matchmanager')
+const logger = createLogger('match')
 
 let matchMaker: MatchMaker
 export async function loadMatches() {
     matchMaker = new MatchMaker()
+    logger.info({}, 'Constructed matchmaker')
     const matchCount = await prisma.match.count()
     if (matchCount == 0) {
         const match = await matchMaker.advanceQualsMatch()
@@ -22,6 +23,7 @@ export async function loadMatches() {
         eventState.loadedMatch = match.id
         eventState.preloadedMatch = match.id
     }
+    logger.info({}, 'Loaded matches')
 }
 
 export async function getMatches(): Promise<Record<string, Match>> {

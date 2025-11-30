@@ -52,11 +52,11 @@
     const breakdown = derived(scores, ($scores) => calculatePointsBreakdown($scores))
     $: blueWon = $blueScore > $redScore
     $: tie = $blueScore == $redScore
-    $: empty = $scores.corral_empty
+    $: coopertition = $scores.cabbages_in_patch
 </script>
 
 <div class="final-scores" style="clip-path:polygon(148px 87px, 3692px 87px, 3490px 2060px, 350px 2060px)">
-    <img src="handshake.png" alt="Co-op Point Achieved" id="clear" style={`display: ${empty ? 'block' : 'none'};`} />
+    <img src="handshake.png" alt="Co-op Point Achieved" id="clear" style={`display: ${coopertition ? 'block' : 'none'};`} />
     <svg class="background" width="3548" height="1994" viewBox="0 0 3548 1994" fill="none" xmlns="http://www.w3.org/2000/svg">
         <g filter="url(#filter0_d_95_212)">
             <path d="M971.858 1985.07L774.354 992.537L576.851 0H971.858V1985.07Z" fill="#ED1C24" />
@@ -146,22 +146,22 @@
     <!-- Red Score Breakdown -->
     <div class="_200">{$redScore}</div>
     <div class="total">TOTAL</div>
-    <div class="_100">{$breakdown.red.tote_balloons}</div>
-    <div class="hybrid">TOTES</div>
-    <div class="_95">{$breakdown.red.low_zone_balloon + $breakdown.red.low_zone_bunny}</div>
-    <div class="teleop">LOWZONE</div>
+    <div class="_100">{$breakdown.red.auto_carrots + $breakdown.red.auto_park}</div>
+    <div class="hybrid">AUTO</div>
+    <div class="_95">{$breakdown.red.tele_bunnies + $breakdown.red.tele_carrots + $breakdown.red.tele_hits}</div>
+    <div class="teleop">TELE</div>
     <div class="_5">{$breakdown.red.foul}</div>
-    <div class="fouls">FOULS</div>
+    <div class="fouls">FOUL</div>
 
     <!-- Blue Score Breakdown -->
     <div class="_190">{$blueScore}</div>
     <div class="total2">TOTAL</div>
-    <div class="_952">{$breakdown.blue.tote_balloons}</div>
-    <div class="hybrid2">TOTES</div>
-    <div class="_52">{$breakdown.blue.low_zone_balloon + $breakdown.blue.low_zone_bunny}</div>
-    <div class="teleop2">LOWZONE</div>
+    <div class="_952">{$breakdown.blue.auto_carrots + $breakdown.blue.tele_carrots}</div>
+    <div class="hybrid2">AUTO</div>
+    <div class="_52">{$breakdown.blue.tele_bunnies}</div>
+    <div class="teleop2">TELE</div>
     <div class="_90">{$breakdown.blue.foul}</div>
-    <div class="fouls2">FOULS</div>
+    <div class="fouls2">FOUL</div>
 
     <div>
         <!-- Red 1 -->

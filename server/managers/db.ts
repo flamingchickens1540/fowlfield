@@ -24,8 +24,7 @@ export const prisma = new PrismaClient({
 })
 export default prisma
 
-await prisma.$connect()
-
+await prisma.$connect().then(() => logger.info({}, 'connected'))
 if (process.env.NODE_ENV != 'prod') {
     prisma.$on('query', (e) => {
         // logger.trace({ name: 'prisma' }, e.query)

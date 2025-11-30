@@ -3,7 +3,7 @@ import { resolve } from 'path'
 import { defineConfig } from 'vite'
 import { svelte } from '@sveltejs/vite-plugin-svelte'
 
-let pages = ['estop', 'audience', 'alliance', 'match', 'event', 'queuing', 'rankings', 'test', 'scoring', 'review', 'announcer']
+let pages = ['audience', 'alliance', 'match', 'event', 'queuing', 'rankings', 'test', 'testscores', 'scoring', 'review', 'announcer']
 
 let entrypoints: Record<string, string> = {}
 for (const key of pages) {
