@@ -19,8 +19,6 @@ export function getBracketInfo(match: Match): DoubleEliminationMatch | null {
     return schedule[match.stage_index]
 }
 
-
-
 export const schedule: Readonly<{
     [key: number]: Readonly<DoubleEliminationMatch>
 }> = {

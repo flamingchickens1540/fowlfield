@@ -106,12 +106,12 @@ Where W is the winner’s score, L is the loser’s score, and T is either team�
     let redRP = redScore
     let blueRP = blueScore
     if (winner == 'red') {
-        redRP += blueScore/2
+        redRP += blueScore / 2
     } else if (winner == 'blue') {
-        blueRP += redScore/2
+        blueRP += redScore / 2
     } else {
-        redRP += redScore/4
-        blueRP += blueScore/4
+        redRP += redScore / 4
+        blueRP += blueScore / 4
     }
     return {
         redBreakdown: breakdown.red,

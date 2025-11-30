@@ -283,7 +283,7 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
             data: {
                 state: 'not_started',
                 startTime: 0,
-                scores: getBlankMatchScoreBreakdown(),
+                scores: getBlankMatchScoreBreakdown()
             }
         })
         io.emit('match', match)
