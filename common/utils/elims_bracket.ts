@@ -19,6 +19,8 @@ export function getBracketInfo(match: Match): DoubleEliminationMatch | null {
     return schedule[match.stage_index]
 }
 
+
+
 export const schedule: Readonly<{
     [key: number]: Readonly<DoubleEliminationMatch>
 }> = {
@@ -95,4 +97,12 @@ export const schedule: Readonly<{
         elimGroup: 1,
         elimInstance: 3
     }
+}
+
+export function getScheduleItem(id: string): DoubleEliminationMatch | null {
+    const match = id.match(/(f|sf)(\d+)m(\d+)/)
+    if (!match) return null
+    const [_, type, round, instance] = match
+
+    return schedule[type == 'f' ? 5 + parseInt(instance) : parseInt(round)]
 }

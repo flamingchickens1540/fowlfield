@@ -114,42 +114,6 @@ export interface TbaMatch {
     display_name?: string
 }
 
-export type TbaScoreBreakdown = {
-    adjustPoints: number
-    algaePoints: number
-    autoBonusAchieved: boolean
-    autoCoralCount: number
-    autoCoralPoints: number
-    autoLineRobot1: 'Yes' | 'No'
-    autoLineRobot2: 'Yes' | 'No'
-    autoLineRobot3: 'Yes' | 'No'
-    autoMobilityPoints: number
-    autoPoints: number
-    autoReef: never
-    bargeBonusAchieved: boolean
-    coopertitionCriteriaMet: boolean
-    coralBonusAchieved: boolean
-    endGameBargePoints: number
-    endGameRobot1: never
-    endGameRobot2: never
-    endGameRobot3: never
-    foulCount: number
-    foulPoints: number
-    g206Penalty: boolean
-    g410Penalty: boolean
-    g418Penalty: boolean
-    g428Penalty: boolean
-    netAlgaeCount: number
-    rp: number
-    techFoulCount: number
-    teleopCoralCount: number
-    teleopCoralPoints: number
-    teleopPoints: number
-    teleopReef: never
-    totalPoints: number
-    wallAlgaeCount: number
-}
-
 export class TbaAlliance {
     teams: TbaTeamNumber[] = []
     surrogates: TbaTeamNumber[] = []
@@ -222,3 +186,152 @@ export enum TbaPlayoffType {
     // Custom
     CUSTOM = 8
 }
+
+// https://github.com/the-blue-alliance/the-blue-alliance/blob/0ff5d0256e24bf340c37cf9e644a0e65c3d691ab/pwa/app/api/tba/read/types.gen.ts#L1800
+export type TbaScoreBreakdown = {
+  adjustPoints?: number;
+  algaePoints?: number;
+  autoBonusAchieved?: boolean;
+  autoCoralCount?: number;
+  autoCoralPoints?: number;
+  autoLineRobot1?: 'No' | 'Yes';
+  autoLineRobot2?: 'No' | 'Yes';
+  autoLineRobot3?: 'No' | 'Yes';
+  autoMobilityPoints?: number;
+  autoPoints?: number;
+  autoReef?: {
+    topRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    midRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    botRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    trough: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the botRow object.
+     */
+    tba_botRowCount?: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the midRow object.
+     */
+    tba_midRowCount?: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the topRow object.
+     */
+    tba_topRowCount?: number;
+  };
+  bargeBonusAchieved?: boolean;
+  coopertitionCriteriaMet?: boolean;
+  coralBonusAchieved?: boolean;
+  endGameBargePoints?: number;
+  endGameRobot1?: 'None' | 'Parked' | 'ShallowCage' | 'DeepCage';
+  endGameRobot2?: 'None' | 'Parked' | 'ShallowCage' | 'DeepCage';
+  endGameRobot3?: 'None' | 'Parked' | 'ShallowCage' | 'DeepCage';
+  foulCount?: number;
+  foulPoints?: number;
+  g206Penalty?: boolean;
+  g410Penalty?: boolean;
+  g418Penalty?: boolean;
+  g428Penalty?: boolean;
+  netAlgaeCount?: number;
+  rp?: number;
+  techFoulCount?: number;
+  teleopCoralCount?: number;
+  teleopCoralPoints?: number;
+  teleopPoints?: number;
+  teleopReef?: {
+    topRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    midRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    botRow: {
+      nodeA: boolean;
+      nodeB: boolean;
+      nodeC: boolean;
+      nodeD: boolean;
+      nodeE: boolean;
+      nodeF: boolean;
+      nodeG: boolean;
+      nodeH: boolean;
+      nodeI: boolean;
+      nodeJ: boolean;
+      nodeK: boolean;
+      nodeL: boolean;
+    };
+    trough: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the botRow object.
+     */
+    tba_botRowCount?: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the midRow object.
+     */
+    tba_midRowCount?: number;
+    /**
+     * Unofficial TBA-computed value that sums the total number of game pieces scored in the topRow object.
+     */
+    tba_topRowCount?: number;
+  };
+  totalPoints?: number;
+  wallAlgaeCount?: number;
+};

@@ -93,14 +93,25 @@ export function getScores(match: Match) {
     const redScore = sumBreakdownPoints(breakdown.red)
     const blueScore = sumBreakdownPoints(breakdown.blue)
     const winner = getResult({ red: redScore, blue: blueScore })
+
+    /*
+2025:
+    Winning Alliance Qualification Points = W + L/2
+Loser Qualification Points = L
+Tie Qualification Points = T + T/4     
+
+Where W is the winner’s score, L is the loser’s score, and T is either team’s score in the event of a tie.
+
+    */
     let redRP = redScore
     let blueRP = blueScore
     if (winner == 'red') {
-        // If red wins, redRp = redScore, blueRp = blueScore/2
-        blueRP /= 2
+        redRP += blueScore/2
     } else if (winner == 'blue') {
-        // If blue wins, blueRp = blueScore, redRp = redScore/2
-        redRP /= 2
+        blueRP += redScore/2
+    } else {
+        redRP += redScore/4
+        blueRP += blueScore/4
     }
     return {
         redBreakdown: breakdown.red,
