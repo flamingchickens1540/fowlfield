@@ -40,7 +40,8 @@
                         s.cabbages_in_patch = Math.random() > 0.7
                         return s
                     })
-                }}>Randomize Scores</button>
+                }}>Randomize Scores</button
+            >
         </div>
         {#each [{ scores: redScores, color: 'var(--bgred)' }, { scores: blueScores, color: 'var(--bgblue)' }] as { scores, color }}
             <div class="col" style="--bgcolor:{color}">

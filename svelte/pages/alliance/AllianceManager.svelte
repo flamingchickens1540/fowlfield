@@ -32,7 +32,8 @@
         socket.emit('commitAlliances', (success) => {
             console.log(success)
         })
-    }}>Publish to TBA</button>
+    }}>Publish to TBA</button
+>
 
 <style lang="scss">
     button {
