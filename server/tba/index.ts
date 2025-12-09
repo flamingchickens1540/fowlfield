@@ -203,6 +203,23 @@ export async function updateAwards() {
     }
     await post('awards/update', body)
 }
+
+function getEmptyReefRow() {
+    return {
+        nodeA: false,
+        nodeB: false,
+        nodeC: false,
+        nodeD: false,
+        nodeE: false,
+        nodeF: false,
+        nodeG: false,
+        nodeH: false,
+        nodeI: false,
+        nodeJ: false,
+        nodeK: false,
+        nodeL: false
+    }
+}
 function matchToTBAMatch(match: Match): TbaMatch | null {
     let matchIdInfo: Pick<TbaMatch, 'comp_level' | 'set_number' | 'match_number'>
     if (match.type == 'qualification') {
@@ -226,21 +243,28 @@ function matchToTBAMatch(match: Match): TbaMatch | null {
         const totalPoints = sumBreakdownPoints(points)
         return {
             rp,
+
+            autoCoralCount: results[alliance].grass_auto,
+            wallAlgaeCount: results[alliance].feeding_station_auto,
+            autoCoralPoints: points.auto_carrots,
             autoLineRobot1: results[alliance].auto_park_robot1 ? 'Yes' : 'No',
             autoLineRobot2: results[alliance].auto_park_robot2 ? 'Yes' : 'No',
             autoLineRobot3: results[alliance].auto_park_robot3 ? 'Yes' : 'No',
             autoMobilityPoints: points.auto_park,
-            autoCoralCount: results[alliance].grass_auto + results[alliance].feeding_station_auto,
-            autoCoralPoints: points.auto_carrots,
             autoPoints: points.auto_carrots + points.auto_park,
+
             algaePoints: points.tele_hits,
-            endGameBargePoints: points.tele_bunnies,
-            teleopCoralCount: results[alliance].grass_tele + results[alliance].feeding_station_tele,
+            netAlgaeCount: results[alliance].feeding_station_tele,
+            teleopCoralCount: results[alliance].grass_tele,
             teleopCoralPoints: points.tele_carrots,
-            coopertitionCriteriaMet: points.coopertition > 0,
+            endGameBargePoints: points.tele_bunnies,
             teleopPoints: points.tele_bunnies + points.tele_hits + points.tele_carrots,
-            totalPoints: totalPoints,
-            adjustPoints: points.foul
+
+            coopertitionCriteriaMet: points.coopertition > 0,
+            adjustPoints: points.coopertition,
+            foulPoints: points.foul,
+
+            totalPoints: totalPoints
         }
     }
     return {
