@@ -45,7 +45,7 @@ export async function getMatchStats(): Promise<{
     })
     const matches = await prisma.match.findMany()
     matches.forEach((match) => {
-        if (match.type == 'elimination' || match.state != "ended" ) {
+        if (match.type == 'elimination' || match.state != 'ended') {
             return
         }
         const scores = getScores(match)
