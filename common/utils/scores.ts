@@ -90,8 +90,8 @@ export function getWinner(match: Match): 'red' | 'blue' | 'tie' {
 }
 
 export function getScores(match: Match) {
-    if (match.state != "posted") {
-        console.warn("Calculating scores for incomplete match")
+    if (match.state != 'posted') {
+        console.warn('Calculating scores for incomplete match')
     }
     const breakdown = calculatePointsBreakdown(match.scores)
     const redScore = sumBreakdownPoints(breakdown.red)

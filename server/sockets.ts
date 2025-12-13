@@ -118,7 +118,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
         cb(match)
     })
 
-
     // Send initial data
     const loadedMatch = await matchmanager.getLoadedMatch()
     if (loadedMatch) socket.emit('loadMatch', loadedMatch)
@@ -317,9 +316,6 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
                 lunchReturnTime: eventState.lunchReturnTime
             })
         })
-
-
-
 
         function alert(...message: string[]) {
             logger.warn('ALERT', ...message)
