@@ -16,15 +16,15 @@
         return mostRecent.id
     })
     let animationFrame = 0
-    onMount(() => {
+    setTimeout(() => {
         let isGoingDown = true
         let lastTime = 0
         const scroll = (time: number) => {
-            if (isHovering) {
-                lastTime = time
-                animationFrame = requestAnimationFrame(scroll)
-                return
-            }
+            // if (isHovering) {
+            //     lastTime = time
+            //     animationFrame = requestAnimationFrame(scroll)
+            //     return
+            // }
             const distanceToBottom = document.body.scrollHeight - (window.scrollY + window.innerHeight)
             const distanceToTop = window.scrollY
 
@@ -44,7 +44,7 @@
             animationFrame = requestAnimationFrame(scroll)
         }
         scroll(0)
-    })
+    }, 200)
     onDestroy(() => {
         cancelAnimationFrame(animationFrame)
     })

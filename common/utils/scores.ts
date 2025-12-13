@@ -1,5 +1,6 @@
 import { Match, Match_Results } from '@prisma/client'
 import { ToteKey } from '../types'
+import { Logger } from 'sass'
 
 export type PointsBreakdown = {
     auto_carrots: number
@@ -89,6 +90,9 @@ export function getWinner(match: Match): 'red' | 'blue' | 'tie' {
 }
 
 export function getScores(match: Match) {
+    if (match.state != "posted") {
+        console.warn("Calculating scores for incomplete match")
+    }
     const breakdown = calculatePointsBreakdown(match.scores)
     const redScore = sumBreakdownPoints(breakdown.red)
     const blueScore = sumBreakdownPoints(breakdown.blue)
