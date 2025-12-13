@@ -26,5 +26,8 @@ export default defineConfig({
         rollupOptions: {
             input: entrypoints
         }
+    },
+    server: {
+        allowedHosts: ["team1540.catlin.edu"]
     }
 })

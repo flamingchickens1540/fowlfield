@@ -35,7 +35,7 @@
         div {
             flex-grow: 2;
             input {
-                width: 90%;
+                // width: 90%;
                 outline-color: rgba(183, 183, 183, 0.3);
                 background-color: #404040a0;
                 accent-color: rgba(183, 183, 183, 0.63);
