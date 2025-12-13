@@ -208,7 +208,7 @@
     <!-- Blue Score Breakdown -->
     <div class="_190">{$blueScore}</div>
     <div class="total2">TOTAL</div>
-    <div class="_952">{$breakdown.blue.auto_carrots + $breakdown.blue.tele_carrots}</div>
+    <div class="_952">{$breakdown.blue.auto_carrots + $breakdown.blue.auto_park}</div>
     <div class="hybrid2">AUTO</div>
     <div class="_52">{$breakdown.blue.tele_bunnies}</div>
     <div class="teleop2">TELE</div>
@@ -294,7 +294,7 @@
     <!-- Footer -->
     <div class="rectangle-72" />
     <div class="qualification-match-13">Elimination Match {$stage_index}</div>
-    <div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2024</div>
+    <div class="bunny-bots-2023-rabbit-roundup">BunnyBots 2025</div>
 </div>
 
 <style lang="scss">
