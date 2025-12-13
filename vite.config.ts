@@ -28,6 +28,6 @@ export default defineConfig({
         }
     },
     server: {
-        allowedHosts: ["team1540.catlin.edu"]
+        allowedHosts: ['team1540.catlin.edu']
     }
 })
