@@ -48,7 +48,7 @@ export default function startServer(server: http.Server) {
     })
 
     if (process.env.NODE_ENV !== 'production') {
-        logger.info('starting admin server')
+        logger.info({}, 'starting admin server')
         instrument(io, {
             auth: {
                 type: 'basic',
@@ -95,15 +95,27 @@ export default function startServer(server: http.Server) {
     })
 
     setInterval(handleMatchEnd, 5000) // just in case
-
+    logger.info({}, 'Started sockets')
     return
 }
 
 async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEvents>) {
-    logger.info('new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
+    logger.info({}, 'new connection from ' + socket.id + ' ' + socket.handshake.address + ' ' + socket.handshake.auth.role)
 
     socket.onAny((event, ...args) => {
-        logger.debug(['received', event, ...args].join(' '))
+        logger.debug({ ...args }, ['received', event].join(' '))
+    })
+    socket.on('disconnect', () => {
+        logger.info({}, 'disconnected', socket.id, socket.handshake.auth.role)
+    })
+
+    socket.on('getMatch', async (id, cb) => {
+        const match = await prisma.match.findUnique({ where: { id } })
+        if (match == null) {
+            logger.error({ id, match }, 'could not find match')
+            return
+        }
+        cb(match)
     })
 
     // Send initial data
@@ -125,199 +137,209 @@ async function setupSocket(socket: Socket<ClientToServerEvents, ServerToClientEv
     socket.on('ping', (cb) => {
         cb(Date.now())
     })
-    socket.on('partialAlliance', async (data) => {
-        const seed = data.seed
-        const updateData: Partial<PlayoffAlliance> = data
-        delete updateData.seed
 
-        const alliance = await prisma.playoffAlliance.upsert({
-            where: { seed },
-            update: updateData,
-            create: { seed, ...updateData }
+    if (socket.data.access == SocketAccess.NORMAL) {
+        socket.on('partialAlliance', async (data) => {
+            const seed = data.seed
+            const updateData: Partial<PlayoffAlliance> = data
+            delete updateData.seed
+
+            const alliance = await prisma.playoffAlliance.upsert({
+                where: { seed },
+                update: updateData,
+                create: { seed, ...updateData }
+            })
+            io.emit('alliance', alliance)
         })
-        io.emit('alliance', alliance)
-    })
-    socket.on('commitAlliances', async (cb) => {
-        cb(await tba.updateAlliances())
-    })
+        socket.on('commitAlliances', async (cb) => {
+            cb(await tba.updateAlliances())
+        })
 
-    socket.on('preloadMatch', (id: string) => {
-        logger.info('preloading', id)
-        matchmanager.updatePreloadedMatch(id)
-    })
+        socket.on('preloadMatch', (id: string) => {
+            logger.info('preloading', id)
+            matchmanager.updatePreloadedMatch(id)
+        })
 
-    socket.on('loadMatch', (id: string) => {
-        logger.info('loading', id)
-        matchmanager.updateLoadedMatch(id)
-    })
+        socket.on('loadMatch', (id: string) => {
+            logger.info('loading', id)
+            matchmanager.updateLoadedMatch(id)
+        })
 
-    socket.on('partialMatch', async (data: PartialMatch) => {
-        logger.debug('receiving match', data)
-        if (!data.id) {
-            logger.warn('received bad match data', data)
-            return
-        }
-        const match = await matchmanager.updateMatch(data)
-        io.emit('match', match)
-    })
-
-    socket.on('partialTeam', async (data: PartialTeam) => {
-        logger.debug('receiving team', data)
-        if (!data.id) {
-            logger.warn('received bad team', data)
-            return
-        }
-        const team = await teammanager.updateTeam(data)
-        io.emit('team', team)
-    })
-
-    socket.on('deleteTeam', async (id: number) => {
-        logger.info('deleting team', id)
-        await teammanager.deleteTeam(id)
-
-        io.emit('teams', await getTeams())
-    })
-
-    socket.on('newTeam', async (data: PartialTeam) => {
-        logger.debug('receiving full team', data)
-        if (!data.id) {
-            logger.warn('received bad team', data)
-            return
-        }
-        const display_number = data.display_number || data.id.toString()
-        const team = await prisma.team.create({
-            data: {
-                id: data.id,
-                display_number,
-                team_name: data.team_name ?? 'Team ' + display_number,
-                robot_name: data.robot_name,
-                has_card: false
+        socket.on('partialMatch', async (data: PartialMatch) => {
+            logger.debug('receiving match', data)
+            if (!data.id) {
+                logger.warn('received bad match data', data)
+                return
             }
+            const match = await matchmanager.updateMatch(data)
+            io.emit('match', match)
         })
-        io.emit('team', team)
-    })
 
-    socket.on('startMatch', async (id) => {
-        if (id != eventState.loadedMatch) {
-            alert('Attempted to start a non-loaded match')
-            return
-        }
-        const match = await prisma.match.update({
-            where: { id },
-            data: {
-                startTime: Date.now(),
-                state: 'in_progress'
+        socket.on('partialTeam', async (data: PartialTeam) => {
+            logger.debug('receiving team', data)
+            if (!data.id) {
+                logger.warn('received bad team', data)
+                return
             }
+            const team = await teammanager.updateTeam(data)
+            io.emit('team', team)
         })
 
-        io.emit('match', match)
-    })
-    socket.on('abortMatch', async (id) => {
-        if (id != eventState.loadedMatch) {
-            alert('Attempted to abort a non-loaded match')
-            return
-        }
-        const match = await prisma.match.update({
-            where: { id },
-            data: {
-                startTime: 0,
-                state: 'not_started'
+        socket.on('deleteTeam', async (id: number) => {
+            logger.info('deleting team', id)
+            await teammanager.deleteTeam(id)
+
+            io.emit('teams', await getTeams())
+        })
+
+        socket.on('newTeam', async (data: PartialTeam) => {
+            logger.debug('receiving full team', data)
+            if (!data.id) {
+                logger.warn('received bad team', data)
+                return
             }
-        })
-        io.emit('abortMatch')
-        io.emit('match', match)
-    })
-
-    socket.on('commitMatch', async (id) => {
-        const match = await prisma.match.update({
-            where: { id },
-            data: {
-                state: 'posted'
-            }
-        })
-
-        const { red, blue } = getAlliances(match)
-        red.concat(blue).forEach(({ team: team_number, card }) => {
-            logger.info({ team_number, card })
-            setTimeout(async () => {
-                if (card == 'none') {
-                    return
+            const display_number = data.display_number || data.id.toString()
+            const team = await prisma.team.create({
+                data: {
+                    id: data.id,
+                    display_number,
+                    team_name: data.team_name ?? 'Team ' + display_number,
+                    robot_name: data.robot_name,
+                    has_card: false
                 }
-                const team = await prisma.team.update({
-                    where: { id: team_number },
-                    data: {
-                        has_card: true
+            })
+            io.emit('team', team)
+        })
+
+        socket.on('startMatch', async (id) => {
+            if (id != eventState.loadedMatch) {
+                alert('Attempted to start a non-loaded match')
+                return
+            }
+            const match = await prisma.match.update({
+                where: { id },
+                data: {
+                    startTime: Date.now(),
+                    state: 'in_progress'
+                }
+            })
+
+            io.emit('match', match)
+        })
+        socket.on('abortMatch', async (id) => {
+            if (id != eventState.loadedMatch) {
+                alert('Attempted to abort a non-loaded match')
+                return
+            }
+            const match = await prisma.match.update({
+                where: { id },
+                data: {
+                    startTime: 0,
+                    state: 'not_started'
+                }
+            })
+            io.emit('abortMatch')
+            io.emit('match', match)
+        })
+
+        socket.on('commitMatch', async (id) => {
+            const match = await prisma.match.update({
+                where: { id },
+                data: {
+                    state: 'posted'
+                }
+            })
+
+            const { red, blue } = getAlliances(match)
+            red.concat(blue).forEach(({ team: team_number, card }) => {
+                logger.info({ team_number, card })
+                setTimeout(async () => {
+                    if (card == 'none') {
+                        return
                     }
+                    const team = await prisma.team.update({
+                        where: { id: team_number },
+                        data: {
+                            has_card: true
+                        }
+                    })
+                    logger.info(`Committing ${card} for ${team_number}`)
+                    io.emit('team', team)
                 })
-                logger.info(`Committing ${card} for ${team_number}`)
-                io.emit('team', team)
+            })
+            if (match.type == 'elimination') {
+                notifyMatchUpdated(match)
+            } else {
+                io.emit('rankings', await buildRankings())
+            }
+            logger.info('Committing', id)
+            setTimeout(tba.updateMatches)
+
+            io.emit('match', match)
+        })
+
+        socket.on('nextMatch', async (type) => {
+            const newmatch = await matchmanager.advanceMatches(type as 'elimination' | 'qualification')
+            if (newmatch != null) {
+                io.emit('match', newmatch)
+            }
+        })
+
+        socket.on('resetMatch', async (id) => {
+            const match = await matchmanager.getMatch(id)
+            if (match == null) {
+                logger.warn({ id, match }, 'cannot reset match')
+                return
+            }
+            logger.warn({ id }, 'Resetting match')
+            await prisma.match.update({
+                where: { id: match.id },
+                data: {
+                    state: 'not_started',
+                    startTime: 0,
+                    scores: getBlankMatchScoreBreakdown()
+                }
+            })
+            io.emit('match', match)
+        })
+
+        socket.on('partialEvent', async (data) => {
+            console.info('recieved partial event', data)
+            if (data.atLunch != null) {
+                eventState.atLunch = data.atLunch
+            }
+            if (data.lunchReturnTime != null) {
+                eventState.lunchReturnTime = data.lunchReturnTime
+            }
+            io.emit('event', {
+                atLunch: eventState.atLunch,
+                lunchReturnTime: eventState.lunchReturnTime
             })
         })
-        if (match.type == 'elimination') {
-            notifyMatchUpdated(match)
-        } else {
-            io.emit('rankings', await buildRankings())
-        }
-        logger.info('Committing', id)
-        setTimeout(tba.updateMatches)
 
-        io.emit('match', match)
-    })
-
-    socket.on('nextMatch', async (type) => {
-        const newmatch = await matchmanager.advanceMatches(type as 'elimination' | 'qualification')
-        if (newmatch != null) {
-            io.emit('match', newmatch)
+        function alert(...message: string[]) {
+            logger.warn('ALERT', ...message)
+            socket.emit('alert', message.join(' '))
         }
-    })
 
-    socket.on('resetMatch', async (id) => {
-        const match = await matchmanager.getMatch(id)
-        if (match == null) {
-            logger.warn({ id, match }, 'cannot reset match')
-            return
-        }
-        logger.warn({ id }, 'Resetting match')
-        await prisma.match.update({
-            where: { id: match.id },
-            data: {
-                state: 'not_started',
-                startTime: 0,
-                scores: getBlankMatchScoreBreakdown()
+        socket.on('updateMatchScores', async (id, key, v) => {
+            if (id != eventState.loadedMatch) {
+                logger.warn({ loaded: eventState.loadedMatch, found: id }, 'not updating non-loaded match scores')
             }
+            const data = {
+                scores: {
+                    update: {
+                        [key[0]]: {
+                            update: {
+                                [key[1]]: v
+                            }
+                        }
+                    }
+                }
+            }
+            logger.info({ id, [key.join('.')]: v }, 'updating')
+            const match = await prisma.match.update({ where: { id }, data })
+            io.emit('match', match)
         })
-        io.emit('match', match)
-    })
-
-    socket.on('partialEvent', async (data) => {
-        console.info('recieved partial event', data)
-        if (data.atLunch != null) {
-            eventState.atLunch = data.atLunch
-        }
-        if (data.lunchReturnTime != null) {
-            eventState.lunchReturnTime = data.lunchReturnTime
-        }
-        io.emit('event', {
-            atLunch: eventState.atLunch,
-            lunchReturnTime: eventState.lunchReturnTime
-        })
-    })
-
-    socket.on('getMatch', async (id, cb) => {
-        const match = await prisma.match.findUnique({ where: { id } })
-        if (match == null) {
-            logger.error({ id, match }, 'could not find match')
-            return
-        }
-        cb(match)
-    })
-
-    socket.on('disconnect', () => {
-        logger.info('disconnected', socket.id, socket.handshake.auth.role)
-    })
-
-    function alert(...message: string[]) {
-        logger.warn('ALERT', ...message)
-        socket.emit('alert', message.join(' '))
     }
 }

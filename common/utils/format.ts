@@ -12,3 +12,7 @@ export function roundToPlaces(value: number | null, places: number): number | nu
     const pad = 10 ** places
     return Math.round(value * pad) / pad
 }
+
+export function titleCaseWord(v: string) {
+    return v.slice(0, 1).toUpperCase() + v.slice(1).toLowerCase()
+}

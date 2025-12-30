@@ -1,5 +1,18 @@
 <script lang="ts" context="module">
+    import { schedule } from '~common/utils/elims_bracket'
     export type LineData = { line: LeaderLine; startElement: HTMLElement; endElement: HTMLElement } | null
+
+    export const reverseSchedule: Record<string, { red?: { match: number; winner: boolean }; blue?: { match: number; winner: boolean } }> = {}
+    Object.values(schedule).forEach((match) => {
+        if (match.winnerTo) {
+            reverseSchedule[schedule[match.winnerTo.match].matchId] ??= {}
+            reverseSchedule[schedule[match.winnerTo.match].matchId][match.winnerTo.alliance] = { match: match.matchNumber, winner: true }
+        }
+        if (match.loserTo) {
+            reverseSchedule[schedule[match.loserTo.match].matchId] ??= {}
+            reverseSchedule[schedule[match.loserTo.match].matchId][match.loserTo.alliance] = { match: match.matchNumber, winner: false }
+        }
+    })
 </script>
 
 <script lang="ts">
@@ -8,39 +21,46 @@
     import LeaderLine from 'leader-line-new'
     import { type Writable, writable } from 'svelte/store'
 
-    function drawLine(a: string, b: string, dash: boolean = false, start: LeaderLine.SocketType = 'right'): LineData {
+    function drawLine(a: string, b: string, loss: boolean = false, startOffset: number = 0): LineData {
         const startElement = document.getElementById(a)!
         const endElement = document.getElementById(b)!
-        const line = new LeaderLine(LeaderLine.pointAnchor(startElement, { x: '100%', y: dash ? 40 : 20 }), LeaderLine.pointAnchor(endElement, { x: 0, y: 30 }), {
+        const line = new LeaderLine(LeaderLine.pointAnchor(startElement, { x: '100%', y: loss ? 40 : 20 }), LeaderLine.pointAnchor(endElement, { x: 0, y: 30 }), {
             path: 'grid',
             startSocket: 'right',
             endSocket: 'left',
-            color: '#d6d6d6',
-            // startSocketGravity:dash?[300,0]:[0,0],
-            dash
+            color: loss ? '#f6f6a6' : '#a6f6a6',
+            startSocketGravity: loss ? [20 + startOffset, 0] : [startOffset, 0],
+            dash: {
+                animation: {
+                    timing: 'linear'
+                }
+            }
         })
         return { line, startElement, endElement }
     }
 
-    function createLines(start: string, win: string, lose?: string) {
+    function createLines(start: string, win: string, lose?: string, loseOffset?: number) {
         lines.update((data) => {
             data[start] ??= [null, null]
             data[start][0] = drawLine(start, win, false)
             if (lose != null) {
-                data[start][1] = drawLine(start, lose, true)
+                data[start][1] = drawLine(start, lose, true, loseOffset)
             }
             return data
         })
     }
 
     let lines: Writable<{ [key: string]: [LineData, LineData] }> = writable({})
-    onMount(() => {
-        createLines('sf1m1', 'sf3m1', 'sf4m1')
+    // onMount(() => {
+    setTimeout(() => {
+        console.warn('onmount')
+        createLines('sf1m1', 'sf3m1', 'sf4m1', 25)
         createLines('sf2m1', 'sf3m1', 'sf4m1')
         createLines('sf4m1', 'sf5m1')
         createLines('sf3m1', 'f1m1', 'sf5m1')
         createLines('sf5m1', 'f1m1')
-    })
+    }, 100)
+    // })
     onDestroy(() => {
         lines.update((data) => {
             for (let [key, [line1, line2]] of Object.entries(data)) {

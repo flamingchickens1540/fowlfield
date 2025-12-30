@@ -19,11 +19,13 @@ jobs:
                   path: |
                       ~/.bun/install/cache
                       ./node_modules
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('prisma/schema.prisma') }}
                   restore-keys: |
                       ${{ runner.os }}-bun
             - name: Install Packages
               run: bun install --frozen-lockfile
+            - name: Generate Prisma Client
+              run: bun x prisma generate
             - name: Check
               run: bun run backend:check
             - name: Build
@@ -41,11 +43,13 @@ jobs:
                   path: |
                       ~/.bun/install/cache
                       ./node_modules
-                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
+                  key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}-${{ hashFiles('prisma/schema.prisma') }}
                   restore-keys: |
                       ${{ runner.os }}-bun
             - name: Install Packages
               run: bun install --frozen-lockfile
+            - name: Generate Prisma Client
+              run: bun x prisma generate
             - name: Check
               run: bun run frontend:check
             - name: Build

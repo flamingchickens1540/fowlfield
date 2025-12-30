@@ -7,7 +7,7 @@ import * as tba from '~/tba'
 import prisma from '~/managers/db'
 
 const rootLogger = createLogger('root')
-
+rootLogger.info({}, 'Starting...')
 const app = express()
 const server = http.createServer(app)
 
@@ -39,6 +39,6 @@ if (process.env.TBA_UPDATE) {
 app.use(express.static('public'))
 app.use(express.static('dist'))
 
-rootLogger.info('Starting node')
+rootLogger.info({}, 'Starting node')
 
 server.listen(9001)

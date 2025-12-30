@@ -1,4 +1,4 @@
-import App from './Scoring.svelte'
+import App from './Match.svelte'
 
 const app = new App({
     target: document.body

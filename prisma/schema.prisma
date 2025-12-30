@@ -74,7 +74,9 @@ type Match_AllianceResults {
   grass_tele                Int // The number of carrots in the grass at the end of the match (this includes carrots placed during auto)
   endgame_bunnies           Int // The number of bunnies in the petting zoo at the end of the match
 
-  total_hits                Int // The number of carrots that successfully hit opponent robots
+  hits_robot1                Int // The number of times robot1 was hit
+  hits_robot2                Int // The number of times robot2 was hit
+  hits_robot3                Int //  The number of times robot3 was hit
 
   auto_park_robot1       Boolean // Whether the first robot ends auto partially inside the carrot patch
   auto_park_robot2       Boolean // Whether the second robot ends auto partially inside the carrot patch

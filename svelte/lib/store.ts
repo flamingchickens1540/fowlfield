@@ -124,9 +124,10 @@ export function updateLoadedMatch(loadType: 'preload' | 'load', data: Match) {
 export function fetchMatch(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
         socket.emit('getMatch', id, (data: Match) => {
+            console.debug('Recieved match data from getMatch', data)
             if (data) {
                 resolve()
-                updateStoredMatch(data)
+                updateStoredMatch(data, true)
             } else {
                 reject()
             }
@@ -188,14 +189,16 @@ export function updateMatchList(data: { [key: string]: Match }) {
     matchList.set(data)
 }
 
-export function updateStoredMatch(data: Match) {
+export function updateStoredMatch(data: Match, force: boolean = false) {
     matchList.update((list) => {
         list[data.id] = data
         return list
     })
-    Object.entries(matchDataPrivate).forEach(([key, store]) => {
-        ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
-    })
+    if (force || data.id == (loadTrack == 'load' ? loadedMatch.get() : preloadedMatch.get())) {
+        Object.entries(matchDataPrivate).forEach(([key, store]) => {
+            ;(store as SocketWritable<unknown>).setLocal(data[key as keyof Match])
+        })
+    }
 }
 
 export function updateStoredEventinfo(data: EventInfo) {
